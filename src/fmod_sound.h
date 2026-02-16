@@ -3,15 +3,14 @@
 
 #include "fmod_server.h"
 #include "fmod_channel.h"
-#include <fmod.hpp>
+#include "fmod_system.h"
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/classes/object.hpp>
-#include <string>
 
 namespace godot {
-	class FmodSound : public Object {
-		GDCLASS(FmodSound, Object)
+	class FmodSound : public RefCounted {
+		GDCLASS(FmodSound, RefCounted)
 
 	protected:
 		static void _bind_methods();
@@ -24,8 +23,13 @@ namespace godot {
 		PackedByteArray data;
 		String file_path;
 
-		static FmodSound* load_from_file(const String& p_path);
-		double get_length() const;
+		static Ref<FmodSound> load_from_file(const String& p_path);
+
+		// 格式信息
+		String get_name() const;								// 获取一个声音的名称
+		Dictionary get_format() const;							// 获取声音的格式信息
+		double get_length() const;								// 获取声音时长
+
 	};
 }
 

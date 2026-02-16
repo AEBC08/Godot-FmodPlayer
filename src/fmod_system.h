@@ -11,6 +11,7 @@ namespace godot {
 	class FmodSound;
 	class FmodChannel;
 	class FmodChannelGroup;
+	class FmodDSP;
 
 	class FmodSystem : public Object {
 		GDCLASS(FmodSystem, Object)
@@ -131,36 +132,54 @@ namespace godot {
 			TIMEUNIT_MODPATTERN = 0x00000400
 		};
 
-		void update();
+		// 管理
+		void update();																			// 更新 FMOD System
 
-		void set_output(FmodOutputType output_type);
-		FmodOutputType get_output() const;
-		int64_t get_num_drivers() const;
-		Dictionary get_driver_info(int id) const;
-		void set_driver(int driver);
-		int64_t get_driver() const;
+		// 设备选择
+		void set_output(FmodOutputType output_type);											// 设置用于运行混音器的输出接口类型
+		FmodOutputType get_output() const;														// 获取用于运行混音器的输出接口类型
+		int64_t get_num_drivers() const;														// 获取所选输出类型可用的输出驱动器数量
+		Dictionary get_driver_info(int id) const;												// 获取由其索引指定的声音设备的识别信息，且针对所选输出模式
+		void set_driver(int driver);															// 设置所选输出类型的输出驱动
+		int64_t get_driver() const;																// 获取所选输出类型的输出驱动
 
-		void set_network_proxy(const String& p_proxy);
-		String get_network_proxy() const;
-		void set_network_timeout(int timeout);
-		int64_t get_network_timeout() const;
+		// 网络配置
+		void set_network_proxy(const String& p_proxy);											// 设置一个代理服务器，用于所有后续的互联网连接
+		String get_network_proxy() const;														// 获取用于互联网流媒体的代理服务器的URL
+		void set_network_timeout(int timeout);													// 设置网络流的超时
+		int64_t get_network_timeout() const;													// 获取网络流的超时
 
-		Dictionary get_version() const;																	// 获取 Fmod 版本
-		uint64_t get_output_handle() const;
-		Dictionary get_channels_playing() const;
-		Dictionary get_cpu_usage() const;
-		Dictionary get_file_usage() const;
+		// 信息
+		Dictionary get_version() const;															// 获取 Fmod 版本
+		uint64_t get_output_handle() const;														// 获取输出类型特定的内部原生接口
+		Dictionary get_channels_playing() const;												// 获取当前播放 Channel 数量
+		Dictionary get_cpu_usage() const;														// 获取 Core API不同部分所使用的CPU资源
+		Dictionary get_file_usage() const;														// 获取文件读取信息
 		PackedFloat32Array get_default_mix_matrix(
-			FmodSpeakerMode source_speaker_mode, FmodSpeakerMode target_speaker_mode, int array_length, int hop) const;
-		int64_t get_speaker_mode_channels(FmodSpeakerMode mode) const;
+			FmodSpeakerMode source_speaker_mode,
+			FmodSpeakerMode target_speaker_mode,
+			int array_length,
+			int hop) const;																		// 检索用于从一种扬声器模式转换为另一种模式的默认矩阵
+		int64_t get_speaker_mode_channels(FmodSpeakerMode mode) const;							// 获取给定扬声器模式的通道数
 
-		FmodSound* create_sound_from_file(const String p_path, unsigned int mode);						// 从文件创建 FmodSound
-		FmodSound* create_sound_from_memory(const PackedByteArray& data, unsigned int mode);			// 从内存创建 FmodSound
-		FmodSound* create_sound_from_res(const String p_path, unsigned int mode);						// 从资源文件创建 FmodSound
-		FmodChannelGroup* create_channel_group(const String& p_name);								// 创建 ChannelGroup
-		FmodChannel* play_sound(
-			FmodSound* sound, FmodChannelGroup* channel_group, bool paused = false);				// 创建 FmodChannel
-		FmodChannelGroup* get_master_channel_group();												// 获取所有声音最终路由到的主通道组
+		// 创建与检索
+		Ref<FmodSound> create_sound_from_file(const String p_path, unsigned int mode);			// 从文件创建 FmodSound
+		Ref<FmodSound> create_sound_from_memory(const PackedByteArray& data, unsigned int mode);// 从内存创建 FmodSound
+		Ref<FmodSound> create_sound_from_res(const String p_path, unsigned int mode);			// 从资源文件创建 FmodSound
+		Ref<FmodSound> create_stream_from_file(const String p_path, unsigned int mode);			// 从文件创建流 FmodSound
+		Ref<FmodDSP> create_dsp(const String& name);											// 创建 DSP
+		Ref<FmodDSP> create_dsp_by_type(unsigned int type);										// 创建一个带有指定类型索引的 DSP
+		Ref<FmodChannelGroup> create_channel_group(const String& p_name);						// 创建 ChannelGroup
+		Ref<FmodChannel> play_sound(
+			Ref<FmodSound> sound, Ref<FmodChannelGroup> channel_group, bool paused = false);	// 在 Channel 播放一个声音
+		Ref<FmodChannel> play_dsp(
+			Ref<FmodDSP> dsp,
+			Ref<FmodChannelGroup> channel_group,
+			bool paused = false
+		);																						// 播放一个 DSP 及其任何输入在 Channel 的信号
+		Ref<FmodChannel> get_channel(const int64_t id);											// 通过 ID 获取 Channel 的句柄
+		Dictionary get_dsp_info_by_type(unsigned int type) const;								// 获取内置 DSP 描述结构信息
+		Ref<FmodChannelGroup> get_master_channel_group();										// 获取所有声音最终路由到的主通道组
 		
 	};
 }

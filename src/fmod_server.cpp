@@ -24,6 +24,11 @@ namespace godot {
 			return;
 		}
 
+		//AudioServer* audio_server = AudioServer::get_singleton();
+		//if (audio_server) {
+		//	audio_server->connect("bus_layout_changed", callable_mp(this, &FmodServer::_on_bus_layout_changed, CONNECT_DEFERRED));
+		//}
+
 		UtilityFunctions::print("    _____                    _ ____  _                       ");
 		UtilityFunctions::print("   |  ___| __ ___   ___   __| |  _ \\| | __ _ _   _  ___ _ __ ");
 		UtilityFunctions::print("   | |_ | '_ ` _ \\ / _ \\ / _` | |_) | |/ _` | | | |/ _ \\ '__|");
@@ -110,8 +115,41 @@ namespace godot {
 		return main_system;
 	}
 
-	FmodChannelGroup* FmodServer::get_master_channel_group() {
+	Ref<FmodChannelGroup> FmodServer::get_master_channel_group() {
 		return main_system->get_master_channel_group();
+	}
+
+	void FmodServer::_on_bus_layout_changed() {
+		//ERR_FAIL_COND_MSG(!main_system, "FmodSystem is not initialized.");
+		//AudioServer* audio_server = AudioServer::get_singleton();
+		//if (!audio_server) return;
+		//audio_buses_map["Master"] = get_master_channel_group();
+		//for (int i = 0; i < audio_server->get_bus_count(); i++) {
+		//	String bus_name = audio_server->get_bus_name(i);
+		//	String parent_send = audio_server->get_bus_send(i);
+		//	if (bus_name == "Master") continue;
+		//	Ref<FmodChannelGroup> new_bus = main_system->create_channel_group(bus_name);
+		//	if (new_bus.is_null()) {
+		//		UtilityFunctions::push_error("Failed to create FMOD bus for: ", bus_name);
+		//		continue;
+		//	}
+
+		//	// 设置父子关系
+		//	if (audio_buses_map.has(parent_send)) {
+		//		Ref<FmodChannelGroup> parent_bus = audio_buses_map[parent_send];
+		//		parent_bus->add_group(new_bus);
+		//	}
+		//	else {
+		//		audio_buses_map["Master"]->add_group(new_bus);
+		//	}
+
+		//	// 同步音量和静音状态
+		//	new_bus->set_volume_db(audio_server->get_bus_volume_db(i));
+		//	new_bus->set_mute(audio_server->is_bus_mute(i));
+
+		//	// 存储映射
+		//	audio_buses_map[bus_name] = new_bus;
+		//}
 	}
 
 	double FmodServer::_get_dsp() const {

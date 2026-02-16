@@ -12,9 +12,8 @@ namespace godot {
 	FmodAudio::FmodAudio() {}
 
 	FmodAudio::~FmodAudio() {
-		if (sound) {
-			memdelete(sound);
-			sound = nullptr;
+		if (sound.is_valid()) {
+			sound.unref();
 		}
 	}
 
@@ -22,7 +21,7 @@ namespace godot {
 		return sound->get_length();
 	}
 
-	FmodSound* FmodAudio::get_sound() const {
+	Ref<FmodSound> FmodAudio::get_sound() const {
 		return sound;
 	}
 

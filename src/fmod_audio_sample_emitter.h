@@ -13,23 +13,26 @@ namespace godot {
 		GDCLASS(FmodAudioSampleEmitter, Node)
 
 	private:
-		void _on_channel_ended(FmodChannel* channel);
+		Ref<FmodChannelGroup> internal_channel_group;
 
 	protected:
 		static void _bind_methods();
 
 	public:
 		FmodAudioSampleEmitter();
-		~FmodAudioSampleEmitter();
 
-		FmodSystem* system = nullptr;
-		FmodChannelGroup* channel_group = nullptr;
+		void _notification(int p_what);
+
 		Ref<FmodAudioSample> sample;
+		bool auto_emit = false;
 
 		void emit();
 
 		void set_sample(Ref<FmodAudioSample> new_sample);
 		Ref<FmodAudioSample> get_sample() const;
+
+		void set_auto_emit(const bool enable);
+		bool is_autoemit_enabled() const;
 	};
 }
 

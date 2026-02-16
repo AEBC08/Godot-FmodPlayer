@@ -3,6 +3,7 @@
 
 #include "fmod_audio_stream.h"
 #include "fmod_channel_group.h"
+#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/core/class_db.hpp>
 
@@ -11,9 +12,10 @@ namespace godot {
 		GDCLASS(FmodAudioStreamPlayer, Node)
 
 	private:
-		FmodChannel* internal_channel = nullptr;
-		FmodChannelGroup* internal_channel_group = nullptr;
+		Ref<FmodChannel> internal_channel = nullptr;
+		Ref<FmodChannelGroup> internal_channel_group = nullptr;
 
+		void _create_internal_channel(Ref<FmodAudioStream> stream);
 		void _on_internal_channel_ended();
 
 	protected:
@@ -21,21 +23,37 @@ namespace godot {
 
 	public:
 		FmodAudioStreamPlayer();
-		~FmodAudioStreamPlayer();
+		
+		void _notification(int p_what);
 
-		FmodSystem* system = nullptr;
 		Ref<FmodAudioStream> stream;
+		bool playing = false;
+		double volume_db = 0.0;
+		double pitch = 1.0;
+		bool auto_play = false;
+		StringName bus;
 
 		void set_stream(Ref<FmodAudioStream> new_stream);
 		Ref<FmodAudioStream> get_stream() const;
 
-		bool playing = false;
 		void play(const double from_position = 0.0);
-		void set_playing(const bool play);
+		void stop();
+		void set_playing(const bool playing);
 		bool is_playing() const;
+
+		double get_playback_position() const;
 
 		void set_volume_db(const double new_volume_db);
 		double get_volume_db() const;
+
+		void set_pitch(const double new_pitch);
+		double get_pitch() const;
+
+		void set_auto_play(const bool enable);
+		bool is_autoplay_enabled() const;
+
+		void set_bus(const StringName& p_bus);
+		StringName get_bus() const;
 	};
 }
 

@@ -1,0 +1,17 @@
+[configuration]
+
+entry_symbol = "example_library_init"
+compatibility_minimum = "4.1"
+reloadable = true
+
+[libraries]
+
+windows.debug.x86_64 = "fmod_player.windows.template_debug.x86_64.dll"
+android.debug.arm64 = "libfmod_player.android.template_debug.arm64.so"
+
+[icons]
+
+FmodAudioStreamPlayer = "icons/FmodAudioStreamPlayer.svg"
+FmodAudioSampleEmitter = "icons/FmodAudioSampleEmitter.svg"
+FmodAudioStream = "icons/FmodAudioStream.svg"
+FmodAudioSample = "icons/FmodAudioSample.svg"

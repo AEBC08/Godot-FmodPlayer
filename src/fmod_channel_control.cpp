@@ -85,7 +85,7 @@ namespace godot {
 	}
 
 	void FmodChannelControl::stop() {
-		ERR_FAIL_COND(!channel_control);
+		if (!channel_control) return;
 		FMOD_ERR_CHECK(channel_control->stop());
 	}
 
@@ -108,7 +108,7 @@ namespace godot {
 	}
 
 	FmodSystem::FmodMode FmodChannelControl::get_mode() const {
-		if (!channel_control) FmodSystem::MODE_DEFAULT;
+		if (!channel_control) return FmodSystem::MODE_DEFAULT;
 		FMOD_MODE fmod_mode;
 		FMOD_ERR_CHECK(channel_control->getMode(&fmod_mode));
 		FmodSystem::FmodMode mode = static_cast<FmodSystem::FmodMode>((int)fmod_mode);
@@ -259,14 +259,14 @@ namespace godot {
 		unsigned long long dspclock = 0, parentclock = 0;
 		FMOD_ERR_CHECK_V(channel_control->getDSPClock(&dspclock, &parentclock), Dictionary());
 		Dictionary result;
-		result["dsp_lock"] = dspclock;
-		result["parent_clock"] = parentclock;
+		result["dsp_lock"] = (uint64_t)dspclock;
+		result["parent_clock"] = (uint64_t)parentclock;
 		return result;
 	}
 
 	void FmodChannelControl::set_delay(
-		const unsigned long long start,
-		const unsigned long long end,
+		const uint64_t start,
+		const uint64_t end,
 		const bool stopchannels
 	) {
 		ERR_FAIL_COND(!channel_control);
@@ -279,23 +279,23 @@ namespace godot {
 		bool stopchannels = true;
 		FMOD_ERR_CHECK_V(channel_control->getDelay(&start, &end, &stopchannels), Dictionary());
 		Dictionary result;
-		result["start"] = start;
-		result["end"] = end;
+		result["start"] = (uint64_t)start;
+		result["end"] = (uint64_t)end;
 		result["stop_channels"] = stopchannels;
 		return result;
 	}
 
-	void FmodChannelControl::add_fade_point(const unsigned long long dspclock, const float volume) {
+	void FmodChannelControl::add_fade_point(const uint64_t dspclock, const float volume) {
 		ERR_FAIL_COND(!channel_control);
 		FMOD_ERR_CHECK(channel_control->addFadePoint(dspclock, volume));
 	}
 
-	void FmodChannelControl::set_fade_point_ramp(const unsigned long long dspclock, const float volume) {
+	void FmodChannelControl::set_fade_point_ramp(const uint64_t dspclock, const float volume) {
 		ERR_FAIL_COND(!channel_control);
 		FMOD_ERR_CHECK(channel_control->setFadePointRamp(dspclock, volume));
 	}
 
-	void FmodChannelControl::remove_fade_points(const unsigned long long start, const unsigned long long end) {
+	void FmodChannelControl::remove_fade_points(const uint64_t start, const uint64_t end) {
 		ERR_FAIL_COND(!channel_control);
 		FMOD_ERR_CHECK(channel_control->removeFadePoints(start, end));
 	}
@@ -307,8 +307,8 @@ namespace godot {
 		float point_volume = 0.0f;
 		FMOD_ERR_CHECK_V(channel_control->getFadePoints(&numpoints, &point_dspclock, &point_volume), Dictionary());
 		Dictionary result;
-		result["num_points"] = numpoints;
-		result["point_dspclock"] = point_dspclock;
+		result["num_points"] = (uint32_t)numpoints;
+		result["point_dspclock"] = (uint64_t)point_dspclock;
 		result["point_volume"] = point_volume;
 		return result;
 	}

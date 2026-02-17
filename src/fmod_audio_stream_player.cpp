@@ -49,6 +49,7 @@ namespace godot {
 
 		case NOTIFICATION_PREDELETE: {
 			if (internal_channel.is_valid()) {
+				internal_channel->stop();
 				internal_channel.unref();
 			}
 			if (internal_channel_group.is_valid()) {
@@ -61,7 +62,14 @@ namespace godot {
 	void FmodAudioStreamPlayer::_create_internal_channel(Ref<FmodAudioStream> stream) {
 		FmodSystem* system = FmodServer::get_main_system();
 
-		internal_channel = system->play_sound(stream->sound, internal_channel_group, true);
+		// 通过 get_sound() 获取 Sound（延迟创建）
+		Ref<FmodSound> sound = stream->get_sound();
+		if (sound.is_null()) {
+			UtilityFunctions::push_error("Failed to get sound from stream");
+			return;
+		}
+
+		internal_channel = system->play_sound(sound, internal_channel_group, true);
 		if (internal_channel.is_null()) {
 			UtilityFunctions::push_error("Failed to get Fmod Channel!");
 			return;
@@ -93,14 +101,24 @@ namespace godot {
 	}
 
 	void FmodAudioStreamPlayer::play(const double from_position) {
-		// 总是重新创建 channel，确保干净的状态
-		if (internal_channel.is_valid()) {
-			if (internal_channel->is_connected("ended", callable_mp(this, &FmodAudioStreamPlayer::_on_internal_channel_ended)))
-				internal_channel->disconnect("ended", callable_mp(this, &FmodAudioStreamPlayer::_on_internal_channel_ended));
-			internal_channel.unref();
+		if (internal_channel.is_valid() && internal_channel->channel_is_valid()) {
+			//if (internal_channel->is_connected("ended", callable_mp(this, &FmodAudioStreamPlayer::_on_internal_channel_ended)))
+			//	internal_channel->disconnect("ended", callable_mp(this, &FmodAudioStreamPlayer::_on_internal_channel_ended));
+			//internal_channel.unref();
+			// 如果已有 channel，尝试使用它
+			internal_channel->set_position(int(from_position * 1000));
+			internal_channel->set_paused(false);
+			playing = true;
+			return;
 		}
 
 		if (stream.is_valid()) {
+			Ref<FmodSound> current_sound = stream->get_sound();
+			if (current_sound.is_null()) {
+				UtilityFunctions::push_error("No sound available");
+				return;
+			}
+
 			_create_internal_channel(stream);
 			if (internal_channel.is_valid()) {
 				if (from_position > 0.0) {

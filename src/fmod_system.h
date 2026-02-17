@@ -19,8 +19,6 @@ namespace godot {
 	private:
 		FMOD::System* system = nullptr;
 
-		bool _check_error(FMOD_RESULT result);
-
 	protected:
 		static void _bind_methods();
 
@@ -132,13 +130,22 @@ namespace godot {
 			TIMEUNIT_MODPATTERN = 0x00000400
 		};
 
+		bool system_is_valid() const;															// 检查 FMOD System 是否有效
+		bool system_is_null() const;															// 检查 FMOD System 是否无效
+
 		// 管理
+		static FmodSystem* create_system(const int max_channels, FmodInitFlags flags);			// 创建 FMOD System 实例
+		void init(const int max_channels, FmodInitFlags flags);									// 初始化 FMOD System
+		void close();																			// 关闭与输出的连接，回到未初始化状态，但不释放对象
+		void release();																			// 关闭并释放该对象及其资源
 		void update();																			// 更新 FMOD System
+		void mixer_suspend();																	// 暂停调音器线程，放弃使用音频硬件，同时保持内部状态
+		void mixer_resume();																	// 恢复混音线程并重新获取音频硬件访问权限
 
 		// 设备选择
 		void set_output(FmodOutputType output_type);											// 设置用于运行混音器的输出接口类型
 		FmodOutputType get_output() const;														// 获取用于运行混音器的输出接口类型
-		int64_t get_num_drivers() const;														// 获取所选输出类型可用的输出驱动器数量
+		int get_num_drivers() const;															// 获取所选输出类型可用的输出驱动器数量
 		Dictionary get_driver_info(int id) const;												// 获取由其索引指定的声音设备的识别信息，且针对所选输出模式
 		void set_driver(int driver);															// 设置所选输出类型的输出驱动
 		int64_t get_driver() const;																// 获取所选输出类型的输出驱动
@@ -153,16 +160,16 @@ namespace godot {
 		Dictionary get_version() const;															// 获取 Fmod 版本
 		uint64_t get_output_handle() const;														// 获取输出类型特定的内部原生接口
 		Dictionary get_channels_playing() const;												// 获取当前播放 Channel 数量
-		Dictionary get_cpu_usage() const;														// 获取 Core API不同部分所使用的CPU资源
+		Dictionary get_cpu_usage() const;														// 获取 Core API不同部分所使用的 CPU 资源
 		Dictionary get_file_usage() const;														// 获取文件读取信息
 		PackedFloat32Array get_default_mix_matrix(
 			FmodSpeakerMode source_speaker_mode,
 			FmodSpeakerMode target_speaker_mode,
 			int array_length,
 			int hop) const;																		// 检索用于从一种扬声器模式转换为另一种模式的默认矩阵
-		int64_t get_speaker_mode_channels(FmodSpeakerMode mode) const;							// 获取给定扬声器模式的通道数
+		int get_speaker_mode_channels(FmodSpeakerMode mode) const;								// 获取给定扬声器模式的通道数
 
-		// 创建与检索
+		// 创建与获取
 		Ref<FmodSound> create_sound_from_file(const String p_path, unsigned int mode);			// 从文件创建 FmodSound
 		Ref<FmodSound> create_sound_from_memory(const PackedByteArray& data, unsigned int mode);// 从内存创建 FmodSound
 		Ref<FmodSound> create_sound_from_res(const String p_path, unsigned int mode);			// 从资源文件创建 FmodSound

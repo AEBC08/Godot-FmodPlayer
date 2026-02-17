@@ -21,8 +21,6 @@
         }                                                                       \
     } while(0)
 
-#define FMOD_CHECK_ERR(result) FmodSystem::_check_error(result)
-
 #define FMOD_ERR_CHECK_V(fmod_call, retval)                                    \
     do {                                                                        \
         FMOD_RESULT _r = (fmod_call);                                           \

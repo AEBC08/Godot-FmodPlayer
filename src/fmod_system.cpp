@@ -97,17 +97,29 @@ namespace godot {
 		BIND_ENUM_CONSTANT(TIMEUNIT_MODROW);
 		BIND_ENUM_CONSTANT(TIMEUNIT_MODPATTERN);
 
+		ClassDB::bind_method(D_METHOD("system_is_valid"), &FmodSystem::system_is_valid);
+		ClassDB::bind_method(D_METHOD("system_is_null"), &FmodSystem::system_is_null);
+
+		ClassDB::bind_static_method("FmodSystem", D_METHOD("create_system", "max_channels", "flags"), &FmodSystem::create_system, DEFVAL(INIT_NORMAL), DEFVAL(32));
+		ClassDB::bind_method(D_METHOD("init", "max_channels", "flags"), &FmodSystem::init, DEFVAL(INIT_NORMAL), DEFVAL(32));
+		ClassDB::bind_method(D_METHOD("close"), &FmodSystem::close);
+		ClassDB::bind_method(D_METHOD("release"), &FmodSystem::release);
 		ClassDB::bind_method(D_METHOD("update"), &FmodSystem::update);
+		ClassDB::bind_method(D_METHOD("mixer_suspend"), &FmodSystem::mixer_suspend);
+		ClassDB::bind_method(D_METHOD("mixer_resume"), &FmodSystem::mixer_resume);
+
 		ClassDB::bind_method(D_METHOD("set_output", "output_type"), &FmodSystem::set_output);
 		ClassDB::bind_method(D_METHOD("get_output"), &FmodSystem::get_output);
 		ClassDB::bind_method(D_METHOD("get_num_drivers"), &FmodSystem::get_num_drivers);
 		ClassDB::bind_method(D_METHOD("get_driver_info", "id"), &FmodSystem::get_driver_info);
 		ClassDB::bind_method(D_METHOD("set_driver", "driver"), &FmodSystem::set_driver);
 		ClassDB::bind_method(D_METHOD("get_driver"), &FmodSystem::get_driver);
+
 		ClassDB::bind_method(D_METHOD("set_network_proxy", "proxy"), &FmodSystem::set_network_proxy);
 		ClassDB::bind_method(D_METHOD("get_network_proxy"), &FmodSystem::get_network_proxy);
 		ClassDB::bind_method(D_METHOD("set_network_timeout", "timeout"), &FmodSystem::set_network_timeout);
 		ClassDB::bind_method(D_METHOD("get_network_timeout"), &FmodSystem::get_network_timeout);
+
 		ClassDB::bind_method(D_METHOD("get_version"), &FmodSystem::get_version);
 		ClassDB::bind_method(D_METHOD("get_output_handle"), &FmodSystem::get_output_handle);
 		ClassDB::bind_method(D_METHOD("get_channels_playing"), &FmodSystem::get_channels_playing);
@@ -115,6 +127,7 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_file_usage"), &FmodSystem::get_file_usage);
 		ClassDB::bind_method(D_METHOD("get_default_mix_matrix", "source_speaker_mode", "target_speaker_mode", "array_length", "hop"), &FmodSystem::get_default_mix_matrix);
 		ClassDB::bind_method(D_METHOD("get_speaker_mode_channels", "mode"), &FmodSystem::get_speaker_mode_channels);
+
 		ClassDB::bind_method(D_METHOD("create_sound_from_file", "path", "mode"), &FmodSystem::create_sound_from_file, DEFVAL(MODE_DEFAULT));
 		ClassDB::bind_method(D_METHOD("create_sound_from_memory", "data", "mode"), &FmodSystem::create_sound_from_memory, DEFVAL(MODE_DEFAULT));
 		ClassDB::bind_method(D_METHOD("create_sound_from_res", "path", "mode"), &FmodSystem::create_sound_from_res, DEFVAL(MODE_DEFAULT));
@@ -129,28 +142,67 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_master_channel_group"), &FmodSystem::get_master_channel_group);
 	}
 
-	bool FmodSystem::_check_error(FMOD_RESULT result) {
-		if (result != FMOD_OK)
-			UtilityFunctions::push_error("FMOD System Error at ", __FILE__, ":", __LINE__, " - ", FMOD_ErrorString(result));
-		return result != FMOD_OK;
-	}
-
 	FmodSystem::FmodSystem() {
 		system = nullptr;
-		if (FMOD_CHECK_ERR(FMOD::System_Create(&system))) return;
-		if (FMOD_CHECK_ERR(system->init(32, FMOD_INIT_PROFILE_ENABLE, nullptr))) return;
 	}
 
 	FmodSystem::~FmodSystem() {
 		if (system) {
-			FMOD_ERR_CHECK(system->release());
-			system = nullptr;
+			release();
 		}
 	}
 
+	bool FmodSystem::system_is_valid() const {
+		return system != nullptr;
+	}
+
+	bool FmodSystem::system_is_null() const {
+		return system == nullptr;
+	}
+
+	FmodSystem* FmodSystem::create_system(const int max_channels, FmodInitFlags flags) {
+		auto initflags = static_cast<FMOD_INITFLAGS>((int)flags);
+		FmodSystem* new_system = memnew(FmodSystem);
+		FMOD_ERR_CHECK_V(FMOD::System_Create(&new_system->system), nullptr);
+		new_system->init(32, flags);
+		return new_system;
+	}
+
+	void FmodSystem::init(const int max_channels, FmodInitFlags flags) {
+		ERR_FAIL_COND(!system);
+		auto initflags = static_cast<FMOD_INITFLAGS>((int)flags);
+		FMOD_ERR_CHECK(system->init(max_channels, initflags, nullptr));
+	}
+
+	void FmodSystem::close() {
+		ERR_FAIL_COND(!system);
+		FMOD_ERR_CHECK(system->close());
+	}
+
+	void FmodSystem::release() {
+		ERR_FAIL_COND(!system);
+		FMOD_RESULT result = system->release();
+		if (result != FMOD_OK) {
+			UtilityFunctions::push_error("Failed to release FMOD System: ", FMOD_ErrorString(result));
+			return;
+		}
+		system = nullptr;
+	}
+
 	void FmodSystem::update() {
-		if (system->update() != FMOD_OK)
-			UtilityFunctions::push_error("Fmod Sytem update failed!");;
+		FMOD_RESULT result = system->update();
+		if (result != FMOD_OK)
+			UtilityFunctions::push_error("FMOD Sytem update failed: ", FMOD_ErrorString(result));
+	}
+
+	void FmodSystem::mixer_suspend() {
+		ERR_FAIL_COND(!system);
+		FMOD_ERR_CHECK(system->mixerSuspend());
+	}
+
+	void FmodSystem::mixer_resume() {
+		ERR_FAIL_COND(!system);
+		FMOD_ERR_CHECK(system->mixerResume());
 	}
 
 	void FmodSystem::set_output(FmodOutputType output_type) {
@@ -167,11 +219,11 @@ namespace godot {
 		return output_type;
 	}
 
-	int64_t FmodSystem::get_num_drivers() const {
+	int FmodSystem::get_num_drivers() const {
 		ERR_FAIL_COND_V(!system, 0);
 		int num = 0;
 		FMOD_ERR_CHECK_V(system->getNumDrivers(&num), 0);
-		return (int64_t)num;
+		return num;
 	}
 
 	Dictionary FmodSystem::get_driver_info(int id) const {
@@ -298,9 +350,7 @@ namespace godot {
 
 	Dictionary FmodSystem::get_file_usage() const {
 		ERR_FAIL_COND_V(!system, Dictionary());
-		long long sample_bytes_read = 0;
-		long long stream_bytes_read = 0;
-		long long other_bytes_read = 0;
+		long long sample_bytes_read = 0, stream_bytes_read = 0, other_bytes_read = 0;
 		FMOD_ERR_CHECK_V(system->getFileUsage(&sample_bytes_read, &stream_bytes_read, &other_bytes_read), Dictionary());
 		Dictionary result;
 		result["sample_bytes_read"] = (int64_t)sample_bytes_read;
@@ -366,17 +416,16 @@ namespace godot {
 		return mix_matrix;
 	}
 
-	int64_t FmodSystem::get_speaker_mode_channels(FmodSpeakerMode mode) const {
+	int FmodSystem::get_speaker_mode_channels(FmodSpeakerMode mode) const {
 		FMOD_SPEAKERMODE fmod_speaker_mode = static_cast<FMOD_SPEAKERMODE>((int)mode);
 		int channels = 0;
 		FMOD_ERR_CHECK_V(system->getSpeakerModeChannels(fmod_speaker_mode, &channels), -1);
-		return (int64_t)channels;
+		return channels;
 	}
-
-	// Creation and retrieval
 
 	Ref<FmodSound> FmodSystem::create_sound_from_file(const String p_path, unsigned int mode) {
 		ERR_FAIL_COND_V(!system, nullptr);
+
 		// 检查是否为资源文件，如果是则改用从资源文件创建 FmodSound
 		if (p_path.begins_with("res://")) {
 			return create_sound_from_res(p_path, mode);
@@ -402,7 +451,7 @@ namespace godot {
 	}
 
 	Ref<FmodSound> FmodSystem::create_sound_from_memory(const PackedByteArray& data, unsigned int mode) {
-		ERR_FAIL_COND_V(!system || data.is_empty(), nullptr);
+		ERR_FAIL_COND_V(!system || data.is_empty(), Ref<FmodSound>());
 
 		// 实例化 FmodSound
 		Ref<FmodSound> sound;
@@ -415,18 +464,19 @@ namespace godot {
 		// 从 FmodSystem 创建音频
 		FMOD_ERR_CHECK_V(system->createSound(
 			(const char*)sound->data.ptr(),
-			mode |= FMOD_OPENMEMORY,
+			mode,
 			&exinfo,
 			&sound->sound
 		), Ref<FmodSound>());
+
 		return sound;
 	}
 
 	Ref<FmodSound> FmodSystem::create_sound_from_res(const String p_path, unsigned int mode) {
-		ERR_FAIL_COND_V(!system, nullptr);
+		ERR_FAIL_COND_V(!system, Ref<FmodSound>());
 		// 打开文件
 		Ref<FileAccess> file = FileAccess::open(p_path, FileAccess::READ);
-		ERR_FAIL_COND_V(file.is_null(), nullptr);
+		ERR_FAIL_COND_V(file.is_null(), Ref<FmodSound>());
 
 		// 读取文件数据到内存
 		PackedByteArray data = file->get_buffer(file->get_length());
@@ -437,7 +487,7 @@ namespace godot {
 	}
 
 	Ref<FmodSound> FmodSystem::create_stream_from_file(const String p_path, unsigned int mode) {
-		ERR_FAIL_COND_V(!system, nullptr);
+		ERR_FAIL_COND_V(!system, Ref<FmodSound>());
 
 		// 保留字符串对象，防止悬空指针
 		CharString path_utf8 = ProjectSettings::get_singleton()->globalize_path(p_path).utf8();
@@ -451,6 +501,7 @@ namespace godot {
 			nullptr,
 			&sound_ptr
 		), Ref<FmodSound>());
+
 		Ref<FmodSound> sound;
 		sound.instantiate();
 		sound->sound = sound_ptr;
@@ -458,12 +509,12 @@ namespace godot {
 	}
 
 	Ref<FmodDSP> FmodSystem::create_dsp(const String& name) {
-		ERR_FAIL_COND_V(!system, nullptr);
+		ERR_FAIL_COND_V(!system, Ref<FmodDSP>());
 
 		// 定义一个静态的描述结构体 (必须保持有效，因为 FMOD 内部会引用它)
 		static FMOD_DSP_DESCRIPTION desc = {};
 		desc.pluginsdkversion = FMOD_PLUGIN_SDK_VERSION;
-		strcpy_s(desc.name, name.utf8().get_data());
+		strcpy(desc.name, name.utf8().get_data());
 		desc.numinputbuffers = 1;
 		desc.numoutputbuffers = 1;
 		desc.create = fmod_dsp_create_callback;
@@ -500,7 +551,7 @@ namespace godot {
 	}
 
 	Ref<FmodChannelGroup> FmodSystem::create_channel_group(const String& p_name) {
-		ERR_FAIL_COND_V(!system, nullptr);
+		ERR_FAIL_COND_V(!system, Ref<FmodChannelGroup>());
 		FMOD::ChannelGroup* channel_group_ptr = nullptr;
 		FMOD_ERR_CHECK_V(
 			system->createChannelGroup(p_name.utf8().get_data(), &channel_group_ptr),
@@ -515,7 +566,7 @@ namespace godot {
 	Ref<FmodChannel> FmodSystem::play_sound(Ref<FmodSound> sound, Ref<FmodChannelGroup> channel_group, bool paused) {
 		ERR_FAIL_COND_V(
 			!system || sound.is_null() || !sound->sound || channel_group.is_null() || !channel_group->channel_group,
-			nullptr
+			Ref<FmodChannel>()
 		);
 
 		// 创建 Channel
@@ -543,7 +594,7 @@ namespace godot {
 	Ref<FmodChannel> FmodSystem::play_dsp(Ref<FmodDSP> dsp, Ref<FmodChannelGroup> channel_group, bool paused) {
 		ERR_FAIL_COND_V(
 			!system || dsp.is_null() || !dsp->dsp || channel_group.is_null() || !channel_group->channel_group,
-			nullptr
+			Ref<FmodChannel>()
 		);
 
 		// 创建 Channel
@@ -553,12 +604,12 @@ namespace godot {
 			channel_group->channel_group,
 			paused,
 			&fmod_channel
-		), nullptr);
+		), Ref<FmodChannel>());
 
 		// 检查 FmodChannel 是否被填充
 		if (!fmod_channel) {
 			UtilityFunctions::push_error("playSound returned null channel");
-			return nullptr;
+			return Ref<FmodChannel>();
 		}
 
 		// 创建 Godot 包装对象
@@ -569,10 +620,10 @@ namespace godot {
 	}
 
 	Ref<FmodChannel> FmodSystem::get_channel(const int64_t id) {
-		ERR_FAIL_COND_V(!system, nullptr);
+		ERR_FAIL_COND_V(!system, Ref<FmodChannel>());
 
 		FMOD::Channel* fmod_channel = nullptr;
-		FMOD_ERR_CHECK_V(system->getChannel((int)id, &fmod_channel), nullptr);
+		FMOD_ERR_CHECK_V(system->getChannel((int)id, &fmod_channel), Ref<FmodChannel>());
 
 		Ref<FmodChannel> channel;
 		channel.instantiate();

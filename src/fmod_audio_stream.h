@@ -14,10 +14,11 @@ namespace godot {
 
 	protected:
 		static void _bind_methods();
+		virtual Ref<FmodSound> _create_sound() override;
 
 	public:
 		FmodAudioStream();
-		~FmodAudioStream();
+		virtual ~FmodAudioStream();
 
 		void set_file_path(const String& p_path) override;
 	};

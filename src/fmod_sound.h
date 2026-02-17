@@ -4,9 +4,6 @@
 #include "fmod_server.h"
 #include "fmod_channel.h"
 #include "fmod_system.h"
-#include <godot_cpp/classes/engine.hpp>
-#include <godot_cpp/classes/project_settings.hpp>
-#include <godot_cpp/classes/object.hpp>
 
 namespace godot {
 	class FmodSound : public RefCounted {
@@ -29,6 +26,9 @@ namespace godot {
 		String get_name() const;								// 获取一个声音的名称
 		Dictionary get_format() const;							// 获取声音的格式信息
 		double get_length() const;								// 获取声音时长
+		Dictionary get_num_tags() const;						// 获取元数据标签数量
+		Dictionary get_tag(
+			const int index, const String& name) const;			// 获取元数据标签
 
 	};
 }

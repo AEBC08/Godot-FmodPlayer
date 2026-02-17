@@ -7,6 +7,7 @@
 #include "fmod_system.h"
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/classes/engine.hpp>
 
 namespace godot {
 	class FmodAudioSampleEmitter : public Node {

@@ -36,8 +36,13 @@ namespace godot {
 
 	void FmodAudioSampleEmitter::emit() {
 		ERR_FAIL_COND(sample.is_null() || internal_channel_group.is_null());
+		Ref<FmodSound> sound = sample->get_sound();
+		if (sound.is_null()) {
+			UtilityFunctions::push_error("Failed to get sound from stream");
+			return;
+		}
 		FmodSystem* system = FmodServer::get_main_system();
-		Ref<FmodChannel> channel = system->play_sound(sample->sound, internal_channel_group);
+		Ref<FmodChannel> channel = system->play_sound(sound, internal_channel_group);
 	}
 
 	void FmodAudioSampleEmitter::set_sample(Ref<FmodAudioSample> new_sample) {

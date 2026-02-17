@@ -67,22 +67,22 @@ namespace godot {
 		// 样本精准排程
 		Dictionary get_dsp_clock() const;							// 获取当前 DSP 时钟值
 		void set_delay(
-			const unsigned long long start,
-			const unsigned long long end,
+			const uint64_t start,
+			const uint64_t end,
 			const bool stopchannels = true
 		);															// 设置相对于父 ChannelGroup DSP 时钟的样本准确起始 (或停止) 时间
 		Dictionary get_delay() const;								// 获取相对于父 ChannelGroup DSP 时钟的样本精确起始 (或停止) 时间
 		void add_fade_point(
-			const unsigned long long dspclock,
+			const uint64_t dspclock,
 			const float volume
 		);															// 在每次相对于父 ChannelGroup DSP 时钟添加一个采样的准确淡出点
 		void set_fade_point_ramp(
-			const unsigned long long dspclock,
+			const uint64_t dspclock,
 			const float volume
 		);															// 在未来指定时间使用淡出点添加音量斜坡
 		void remove_fade_points(
-			const unsigned long long start,
-			const unsigned long long end
+			const uint64_t start,
+			const uint64_t end
 		);															// 移除两个指定时钟值之间的所有淡入淡出点
 		Dictionary get_fade_points() const;							// 获取存储的渐入淡出点信息
 

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/ac4f4eb7-1253-41e9-b304-11dfcb40f5a5" alt="Godot-FmodPlayer Banner" width="100%">
+  <img width="3400" height="920" alt="fmod_player_banner" src="https://github.com/user-attachments/assets/1d2655f5-d440-4bdb-978a-b095cb275e9c" />
 </p>
 
 <h1 align="center">Godot-FmodPlayer</h1>
@@ -47,7 +47,6 @@ Professional-grade audio mixing capabilities:
 - **Channel Groups** - Organize sounds into mix buses with group controls
 - **Real-time Parameters** - Adjust volume, pitch, pan, and 3D attributes on the fly
 - **DSP Effects** - Apply reverb, delay, distortion, and more
-- **3D Audio** - Positional audio with distance attenuation and occlusion
 
 ### 📊 Performance Monitoring
 Built-in integration with Godot's Performance Monitor:

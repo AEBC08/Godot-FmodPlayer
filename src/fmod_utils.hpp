@@ -21,7 +21,7 @@
         }                                                                       \
     } while(0)
 
-#define FMOD_ERR_CHECK_V(fmod_call, retval)                                    \
+#define FMOD_ERR_CHECK_V(fmod_call, retval)                                     \
     do {                                                                        \
         FMOD_RESULT _r = (fmod_call);                                           \
         if (_r != FMOD_OK) {                                                    \
@@ -39,7 +39,7 @@ namespace FmodUtils {
 
     // 线性值转 dB
     // 输入: 0.0 ~ +∞, 输出: -144.0 dB ~ +∞ dB（0 返回 -144dB 而非 -inf）
-    static double linearToDb(double linear) {
+    static double linear_to_db(double linear) {
         // 防止 log(0) 和负数
         linear = std::max(linear, MIN_LINEAR);
         return 20.0 * std::log10(linear);
@@ -47,14 +47,14 @@ namespace FmodUtils {
 
     // dB 转线性值
     // 输入: -∞ ~ +∞, 输出: 0.0 ~ +∞（-144dB 以下返回 0）
-    static double dbToLinear(double db) {
+    static double db_to_linear(double db) {
         // 防止下溢
         if (db <= MIN_DB) return 0.0;
         return std::pow(10.0, db / 20.0);
     }
 
     // 0.0~1.0 → -60dB~0dB（0 映射到 -inf 显示为 -60dB）
-    static double faderToDb(double fader) {
+    static double fader_to_db(double fader) {
         if (fader <= 0.0) return MIN_DB;
         // 使用曲线让 0.5 对应 -20dB 左右（感知线性）
         return 20.0 * std::log10(fader);

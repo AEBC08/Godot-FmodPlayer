@@ -1,4 +1,5 @@
 #include "fmod_dsp.h"
+#include "fmod_dsp_connection.h"
 
 namespace godot {
 	void FmodDSP::_bind_methods() {
@@ -49,6 +50,22 @@ namespace godot {
 		BIND_ENUM_CONSTANT(DSP_PARAMETER_DATA_TYPE_DYNAMIC_RESPONSE);
 		BIND_ENUM_CONSTANT(DSP_PARAMETER_DATA_TYPE_FINITE_LENGTH);
 
+		ClassDB::bind_method(D_METHOD("add_input", "target_dsp", "type"), &FmodDSP::add_input, DEFVAL(FmodDSPConnection::FmodDSPConnectionType::DSPCONNECTION_TYPE_STANDARD));
+		ClassDB::bind_method(D_METHOD("get_input", "index"), &FmodDSP::get_input);
+		ClassDB::bind_method(D_METHOD("get_output", "index"), &FmodDSP::get_output);
+		ClassDB::bind_method(D_METHOD("get_num_inputs"), &FmodDSP::get_num_inputs);
+		ClassDB::bind_method(D_METHOD("get_num_outputs"), &FmodDSP::get_num_outputs);
+		ClassDB::bind_method(D_METHOD("disconnect_all", "inputs", "outputs"), &FmodDSP::disconnect_all);
+		ClassDB::bind_method(D_METHOD("disconnect_from", "target", "connection"), &FmodDSP::disconnect_from, DEFVAL(Ref<FmodDSPConnection>()));
+		
+		ClassDB::bind_method(D_METHOD("set_channel_format", "numchannels", "speakermode"), &FmodDSP::set_channel_format);
+		ClassDB::bind_method(D_METHOD("get_channel_format"), &FmodDSP::get_channel_format);
+		ClassDB::bind_method(D_METHOD("get_output_channel_format", "inchannels", "inspeakermode"), &FmodDSP::get_output_channel_format);
+		
+		ClassDB::bind_method(D_METHOD("get_metering_info"), &FmodDSP::get_metering_info);
+		ClassDB::bind_method(D_METHOD("set_metering_enabled", "input_enabled", "output_enabled"), &FmodDSP::set_metering_enabled);
+		ClassDB::bind_method(D_METHOD("get_metering_enabled"), &FmodDSP::get_metering_enabled);
+
 		ClassDB::bind_method(D_METHOD("get_data_parameter_index", "data_type"), &FmodDSP::get_data_parameter_index);
 		ClassDB::bind_method(D_METHOD("get_num_parameters"), &FmodDSP::get_num_parameters);
 		ClassDB::bind_method(D_METHOD("set_parameter_bool", "index", "value"), &FmodDSP::set_parameter_bool);
@@ -70,6 +87,15 @@ namespace godot {
 		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bypass"), "set_bypass", "get_bypass");
 
 		ClassDB::bind_method(D_METHOD("set_wet_dry_mix", "prewet", "postwet", "dry"), &FmodDSP::set_wet_dry_mix);
+		ClassDB::bind_method(D_METHOD("get_wet_dry_mix"), &FmodDSP::get_wet_dry_mix);
+		ClassDB::bind_method(D_METHOD("get_idle"), &FmodDSP::get_idle);
+
+		ClassDB::bind_method(D_METHOD("reset"), &FmodDSP::reset);
+		ClassDB::bind_method(D_METHOD("release"), &FmodDSP::release);
+		ClassDB::bind_method(D_METHOD("get_type"), &FmodDSP::get_type);
+		ClassDB::bind_method(D_METHOD("get_info"), &FmodDSP::get_info);
+		ClassDB::bind_method(D_METHOD("get_cpu_usage"), &FmodDSP::get_cpu_usage);
+		ClassDB::bind_method(D_METHOD("get_system_object"), &FmodDSP::get_system_object);
 	}
 
 	FmodDSP::FmodDSP() {
@@ -77,23 +103,259 @@ namespace godot {
 
 	FmodDSP::~FmodDSP() {
 		if (dsp) {
-			dsp->release();
+			dsp->setUserData(nullptr);
+			dsp->setCallback(nullptr);
+			dsp = nullptr;
 		}
 	}
 
-	int32_t FmodDSP::get_data_parameter_index(FmodDSPParameterDataType data_type) const {
+	void FmodDSP::setup(FMOD::DSP* p_dsp) {
+		ERR_FAIL_COND_MSG(!p_dsp, "DSP pointer is null");
+
+		// 如果已经有 DSP，先清理旧的
+		if (dsp) {
+			dsp->setUserData(nullptr);
+			if (callbacks_set) {
+				dsp->setCallback(nullptr);
+			}
+		}
+		dsp = p_dsp;
+		dsp->setUserData(this);
+		FMOD_DSP_TYPE dsp_type;
+		if (dsp->getType(&dsp_type) == FMOD_OK) {
+			if (dsp_type == FMOD_DSP_TYPE_UNKNOWN) {
+				// 可能是自定义 DSP，需要设置回调
+				dsp->setCallback(fmod_dsp_callback);  // 需要定义这个回调
+				callbacks_set = true;
+			}
+		}
+	}
+
+	Ref<FmodDSPConnection> FmodDSP::add_input(Ref<FmodDSP> target_dsp, unsigned int type) {
+		ERR_FAIL_COND_V(!dsp, Ref<FmodDSPConnection>());
+		FMOD::DSPConnection* dsp_connection_ptr = nullptr;
+		FMOD_DSPCONNECTION_TYPE connection_type = static_cast<FMOD_DSPCONNECTION_TYPE>((int)type);
+		FMOD_ERR_CHECK_V(dsp->addInput(target_dsp->dsp, &dsp_connection_ptr, connection_type), Ref<FmodDSPConnection>());
+		Ref<FmodDSPConnection> dsp_connection;
+		dsp_connection.instantiate();
+		dsp_connection->dsp_connection = dsp_connection_ptr;
+		return dsp_connection;
+	}
+
+	Dictionary FmodDSP::get_input(const int index) const {
+		ERR_FAIL_COND_V(!dsp, Dictionary());
+		FMOD::DSP* dsp_ptr = nullptr;
+		FMOD::DSPConnection* dsp_connection_ptr = nullptr;
+		FMOD_ERR_CHECK_V(dsp->getOutput(index, &dsp_ptr, &dsp_connection_ptr), Dictionary());
+
+		// 从 userdata 获取已有对象，没有则创建
+		Ref<FmodDSP> output_dsp;
+		if (dsp_ptr) {
+			void* userdata = nullptr;
+			dsp_ptr->getUserData(&userdata);
+			if (userdata) {
+				output_dsp = Ref<FmodDSP>(static_cast<FmodDSP*>(userdata));
+			}
+			else {
+				output_dsp.instantiate();
+				output_dsp->setup(dsp_ptr);
+			}
+		}
+		Ref<FmodDSPConnection> connection;
+		if (dsp_connection_ptr) {
+			void* userdata = nullptr;
+			dsp_connection_ptr->getUserData(&userdata);
+			if (userdata) {
+				connection = Ref<FmodDSPConnection>(static_cast<FmodDSPConnection*>(userdata));
+			}
+			else {
+				connection.instantiate();
+				connection->setup(dsp_connection_ptr);
+			}
+		}
+
+		Dictionary result;
+		result["output"] = output_dsp;
+		result["output_connection"] = connection;
+		return result;
+	}
+
+	Dictionary FmodDSP::get_output(const int index) const {
+		ERR_FAIL_COND_V(!dsp, Dictionary());
+		FMOD::DSP* dsp_ptr = nullptr;
+		FMOD::DSPConnection* dsp_connection_ptr = nullptr;
+		FMOD_ERR_CHECK_V(dsp->getInput(index, &dsp_ptr, &dsp_connection_ptr), Dictionary());
+
+		// 从 userdata 获取已有对象，没有则创建
+		Ref<FmodDSP> input_dsp;
+		if (dsp_ptr) {
+			void* userdata = nullptr;
+			dsp_ptr->getUserData(&userdata);
+			if (userdata) {
+				input_dsp = Ref<FmodDSP>(static_cast<FmodDSP*>(userdata));
+			}
+			else {
+				input_dsp.instantiate();
+				input_dsp->setup(dsp_ptr);
+			}
+		}
+		Ref<FmodDSPConnection> connection;
+		if (dsp_connection_ptr) {
+			void* userdata = nullptr;
+			dsp_connection_ptr->getUserData(&userdata);
+			if (userdata) {
+				connection = Ref<FmodDSPConnection>(static_cast<FmodDSPConnection*>(userdata));
+			}
+			else {
+				connection.instantiate();
+				connection->setup(dsp_connection_ptr);
+			}
+		}
+
+		Dictionary result;
+		result["input"] = input_dsp;
+		result["input_connection"] = connection;
+		return result;
+	}
+
+	int FmodDSP::get_num_inputs() const {
+		ERR_FAIL_COND_V(!dsp, 0);
+		int numinputs = 0;
+		FMOD_ERR_CHECK_V(dsp->getNumInputs(&numinputs), 0);
+		return numinputs;
+	}
+
+	int FmodDSP::get_num_outputs() const {
+		ERR_FAIL_COND_V(!dsp, 0);
+		int numoutputs = 0;
+		FMOD_ERR_CHECK_V(dsp->getNumInputs(&numoutputs), 0);
+		return numoutputs;
+	}
+
+	void FmodDSP::disconnect_all(const bool inputs, const bool outputs) {
+		ERR_FAIL_COND(!dsp);
+		FMOD_ERR_CHECK(dsp->disconnectAll(inputs, outputs));
+	}
+
+	void FmodDSP::disconnect_from(Ref<FmodDSP> target, Ref<FmodDSPConnection> connection) {
+		ERR_FAIL_COND(!dsp);
+		FMOD_ERR_CHECK(dsp->disconnectFrom(target->dsp, connection->dsp_connection));
+	}
+
+	void FmodDSP::set_channel_format(const int numchannels, FmodSystem::FmodSpeakerMode speakermode) {
+		ERR_FAIL_COND(!dsp);
+		FMOD_CHANNELMASK channelmask = FMOD_CHANNELMASK_MONO;
+		FMOD_SPEAKERMODE to = static_cast<FMOD_SPEAKERMODE>((int)speakermode);
+		FMOD_ERR_CHECK(dsp->setChannelFormat(channelmask, numchannels, to));
+	}
+
+	Dictionary FmodDSP::get_channel_format() const {
+		ERR_FAIL_COND_V(!dsp, Dictionary());
+		FMOD_CHANNELMASK channelmask = FMOD_CHANNELMASK_MONO;
+		int numchannels = 0;
+		FMOD_SPEAKERMODE speakermode = FMOD_SPEAKERMODE_DEFAULT;
+		FMOD_ERR_CHECK_V(dsp->getChannelFormat(&channelmask, &numchannels, &speakermode), Dictionary());
+		Dictionary result;
+		result["num_channels"] = numchannels;
+		result["speaker_mode"] = (int)speakermode;
+		return result;
+	}
+
+	Dictionary FmodDSP::get_output_channel_format(const int inchannels, FmodSystem::FmodSpeakerMode inspeakermode) {
+		ERR_FAIL_COND_V(!dsp, Dictionary());
+		FMOD_SPEAKERMODE to = static_cast<FMOD_SPEAKERMODE>((int)inspeakermode);
+		FMOD_CHANNELMASK inmask = FMOD_CHANNELMASK_MONO;
+		FMOD_CHANNELMASK outmask = FMOD_CHANNELMASK_MONO;
+		int outchannels = 0;
+		FMOD_SPEAKERMODE outspeakermode = FMOD_SPEAKERMODE_DEFAULT;
+		FMOD_ERR_CHECK_V(dsp->getOutputChannelFormat(inmask, inchannels, to, &outmask, &outchannels, &outspeakermode), Dictionary());
+		Dictionary result;
+		result["out_channels"] = outchannels;
+		result["out_speaker_mode"] = (int)outspeakermode;
+		return result;
+	}
+
+	Dictionary FmodDSP::get_metering_info() const {
+		ERR_FAIL_COND_V(!dsp, Dictionary());
+		FMOD_DSP_METERING_INFO input_info = {};
+		FMOD_DSP_METERING_INFO output_info = {};
+		FMOD_ERR_CHECK_V(dsp->getMeteringInfo(&input_info, &output_info), Dictionary());
+
+		// 辅助 lambda：将 FMOD_DSP_METERING_INFO 转换为 Dictionary
+		auto metering_info_to_dict = [](const FMOD_DSP_METERING_INFO& metering) -> Dictionary {
+			Dictionary dict;
+
+			// 基本采样信息
+			dict["num_samples"] = metering.numsamples;
+			dict["num_channels"] = metering.numchannels;
+
+			// 峰值电平 (线性值) - 每个通道一个值，最多32通道
+			Array peak_levels;
+			for (int i = 0; i < metering.numchannels && i < 32; i++) {
+				peak_levels.push_back(metering.peaklevel[i]);
+			}
+			dict["peak_level"] = peak_levels;
+
+			// 均方根电平/RMS电平 (线性值) - 每个通道一个值，最多32通道
+			Array rms_levels;
+			for (int i = 0; i < metering.numchannels && i < 32; i++) {
+				rms_levels.push_back(metering.rmslevel[i]);
+			}
+			dict["rms_level"] = rms_levels;
+
+			// 计算平均 RMS 和峰值（单声道混合）
+			if (metering.numchannels > 0) {
+				float avg_rms = 0.0f;
+				float max_peak = 0.0f;
+				for (int i = 0; i < metering.numchannels && i < 32; i++) {
+					avg_rms += metering.rmslevel[i];
+					max_peak = MAX(max_peak, metering.peaklevel[i]);
+				}
+				avg_rms /= metering.numchannels;
+
+				dict["average_rms"] = avg_rms;
+				dict["max_peak"] = max_peak;
+
+				dict["average_rms_db"] = FmodUtils::linear_to_db(avg_rms);
+				dict["max_peak_db"] = FmodUtils::linear_to_db(max_peak);
+			}
+			return dict;
+		};
+
+		Dictionary info;
+		info["input"] = metering_info_to_dict(input_info);
+		info["output"] = metering_info_to_dict(output_info);
+		return info;
+	}
+
+	void FmodDSP::set_metering_enabled(const bool input_enabled, const bool output_enabled) {
+		ERR_FAIL_COND(!dsp);
+		FMOD_ERR_CHECK(dsp->setMeteringEnabled(input_enabled, output_enabled));
+	}
+
+	Dictionary FmodDSP::get_metering_enabled() const {
+		ERR_FAIL_COND_V(!dsp, Dictionary());
+		bool inputenabled = false, outputenabled = false;
+		FMOD_ERR_CHECK_V(dsp->getMeteringEnabled(&inputenabled, &outputenabled), Dictionary());
+		Dictionary result;
+		result["input_enabled"] = inputenabled;
+		result["output_enabled"] = outputenabled;
+		return result;
+	}
+
+	int FmodDSP::get_data_parameter_index(FmodDSPParameterDataType data_type) const {
 		ERR_FAIL_COND_V(!dsp, -1);
 		int index = -1;
 		FMOD_DSP_PARAMETER_DATA_TYPE fmod_data_type = static_cast<FMOD_DSP_PARAMETER_DATA_TYPE>((int)data_type);
 		FMOD_ERR_CHECK_V(dsp->getDataParameterIndex(fmod_data_type, &index), -1);
-		return (int64_t)index;
+		return index;
 	}
 
-	int64_t FmodDSP::get_num_parameters() const {
+	int FmodDSP::get_num_parameters() const {
 		ERR_FAIL_COND_V(!dsp, 0);
 		int numparams = 0;
 		FMOD_ERR_CHECK_V(dsp->getNumParameters(&numparams), 0);
-		return (int64_t)numparams;
+		return numparams;
 	}
 
 	void FmodDSP::set_parameter_bool(const int32_t index, const bool value) {
@@ -275,9 +537,93 @@ namespace godot {
 		ERR_FAIL_COND(!dsp);
 		FMOD_ERR_CHECK(dsp->setWetDryMix(prewet, postwet, dry));
 	}
+
+	Dictionary FmodDSP::get_wet_dry_mix() const {
+		ERR_FAIL_COND_V(!dsp, Dictionary());
+		float prewet = 0.0f;
+		float postwet = 0.0f;
+		float dry = 0.0f;
+		FMOD_ERR_CHECK_V(dsp->getWetDryMix(&prewet, &postwet, &dry), Dictionary());
+		Dictionary result;
+		result["prewet"] = prewet;
+		result["postwet"] = postwet;
+		result["dry"] = dry;
+		return result;
+	}
+
+	bool FmodDSP::get_idle() const {
+		ERR_FAIL_COND_V(!dsp, false);
+		bool idle = false;
+		FMOD_ERR_CHECK_V(dsp->getIdle(&idle), false);
+		return idle;
+	}
+
+	void FmodDSP::reset() {
+		ERR_FAIL_COND(!dsp);
+		FMOD_ERR_CHECK(dsp->reset());
+	}
+
+	void FmodDSP::release() {
+		ERR_FAIL_COND(!dsp);
+		FMOD_RESULT result = dsp->release();
+		if (result != FMOD_OK) {
+			UtilityFunctions::push_error("Failed to release DSP");
+			return;
+		}
+		dsp = nullptr;
+	}
+
+	FmodDSP::FmodDSPType FmodDSP::get_type() const {
+		ERR_FAIL_COND_V(!dsp, DSP_TYPE_UNKNOWN);
+		FMOD_DSP_TYPE dsp_type = FMOD_DSP_TYPE_UNKNOWN;
+		FMOD_ERR_CHECK_V(dsp->getType(&dsp_type), DSP_TYPE_UNKNOWN);
+		FmodDSPType to = static_cast<FmodDSPType>((int)dsp_type);
+		return to;
+	}
+
+	Dictionary FmodDSP::get_info() const {
+		ERR_FAIL_COND_V(!dsp, Dictionary());
+		char name[32] = { 0 };
+		unsigned int version = 0;
+		int channels = 0, configwidth = 0, configheight = 0;
+		FMOD_ERR_CHECK_V(dsp->getInfo(name, &version, &channels, &configwidth, &configheight), Dictionary());
+		Dictionary info;
+		info["name"] = String::utf8(name);
+		info["version"] = (uint32_t)version;
+		info["config_width"] = configwidth;
+		info["config_height"] = configheight;
+		return info;
+	}
+
+	Dictionary FmodDSP::get_cpu_usage() const {
+		ERR_FAIL_COND_V(!dsp, Dictionary());
+		unsigned int exclusive = 0, inclusive = 0;
+		FMOD_ERR_CHECK_V(dsp->getCPUUsage(&exclusive, &inclusive), Dictionary());
+		Dictionary usage;
+		usage["exclusive"] = (uint32_t)exclusive;
+		usage["inclusive"] = (uint32_t)inclusive;
+		return usage;
+	}
+
+	FmodSystem* FmodDSP::get_system_object() const {
+		ERR_FAIL_COND_V(!dsp, nullptr);
+		FMOD::System* system_ptr = nullptr;
+		FMOD_ERR_CHECK_V(dsp->getSystemObject(&system_ptr), nullptr);
+		FmodSystem* system = memnew(FmodSystem);
+		system->system = system_ptr;
+		return system;
+	}
 }
 
 // 回调函数实现
+FMOD_RESULT F_CALL fmod_dsp_callback(
+	FMOD_DSP* dsp,
+	FMOD_DSP_CALLBACK_TYPE type,
+	void* data
+) {
+	return FMOD_OK;
+}
+
 FMOD_RESULT F_CALL fmod_dsp_create_callback(FMOD_DSP_STATE* dsp_state) {
 	// 分配状态内存
 	MyDSPState* state = (MyDSPState*)FMOD_DSP_ALLOC(dsp_state, sizeof(MyDSPState));

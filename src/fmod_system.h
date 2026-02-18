@@ -17,7 +17,6 @@ namespace godot {
 		GDCLASS(FmodSystem, Object)
 
 	private:
-		FMOD::System* system = nullptr;
 
 	protected:
 		static void _bind_methods();
@@ -129,6 +128,8 @@ namespace godot {
 			TIMEUNIT_MODROW = 0x00000200,
 			TIMEUNIT_MODPATTERN = 0x00000400
 		};
+
+		FMOD::System* system = nullptr;
 
 		bool system_is_valid() const;															// 检查 FMOD System 是否有效
 		bool system_is_null() const;															// 检查 FMOD System 是否无效

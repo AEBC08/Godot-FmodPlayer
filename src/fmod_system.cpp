@@ -474,6 +474,7 @@ namespace godot {
 
 	Ref<FmodSound> FmodSystem::create_sound_from_res(const String p_path, unsigned int mode) {
 		ERR_FAIL_COND_V(!system, Ref<FmodSound>());
+
 		// 打开文件
 		Ref<FileAccess> file = FileAccess::open(p_path, FileAccess::READ);
 		ERR_FAIL_COND_V(file.is_null(), Ref<FmodSound>());
@@ -530,9 +531,8 @@ namespace godot {
 
 		Ref<FmodDSP> dsp;
 		dsp.instantiate();
+		dsp->setup(dsp_ptr);
 
-		dsp->dsp = dsp_ptr;
-		dsp_ptr->setUserData(dsp.ptr());
 		return dsp;
 	}
 
@@ -542,10 +542,7 @@ namespace godot {
 
 		Ref<FmodDSP> dsp;
 		dsp.instantiate();
-		dsp->dsp = dsp_ptr;
-
-		// 创建时就设置 userdata
-		dsp_ptr->setUserData(dsp.ptr());
+		dsp->setup(dsp_ptr);
 
 		return dsp;
 	}

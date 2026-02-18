@@ -132,6 +132,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\fmod_dsp_connection.h" />
     <ClInclude Include="src\fmod_audio.h" />
     <ClInclude Include="src\fmod_audio_sample.h" />
     <ClInclude Include="src\fmod_audio_stream.h" />
@@ -148,6 +149,7 @@
     <ClInclude Include="src\fmod_utils.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\fmod_dsp_connection.cpp" />
     <ClCompile Include="src\fmod_audio.cpp" />
     <ClCompile Include="src\fmod_audio_sample.cpp" />
     <ClCompile Include="src\fmod_audio_stream.cpp" />

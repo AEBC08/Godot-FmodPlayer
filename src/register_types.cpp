@@ -8,6 +8,7 @@
 #include "fmod_channel_control.h"
 #include "fmod_channel.h"
 #include "fmod_channel_group.h"
+#include "fmod_dsp_connection.h"
 #include "fmod_dsp.h"
 #include "fmod_sound.h"
 #include "fmod_server.h"
@@ -30,6 +31,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(FmodChannelControl);
 	GDREGISTER_CLASS(FmodChannel);
 	GDREGISTER_CLASS(FmodChannelGroup);
+	GDREGISTER_CLASS(FmodDSPConnection);
 	GDREGISTER_CLASS(FmodDSP);
 	GDREGISTER_CLASS(FmodSound);
 	GDREGISTER_CLASS(FmodSystem);

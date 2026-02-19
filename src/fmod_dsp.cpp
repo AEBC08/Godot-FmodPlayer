@@ -540,9 +540,7 @@ namespace godot {
 
 	Dictionary FmodDSP::get_wet_dry_mix() const {
 		ERR_FAIL_COND_V(!dsp, Dictionary());
-		float prewet = 0.0f;
-		float postwet = 0.0f;
-		float dry = 0.0f;
+		float prewet = 0.0f, postwet = 0.0f, dry = 0.0f;
 		FMOD_ERR_CHECK_V(dsp->getWetDryMix(&prewet, &postwet, &dry), Dictionary());
 		Dictionary result;
 		result["prewet"] = prewet;

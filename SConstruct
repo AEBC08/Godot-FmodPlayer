@@ -7,9 +7,9 @@ env = SConscript("godot-cpp/SConstruct")
 
 # 添加头文件路径
 env.Append(CPPPATH=["src/", "src/thirdparty/fmod/inc"])
-sources = Glob("src/*.cpp")
+sources = Glob("src/*.cpp") + Glob("src/fmod_effects/*.cpp")
 
-# --- 关键修复：清理 Windows 污染 ---
+# --- 清理 Windows 污染 ---
 # 如果在 Windows 上编译 Android，SCons 可能会错误地保留 MinGW 的链接库。
 # 我们需要手动清洗 LIBS 列表。
 if env["platform"] == "android":

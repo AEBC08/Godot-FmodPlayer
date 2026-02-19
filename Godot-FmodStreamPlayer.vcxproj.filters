@@ -25,6 +25,12 @@
     <Filter Include="Source Files\Nodes">
       <UniqueIdentifier>{568406b4-8e5d-49ef-90ca-7cffc6d78b21}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Fmod Effects">
+      <UniqueIdentifier>{4f60825f-4a89-4d93-b33f-73c2873f0764}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Fmod Effects">
+      <UniqueIdentifier>{160b6e6d-568c-4c0b-8b72-3ee980b14e56}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\register_types.h">
@@ -72,6 +78,18 @@
     <ClInclude Include="src\fmod_dsp_connection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\fmod_effects\fmod_audio_effect.h">
+      <Filter>Header Files\Fmod Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fmod_effects\fmod_audio_effect_distortion.h">
+      <Filter>Header Files\Fmod Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fmod_audio_bus_layout.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fmod_audio_bus.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\register_types.cpp">
@@ -115,6 +133,18 @@
     </ClCompile>
     <ClCompile Include="src\fmod_dsp_connection.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fmod_effects\fmod_audio_effect_distortion.cpp">
+      <Filter>Source Files\Fmod Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fmod_effects\fmod_audio_effect.cpp">
+      <Filter>Source Files\Fmod Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fmod_audio_bus_layout.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fmod_audio_bus.cpp">
+      <Filter>Source Files\Resources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

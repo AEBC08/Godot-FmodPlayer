@@ -5,6 +5,10 @@
 #include "fmod_audio_stream.h"
 #include "fmod_audio_stream_player.h"
 #include "fmod_audio_sample_emitter.h"
+#include "fmod_effects/fmod_audio_effect.h"
+#include "fmod_effects/fmod_audio_effect_distortion.h"
+#include "fmod_audio_bus.h"
+#include "fmod_audio_bus_layout.h"
 #include "fmod_channel_control.h"
 #include "fmod_channel.h"
 #include "fmod_channel_group.h"
@@ -35,6 +39,12 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(FmodDSP);
 	GDREGISTER_CLASS(FmodSound);
 	GDREGISTER_CLASS(FmodSystem);
+
+	GDREGISTER_ABSTRACT_CLASS(FmodAudioEffect);
+	GDREGISTER_CLASS(FmodAudioEffectDistortion);
+
+	GDREGISTER_CLASS(FmodAudioBus);
+	GDREGISTER_CLASS(FmodAudioBusLayout);
 
 	GDREGISTER_ABSTRACT_CLASS(FmodAudio);
 	GDREGISTER_CLASS(FmodAudioSample);

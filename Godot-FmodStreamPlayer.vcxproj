@@ -132,6 +132,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\fmod_audio_bus.h" />
+    <ClInclude Include="src\fmod_audio_bus_layout.h" />
     <ClInclude Include="src\fmod_dsp_connection.h" />
     <ClInclude Include="src\fmod_audio.h" />
     <ClInclude Include="src\fmod_audio_sample.h" />
@@ -140,6 +142,8 @@
     <ClInclude Include="src\fmod_channel_control.h" />
     <ClInclude Include="src\fmod_channel_group.h" />
     <ClInclude Include="src\fmod_dsp.h" />
+    <ClInclude Include="src\fmod_effects\fmod_audio_effect.h" />
+    <ClInclude Include="src\fmod_effects\fmod_audio_effect_distortion.h" />
     <ClInclude Include="src\fmod_sound.h" />
     <ClInclude Include="src\fmod_server.h" />
     <ClInclude Include="src\fmod_audio_stream_player.h" />
@@ -149,6 +153,8 @@
     <ClInclude Include="src\fmod_utils.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\fmod_audio_bus.cpp" />
+    <ClCompile Include="src\fmod_audio_bus_layout.cpp" />
     <ClCompile Include="src\fmod_dsp_connection.cpp" />
     <ClCompile Include="src\fmod_audio.cpp" />
     <ClCompile Include="src\fmod_audio_sample.cpp" />
@@ -157,6 +163,8 @@
     <ClCompile Include="src\fmod_channel_control.cpp" />
     <ClCompile Include="src\fmod_channel_group.cpp" />
     <ClCompile Include="src\fmod_dsp.cpp" />
+    <ClCompile Include="src\fmod_effects\fmod_audio_effect.cpp" />
+    <ClCompile Include="src\fmod_effects\fmod_audio_effect_distortion.cpp" />
     <ClCompile Include="src\fmod_sound.cpp" />
     <ClCompile Include="src\fmod_server.cpp" />
     <ClCompile Include="src\fmod_audio_stream_player.cpp" />

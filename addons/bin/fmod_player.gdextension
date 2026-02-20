@@ -15,6 +15,7 @@ FmodAudioStreamPlayer = "icons/FmodAudioStreamPlayer.svg"
 FmodAudioSampleEmitter = "icons/FmodAudioSampleEmitter.svg"
 FmodAudioStream = "icons/FmodAudioStream.svg"
 FmodAudioSample = "icons/FmodAudioSample.svg"
+FmodAudioBusLayout = "icons/FmodAudioBusLayout.svg"
 
 [dependencies]
 windows.debug.x86_64 = {

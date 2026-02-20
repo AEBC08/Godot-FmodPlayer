@@ -72,7 +72,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>godot-cpp\include;godot-cpp\gen\include;godot-cpp\gdextension;src\thirdparty\fmod\inc;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)src\thirdparty\fmod\inc;$(ProjectDir)godot-cpp\gdextension;$(ProjectDir)godot-cpp\gen\include;$(ProjectDir)godot-cpp\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)src\thirdparty\fmod\inc;$(ProjectDir)godot-cpp\gdextension;$(ProjectDir)godot-cpp\gen\include;$(ProjectDir)godot-cpp\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -113,7 +116,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>src\thirdparty\fmod\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\GodotProjects\Godot-FmodStreamPlayer\src\thirdparty\fmod\lib\x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -129,48 +132,49 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>D:\GodotProjects\Godot-FmodStreamPlayer\src\thirdparty\fmod\lib\x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\fmod_audio_bus.h" />
-    <ClInclude Include="src\fmod_audio_bus_layout.h" />
-    <ClInclude Include="src\fmod_dsp_connection.h" />
-    <ClInclude Include="src\fmod_audio.h" />
-    <ClInclude Include="src\fmod_audio_sample.h" />
-    <ClInclude Include="src\fmod_audio_stream.h" />
-    <ClInclude Include="src\fmod_channel.h" />
-    <ClInclude Include="src\fmod_channel_control.h" />
-    <ClInclude Include="src\fmod_channel_group.h" />
-    <ClInclude Include="src\fmod_dsp.h" />
-    <ClInclude Include="src\fmod_effects\fmod_audio_effect.h" />
-    <ClInclude Include="src\fmod_effects\fmod_audio_effect_distortion.h" />
-    <ClInclude Include="src\fmod_sound.h" />
-    <ClInclude Include="src\fmod_server.h" />
-    <ClInclude Include="src\fmod_audio_stream_player.h" />
-    <ClInclude Include="src\fmod_audio_sample_emitter.h" />
-    <ClInclude Include="src\fmod_system.h" />
-    <ClInclude Include="src\register_types.h" />
-    <ClInclude Include="src\fmod_utils.hpp" />
+    <ClInclude Include="src\mixer\fmod_audio_bus.h" />
+    <ClInclude Include="src\mixer\fmod_audio_bus_layout.h" />
+    <ClInclude Include="src\dsp\fmod_dsp_connection.h" />
+    <ClInclude Include="src\audio\fmod_audio.h" />
+    <ClInclude Include="src\audio\fmod_audio_sample.h" />
+    <ClInclude Include="src\audio\fmod_audio_stream.h" />
+    <ClInclude Include="src\playback\fmod_channel.h" />
+    <ClInclude Include="src\playback\fmod_channel_control.h" />
+    <ClInclude Include="src\playback\fmod_channel_group.h" />
+    <ClInclude Include="src\dsp\fmod_dsp.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_distortion.h" />
+    <ClInclude Include="src\audio\fmod_sound.h" />
+    <ClInclude Include="src\core\fmod_server.h" />
+    <ClInclude Include="src\nodes\fmod_audio_stream_player.h" />
+    <ClInclude Include="src\nodes\fmod_audio_sample_emitter.h" />
+    <ClInclude Include="src\core\fmod_system.h" />
+    <ClInclude Include="src\core\fmod_utils.hpp" />
+    <ClInclude Include="src\core\register_types.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\fmod_audio_bus.cpp" />
-    <ClCompile Include="src\fmod_audio_bus_layout.cpp" />
-    <ClCompile Include="src\fmod_dsp_connection.cpp" />
-    <ClCompile Include="src\fmod_audio.cpp" />
-    <ClCompile Include="src\fmod_audio_sample.cpp" />
-    <ClCompile Include="src\fmod_audio_stream.cpp" />
-    <ClCompile Include="src\fmod_channel.cpp" />
-    <ClCompile Include="src\fmod_channel_control.cpp" />
-    <ClCompile Include="src\fmod_channel_group.cpp" />
-    <ClCompile Include="src\fmod_dsp.cpp" />
-    <ClCompile Include="src\fmod_effects\fmod_audio_effect.cpp" />
-    <ClCompile Include="src\fmod_effects\fmod_audio_effect_distortion.cpp" />
-    <ClCompile Include="src\fmod_sound.cpp" />
-    <ClCompile Include="src\fmod_server.cpp" />
-    <ClCompile Include="src\fmod_audio_stream_player.cpp" />
-    <ClCompile Include="src\fmod_audio_sample_emiter.cpp" />
-    <ClCompile Include="src\fmod_system.cpp" />
-    <ClCompile Include="src\register_types.cpp" />
+    <ClCompile Include="src\mixer\fmod_audio_bus.cpp" />
+    <ClCompile Include="src\mixer\fmod_audio_bus_layout.cpp" />
+    <ClCompile Include="src\dsp\fmod_dsp_connection.cpp" />
+    <ClCompile Include="src\audio\fmod_audio.cpp" />
+    <ClCompile Include="src\audio\fmod_audio_sample.cpp" />
+    <ClCompile Include="src\audio\fmod_audio_stream.cpp" />
+    <ClCompile Include="src\playback\fmod_channel.cpp" />
+    <ClCompile Include="src\playback\fmod_channel_control.cpp" />
+    <ClCompile Include="src\playback\fmod_channel_group.cpp" />
+    <ClCompile Include="src\dsp\fmod_dsp.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_distortion.cpp" />
+    <ClCompile Include="src\audio\fmod_sound.cpp" />
+    <ClCompile Include="src\core\fmod_server.cpp" />
+    <ClCompile Include="src\nodes\fmod_audio_stream_player.cpp" />
+    <ClCompile Include="src\nodes\fmod_audio_sample_emitter.cpp" />
+    <ClCompile Include="src\core\fmod_system.cpp" />
+    <ClCompile Include="src\core\register_types.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

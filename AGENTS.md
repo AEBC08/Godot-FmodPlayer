@@ -33,22 +33,31 @@ Godot-FmodPlayer is a **Godot 4 GDExtension** plugin that provides advanced audi
 ```
 .
 ├── src/                          # Source code
-│   ├── fmod_system.{h,cpp}       # FMOD System wrapper
-│   ├── fmod_channel.{h,cpp}      # Channel playback control
-│   ├── fmod_channel_group.{h,cpp}# Channel grouping/mixing
-│   ├── fmod_channel_control.{h,cpp} # Base class for channel controls
-│   ├── fmod_sound.{h,cpp}        # Sound resource wrapper
-│   ├── fmod_dsp.{h,cpp}          # DSP effects wrapper
-│   ├── fmod_dsp_connection.{h,cpp} # DSP routing connections
-│   ├── fmod_audio.{h,cpp}        # Abstract audio resource base
-│   ├── fmod_audio_sample.{h,cpp} # Sample-based audio (loaded in memory)
-│   ├── fmod_audio_stream.{h,cpp} # Streaming audio
-│   ├── fmod_audio_stream_player.{h,cpp} # Node for stream playback
-│   ├── fmod_audio_sample_emitter.{h,cpp} # Node for sample playback
-│   ├── fmod_server.{h,cpp}       # Godot singleton for FMOD management
-│   ├── fmod_utils.hpp            # Utility functions and macros
-│   ├── fmod_effects/             # Custom DSP effect implementations
-│   ├── register_types.{h,cpp}    # GDExtension registration
+│   ├── core/                     # Core system
+│   │   ├── fmod_system.{h,cpp}   # FMOD System wrapper
+│   │   ├── fmod_server.{h,cpp}   # Godot singleton for FMOD management
+│   │   ├── register_types.{h,cpp}# GDExtension registration
+│   │   └── fmod_utils.hpp        # Utility functions and macros
+│   ├── audio/                    # Audio resources
+│   │   ├── fmod_audio.{h,cpp}    # Abstract audio resource base
+│   │   ├── fmod_audio_sample.{h,cpp} # Sample-based audio (loaded in memory)
+│   │   ├── fmod_audio_stream.{h,cpp} # Streaming audio
+│   │   └── fmod_sound.{h,cpp}    # Sound resource wrapper
+│   ├── playback/                 # Playback control
+│   │   ├── fmod_channel_control.{h,cpp} # Base class for channel controls
+│   │   ├── fmod_channel.{h,cpp}  # Channel playback control
+│   │   └── fmod_channel_group.{h,cpp} # Channel grouping/mixing
+│   ├── mixer/                    # Mixing/Bus
+│   │   ├── fmod_audio_bus.{h,cpp}      # Audio bus for mixing
+│   │   └── fmod_audio_bus_layout.{h,cpp} # Bus layout management
+│   ├── dsp/                      # DSP effects
+│   │   ├── fmod_dsp.{h,cpp}              # DSP effects wrapper
+│   │   ├── fmod_dsp_connection.{h,cpp}   # DSP routing connections
+│   │   ├── fmod_audio_effect.{h,cpp}     # Base audio effect class
+│   │   └── fmod_audio_effect_distortion.{h,cpp} # Distortion effect
+│   ├── nodes/                    # Godot Node interfaces
+│   │   ├── fmod_audio_stream_player.{h,cpp} # Node for stream playback
+│   │   └── fmod_audio_sample_emitter.{h,cpp} # Node for sample playback
 │   └── thirdparty/fmod/          # FMOD SDK headers and libraries
 │       ├── inc/                  # FMOD header files
 │       └── lib/                  # Platform-specific libraries
@@ -111,40 +120,50 @@ Built binaries are placed in:
 ```
 Godot Engine Classes
 ├── Object
-│   └── FmodServer              # Singleton managing FMOD lifecycle
-│   └── FmodSystem              # Wrapper for FMOD::System
-│   └── FmodChannelControl (abstract)
-│       └── FmodChannel         # Active sound playback instance
-│       └── FmodChannelGroup    # Mix bus for grouping channels
+│   └── FmodServer              # Singleton managing FMOD lifecycle (core/)
+│   └── FmodSystem              # Wrapper for FMOD::System (core/)
+│   └── FmodChannelControl (abstract) (playback/)
+│       └── FmodChannel         # Active sound playback instance (playback/)
+│       └── FmodChannelGroup    # Mix bus for grouping channels (playback/)
 ├── RefCounted
-│   └── FmodSound               # Audio resource handle
-│   └── FmodDSP                 # Digital signal processor (effects)
-│   └── FmodDSPConnection       # DSP routing connection
-│   └── FmodAudio (abstract)
-│       └── FmodAudioSample     # In-memory audio resource
-│       └── FmodAudioStream     # Streaming audio resource
+│   └── FmodSound               # Audio resource handle (audio/)
+│   └── FmodDSP                 # Digital signal processor (effects) (dsp/)
+│   └── FmodDSPConnection       # DSP routing connection (dsp/)
+│   └── FmodAudio (abstract)    # (audio/)
+│       └── FmodAudioSample     # In-memory audio resource (audio/)
+│       └── FmodAudioStream     # Streaming audio resource (audio/)
+│   └── FmodAudioBus            # Audio bus for mixing (mixer/)
+│   └── FmodAudioBusLayout      # Bus layout management (mixer/)
+│   └── FmodAudioEffect (abstract) # Base audio effect class (dsp/)
+│       └── FmodAudioEffectDistortion # Distortion effect (dsp/)
 ├── Resource
-│   └── FmodAudio (via inheritance)
+│   └── FmodAudio (via inheritance) (audio/)
 └── Node
-    └── FmodAudioStreamPlayer   # High-level stream player node
-    └── FmodAudioSampleEmitter  # High-level sample player node
+    └── FmodAudioStreamPlayer   # High-level stream player node (nodes/)
+    └── FmodAudioSampleEmitter  # High-level sample player node (nodes/)
 ```
 
 ### Key Components
 
-| Class | Purpose |
-|-------|---------|
-| `FmodSystem` | Main FMOD system wrapper - creates sounds, channels, DSPs |
-| `FmodChannel` | Controls playback of a sound (play, pause, stop, position) |
-| `FmodChannelGroup` | Groups channels for collective mixing |
-| `FmodSound` | Handle to loaded audio data |
-| `FmodDSP` | Audio effects (reverb, distortion, EQ, etc.) |
-| `FmodAudio` | Abstract base for audio resources |
-| `FmodAudioSample` | Loads entire audio file into memory |
-| `FmodAudioStream` | Streams audio from disk |
-| `FmodAudioStreamPlayer` | Godot node interface for stream playback |
-| `FmodAudioSampleEmitter` | Godot node interface for one-shot samples |
-| `FmodServer` | Global singleton, auto-updates FMOD, provides Performance metrics |
+| Class | Location | Purpose |
+|-------|----------|---------|
+| `FmodSystem` | core/ | Main FMOD system wrapper - creates sounds, channels, DSPs |
+| `FmodServer` | core/ | Global singleton, auto-updates FMOD, provides Performance metrics |
+| `FmodChannel` | playback/ | Controls playback of a sound (play, pause, stop, position) |
+| `FmodChannelGroup` | playback/ | Groups channels for collective mixing |
+| `FmodChannelControl` | playback/ | Base class for Channel and ChannelGroup |
+| `FmodSound` | audio/ | Handle to loaded audio data |
+| `FmodAudio` | audio/ | Abstract base for audio resources |
+| `FmodAudioSample` | audio/ | Loads entire audio file into memory |
+| `FmodAudioStream` | audio/ | Streams audio from disk |
+| `FmodDSP` | dsp/ | Audio effects (reverb, distortion, EQ, etc.) |
+| `FmodDSPConnection` | dsp/ | DSP routing connection |
+| `FmodAudioEffect` | dsp/ | Base class for custom audio effects |
+| `FmodAudioEffectDistortion` | dsp/ | Distortion effect implementation |
+| `FmodAudioBus` | mixer/ | Audio bus for mixing |
+| `FmodAudioBusLayout` | mixer/ | Bus layout management synchronized with Godot AudioServer |
+| `FmodAudioStreamPlayer` | nodes/ | Godot node interface for stream playback |
+| `FmodAudioSampleEmitter` | nodes/ | Godot node interface for one-shot samples |
 
 ### Error Handling
 The project uses `FMOD_ERR_CHECK` and `FMOD_ERR_CHECK_V` macros from `fmod_utils.hpp` to handle FMOD errors. These macros push errors to Godot's error system with file/line information.

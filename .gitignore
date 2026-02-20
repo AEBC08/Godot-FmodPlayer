@@ -364,3 +364,13 @@ FodyWeavers.xsd
 
 !addons/
 !addons/**
+
+# SCons build artifacts
+*.os
+*.obj
+.sconsign.dblite
+*.ilk
+*.pdb
+src/**/*.os
+src/**/*.obj
+src/**/.sconsign.dblite

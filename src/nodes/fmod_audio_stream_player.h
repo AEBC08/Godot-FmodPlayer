@@ -20,12 +20,12 @@ namespace godot {
 
 	protected:
 		static void _bind_methods();
+		void _validate_property(PropertyInfo& p_property) const;
 
 	public:
 		FmodAudioStreamPlayer();
 		
 		void _notification(int p_what);
-		void _validate_property(PropertyInfo& p_property) const;
 
 		Ref<FmodAudioStream> stream;
 		bool playing = false;

@@ -464,8 +464,22 @@ namespace godot {
 
 			Dictionary piecewiselinearmapping;
 			piecewiselinearmapping["numpoints"] = desc->floatdesc.mapping.piecewiselinearmapping.numpoints;
-			piecewiselinearmapping["pointparamvalues"] = desc->floatdesc.mapping.piecewiselinearmapping.pointparamvalues;
-			piecewiselinearmapping["pointpositions"] = desc->floatdesc.mapping.piecewiselinearmapping.pointpositions;
+			// pointparamvalues 和 pointpositions 是指针，只在 numpoints > 0 时有效
+			// 这里不导出指针值，因为它们对 GDScript 没有直接用处
+			if (desc->floatdesc.mapping.piecewiselinearmapping.numpoints > 0) {
+				Array point_values;
+				Array point_positions;
+				for (int i = 0; i < desc->floatdesc.mapping.piecewiselinearmapping.numpoints; i++) {
+					if (desc->floatdesc.mapping.piecewiselinearmapping.pointparamvalues) {
+						point_values.append(desc->floatdesc.mapping.piecewiselinearmapping.pointparamvalues[i]);
+					}
+					if (desc->floatdesc.mapping.piecewiselinearmapping.pointpositions) {
+						point_positions.append(desc->floatdesc.mapping.piecewiselinearmapping.pointpositions[i]);
+					}
+				}
+				piecewiselinearmapping["point_values"] = point_values;
+				piecewiselinearmapping["point_positions"] = point_positions;
+			}
 
 			mapping["piecewiselinearmapping"] = piecewiselinearmapping;
 

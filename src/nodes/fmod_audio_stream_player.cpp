@@ -6,6 +6,7 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("set_stream", "stream"), &FmodAudioStreamPlayer::set_stream);
 		ClassDB::bind_method(D_METHOD("get_stream"), &FmodAudioStreamPlayer::get_stream);
 		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stream", PROPERTY_HINT_RESOURCE_TYPE, "FmodAudioStream"), "set_stream", "get_stream");
+		
 		ClassDB::bind_method(D_METHOD("play", "from_position"), &FmodAudioStreamPlayer::play, DEFVAL(0.0));
 		ClassDB::bind_method(D_METHOD("stop"), &FmodAudioStreamPlayer::stop);
 
@@ -29,7 +30,7 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_bus", "bus"), &FmodAudioStreamPlayer::set_bus);
 		ClassDB::bind_method(D_METHOD("get_bus"), &FmodAudioStreamPlayer::get_bus);
-		ADD_PROPERTY(PropertyInfo(Variant::STRING, "bus"), "set_bus", "get_bus");
+		ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "bus", PROPERTY_HINT_ENUM), "set_bus", "get_bus");
 
 		ADD_SIGNAL(MethodInfo("finished"));
 	}

@@ -136,6 +136,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\dsp\fmod_audio_effect_amplify.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_capture.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_chorus.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_compressor.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_delay.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_eq.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_filter.h" />
     <ClInclude Include="src\mixer\fmod_audio_bus.h" />
     <ClInclude Include="src\mixer\fmod_audio_bus_layout.h" />
     <ClInclude Include="src\dsp\fmod_dsp_connection.h" />
@@ -157,6 +164,13 @@
     <ClInclude Include="src\core\register_types.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\dsp\fmod_audio_effect_amplify.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_capture.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_chorus.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_compressor.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_delay.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_eq.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_filter.cpp" />
     <ClCompile Include="src\mixer\fmod_audio_bus.cpp" />
     <ClCompile Include="src\mixer\fmod_audio_bus_layout.cpp" />
     <ClCompile Include="src\dsp\fmod_dsp_connection.cpp" />

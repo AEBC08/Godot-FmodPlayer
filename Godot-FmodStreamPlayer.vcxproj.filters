@@ -104,6 +104,27 @@
     <ClInclude Include="src\core\register_types.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_amplify.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_filter.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_capture.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_chorus.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_compressor.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_delay.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_eq.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\fmod_server.cpp">
@@ -159,6 +180,27 @@
     </ClCompile>
     <ClCompile Include="src\core\register_types.cpp">
       <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_amplify.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_filter.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_capture.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_chorus.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_compressor.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_delay.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_eq.cpp">
+      <Filter>Source Files\dsp</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

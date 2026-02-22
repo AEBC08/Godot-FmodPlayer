@@ -1,10 +1,22 @@
+#include "dsp/fmod_audio_effect.h"
+#include "dsp/fmod_audio_effect_amplify.h"
+#include "dsp/fmod_audio_effect_filter.h"
+#include "dsp/fmod_audio_effect_capture.h"
+#include "dsp/fmod_audio_effect_chorus.h"
+#include "dsp/fmod_audio_effect_compressor.h"
+#include "dsp/fmod_audio_effect_delay.h"
+#include "dsp/fmod_audio_effect_distortion.h"
 #include "fmod_audio_bus_layout.h"
 #include "mixer/fmod_audio_bus.h"
 #include "playback/fmod_channel_group.h"
-#include "dsp/fmod_audio_effect_distortion.h"
 #include <godot_cpp/classes/audio_effect.hpp>
+#include <godot_cpp/classes/audio_effect_amplify.hpp>
+#include <godot_cpp/classes/audio_effect_filter.hpp>
+#include <godot_cpp/classes/audio_effect_capture.hpp>
+#include <godot_cpp/classes/audio_effect_chorus.hpp>
+#include <godot_cpp/classes/audio_effect_compressor.hpp>
+#include <godot_cpp/classes/audio_effect_delay.hpp>
 #include <godot_cpp/classes/audio_effect_distortion.hpp>
-#include "dsp/fmod_audio_effect.h"
 
 namespace godot {
 	void FmodAudioBusLayout::_bind_methods() {
@@ -65,6 +77,85 @@ namespace godot {
 				fmod_distortion->set_post_gain(godot_distortion->get_post_gain());
 				fmod_distortion->set_keep_hf_hz(godot_distortion->get_keep_hf_hz());
 				bus->add_effect(fmod_distortion, i);
+			}
+			
+			Ref<AudioEffectAmplify> godot_amplify = godot_effect;
+			if (godot_amplify.is_valid()) {
+				Ref<FmodAudioEffectAmplify> fmod_amplify;
+				fmod_amplify.instantiate();
+				fmod_amplify->set_volume_db(godot_amplify->get_volume_db());
+				bus->add_effect(fmod_amplify, i);
+			}
+
+			Ref<AudioEffectFilter> godot_filter = godot_effect;
+			if (godot_filter.is_valid()) {
+				Ref<FmodAudioEffectFilter> fmod_filter;
+				fmod_filter.instantiate();
+				fmod_filter->set_cutoff_hz(godot_filter->get_cutoff());
+				fmod_filter->set_db(static_cast<FmodAudioEffectFilter::FilterDB>((int)godot_filter->get_db()));
+				fmod_filter->set_gain(godot_filter->get_gain());
+				fmod_filter->set_resonance(godot_filter->get_resonance());
+				bus->add_effect(fmod_filter, i);
+			}
+
+			Ref<AudioEffectCapture> godot_capture = godot_effect;
+			if (godot_capture.is_valid()) {
+				Ref<FmodAudioEffectCapture> fmod_capture;
+				fmod_capture.instantiate();
+				fmod_capture->set_buffer_length(godot_capture->get_buffer_length());
+				bus->add_effect(fmod_capture, i);
+			}
+
+			Ref<AudioEffectChorus> godot_chorus = godot_effect;
+			if (godot_chorus.is_valid()) {
+				Ref<FmodAudioEffectChorus> fmod_chorus;
+				fmod_chorus.instantiate();
+				fmod_chorus->set_voice_count(godot_chorus->get_voice_count());
+				for (int voice_idx = 0; voice_idx < godot_chorus->get_voice_count(); voice_idx++) {
+					fmod_chorus->set_voice_delay_ms(voice_idx, godot_chorus->get_voice_delay_ms(voice_idx));
+					fmod_chorus->set_voice_rate_hz(voice_idx, godot_chorus->get_voice_rate_hz(voice_idx));
+					fmod_chorus->set_voice_depth_ms(voice_idx, godot_chorus->get_voice_depth_ms(voice_idx));
+					fmod_chorus->set_voice_level_db(voice_idx, godot_chorus->get_voice_level_db(voice_idx));
+					fmod_chorus->set_voice_cutoff_hz(voice_idx, godot_chorus->get_voice_cutoff_hz(voice_idx));
+					fmod_chorus->set_voice_pan(voice_idx, godot_chorus->get_voice_pan(voice_idx));
+				}
+				fmod_chorus->set_wet(godot_chorus->get_wet());
+				fmod_chorus->set_dry(godot_chorus->get_dry());
+				bus->add_effect(fmod_chorus, i);
+			}
+
+			Ref<AudioEffectCompressor> godot_compressor = godot_effect;
+			if (godot_compressor.is_valid()) {
+				Ref<FmodAudioEffectCompressor> fmod_compressor;
+				fmod_compressor.instantiate();
+				fmod_compressor->set_threshold(godot_compressor->get_threshold());
+				fmod_compressor->set_ratio(godot_compressor->get_ratio());
+				fmod_compressor->set_gain(godot_compressor->get_gain());
+				fmod_compressor->set_attack_us(godot_compressor->get_attack_us());
+				fmod_compressor->set_release_ms(godot_compressor->get_release_ms());
+				fmod_compressor->set_mix(godot_compressor->get_mix());
+				fmod_compressor->set_sidechain(godot_compressor->get_sidechain());
+				bus->add_effect(fmod_compressor, i);
+			}
+
+			Ref<AudioEffectDelay> godot_delay = godot_effect;
+			if (godot_delay.is_valid()) {
+				Ref<FmodAudioEffectDelay> fmod_delay;
+				fmod_delay.instantiate();
+				fmod_delay->set_dry(godot_delay->get_dry());
+				fmod_delay->set_tap1_active(godot_delay->is_tap1_active());
+				fmod_delay->set_tap1_delay_ms(godot_delay->get_tap1_delay_ms());
+				fmod_delay->set_tap1_level_db(godot_delay->get_tap1_level_db());
+				fmod_delay->set_tap1_pan(godot_delay->get_tap1_pan());
+				fmod_delay->set_tap2_active(godot_delay->is_tap2_active());
+				fmod_delay->set_tap2_delay_ms(godot_delay->get_tap2_delay_ms());
+				fmod_delay->set_tap2_level_db(godot_delay->get_tap2_level_db());
+				fmod_delay->set_tap2_pan(godot_delay->get_tap2_pan());
+				fmod_delay->set_feedback_active(godot_delay->is_feedback_active());
+				fmod_delay->set_feedback_delay_ms(godot_delay->get_feedback_delay_ms());
+				fmod_delay->set_feedback_level_db(godot_delay->get_feedback_level_db());
+				fmod_delay->set_feedback_lowpass(godot_delay->get_feedback_lowpass());
+				bus->add_effect(fmod_delay, i);
 			}
 		}
 	}

@@ -7,6 +7,7 @@
 
 namespace godot {
 	class FmodAudioEffect;
+
 	class FmodAudioBusLayout : public Resource {
 		GDCLASS(FmodAudioBusLayout, Resource)
 

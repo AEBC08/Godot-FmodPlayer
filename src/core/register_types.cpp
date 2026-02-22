@@ -7,6 +7,12 @@
 #include "core/fmod_server.h"
 #include "core/fmod_system.h"
 #include "dsp/fmod_audio_effect.h"
+#include "dsp/fmod_audio_effect_amplify.h"
+#include "dsp/fmod_audio_effect_filter.h"
+#include "dsp/fmod_audio_effect_capture.h"
+#include "dsp/fmod_audio_effect_chorus.h"
+#include "dsp/fmod_audio_effect_compressor.h"
+#include "dsp/fmod_audio_effect_delay.h"
 #include "dsp/fmod_audio_effect_distortion.h"
 #include "dsp/fmod_dsp.h"
 #include "dsp/fmod_dsp_connection.h"
@@ -41,6 +47,12 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(FmodSystem);
 
 	GDREGISTER_ABSTRACT_CLASS(FmodAudioEffect);
+	GDREGISTER_CLASS(FmodAudioEffectAmplify);
+	GDREGISTER_CLASS(FmodAudioEffectFilter);
+	GDREGISTER_CLASS(FmodAudioEffectCapture);
+	GDREGISTER_CLASS(FmodAudioEffectChorus);
+	GDREGISTER_CLASS(FmodAudioEffectCompressor);
+	GDREGISTER_CLASS(FmodAudioEffectDelay);
 	GDREGISTER_CLASS(FmodAudioEffectDistortion);
 
 	GDREGISTER_CLASS(FmodAudioBus);

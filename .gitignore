@@ -375,4 +375,6 @@ src/**/*.os
 src/**/*.obj
 src/**/.sconsign.dblite
 .sconsign.dblite
+
 addons/bin/fmod.dll
+.vscode/

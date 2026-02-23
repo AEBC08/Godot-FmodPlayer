@@ -144,7 +144,10 @@
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
     <ClInclude Include="src\dsp\fmod_audio_effect_spectrum_analyzer.h">
-      <Filter>Source Files\dsp</Filter>
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_stereo_enhance.h">
+      <Filter>Header Files\dsp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -242,6 +245,9 @@
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
     <ClCompile Include="src\dsp\fmod_audio_effect_spectrum_analyzer.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_stereo_enhance.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
   </ItemGroup>

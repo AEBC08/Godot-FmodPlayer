@@ -150,6 +150,7 @@
     <ClInclude Include="src\dsp\fmod_audio_effect_record.h" />
     <ClInclude Include="src\dsp\fmod_audio_effect_reverb.h" />
     <ClInclude Include="src\dsp\fmod_audio_effect_spectrum_analyzer.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_stereo_enhance.h" />
     <ClInclude Include="src\mixer\fmod_audio_bus.h" />
     <ClInclude Include="src\mixer\fmod_audio_bus_layout.h" />
     <ClInclude Include="src\dsp\fmod_dsp_connection.h" />
@@ -185,6 +186,7 @@
     <ClCompile Include="src\dsp\fmod_audio_effect_record.cpp" />
     <ClCompile Include="src\dsp\fmod_audio_effect_reverb.cpp" />
     <ClCompile Include="src\dsp\fmod_audio_effect_spectrum_analyzer.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_stereo_enhance.cpp" />
     <ClCompile Include="src\mixer\fmod_audio_bus.cpp" />
     <ClCompile Include="src\mixer\fmod_audio_bus_layout.cpp" />
     <ClCompile Include="src\dsp\fmod_dsp_connection.cpp" />

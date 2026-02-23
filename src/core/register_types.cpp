@@ -14,6 +14,15 @@
 #include "dsp/fmod_audio_effect_compressor.h"
 #include "dsp/fmod_audio_effect_delay.h"
 #include "dsp/fmod_audio_effect_distortion.h"
+#include "dsp/fmod_audio_effect_eq.h"
+#include "dsp/fmod_audio_effect_hard_limiter.h"
+#include "dsp/fmod_audio_effect_panner.h"
+#include "dsp/fmod_audio_effect_phaser.h"
+#include "dsp/fmod_audio_effect_pitch_shift.h"
+#include "dsp/fmod_audio_effect_record.h"
+#include "dsp/fmod_audio_effect_reverb.h"
+#include "dsp/fmod_audio_effect_spectrum_analyzer.h"
+#include "dsp/fmod_audio_effect_stereo_enhance.h"
 #include "dsp/fmod_dsp.h"
 #include "dsp/fmod_dsp_connection.h"
 #include "mixer/fmod_audio_bus.h"
@@ -54,6 +63,18 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(FmodAudioEffectCompressor);
 	GDREGISTER_CLASS(FmodAudioEffectDelay);
 	GDREGISTER_CLASS(FmodAudioEffectDistortion);
+	GDREGISTER_CLASS(FmodAudioEffectEQ);
+	GDREGISTER_CLASS(FmodAudioEffectEQ6);
+	GDREGISTER_CLASS(FmodAudioEffectEQ10);
+	GDREGISTER_CLASS(FmodAudioEffectEQ21);
+	GDREGISTER_CLASS(FmodAudioEffectHardLimiter);
+	GDREGISTER_CLASS(FmodAudioEffectPanner);
+	GDREGISTER_CLASS(FmodAudioEffectPhaser);
+	GDREGISTER_CLASS(FmodAudioEffectPitchShift);
+	GDREGISTER_CLASS(FmodAudioEffectRecord);
+	GDREGISTER_CLASS(FmodAudioEffectReverb);
+	GDREGISTER_CLASS(FmodAudioEffectSpectrumAnalyzer);
+	GDREGISTER_CLASS(FmodAudioEffectStereoEnhance);
 
 	GDREGISTER_CLASS(FmodAudioBus);
 	GDREGISTER_CLASS(FmodAudioBusLayout);

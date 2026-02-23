@@ -8,7 +8,7 @@ namespace godot {
 	class FmodDSPConnection;
 
 	class FmodDSP : public RefCounted {
-		GDCLASS(FmodDSP, RefCounted);
+		GDCLASS(FmodDSP, RefCounted)
 
 	private:
 		bool callbacks_set = false;                                                     // 记录是否设置了回调

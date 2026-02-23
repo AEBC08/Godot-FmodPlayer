@@ -374,3 +374,4 @@ FodyWeavers.xsd
 src/**/*.os
 src/**/*.obj
 src/**/.sconsign.dblite
+.sconsign.dblite

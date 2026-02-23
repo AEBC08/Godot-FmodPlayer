@@ -445,14 +445,18 @@ namespace godot {
 	Dictionary FmodDSP::get_parameter_info(const int index) const {
 		ERR_FAIL_COND_V(!dsp, Dictionary());
 		FMOD_DSP_PARAMETER_DESC* desc = nullptr;
-		FMOD_ERR_CHECK_V(dsp->getParameterInfo(index, &desc), Dictionary());
+		FMOD_RESULT result = dsp->getParameterInfo(index, &desc);
+		if (result != FMOD_OK || desc == nullptr) {
+			return Dictionary();
+		}
 		Dictionary info;
 		info["type"] = (int)desc->type;
-		info["name"] = String::utf8(desc->name);
-		info["label"] = String::utf8(desc->label);
-		info["description"] = String::utf8(desc->description);
+		info["name"] = desc->name ? String::utf8(desc->name) : String();
+		info["label"] = desc->label ? String::utf8(desc->label) : String();
+		info["description"] = desc->description ? String::utf8(desc->description) : String();
 
 		// 根据参数类型添加特定字段
+		// 注意：FMOD_DSP_PARAMETER_DESC 使用联合体，必须根据 type 访问正确的成员
 		switch (desc->type) {
 		case FMOD_DSP_PARAMETER_TYPE_FLOAT: {
 			info["min"] = desc->floatdesc.min;
@@ -462,26 +466,31 @@ namespace godot {
 			Dictionary mapping;
 			mapping["type"] = (int)desc->floatdesc.mapping.type;
 
-			Dictionary piecewiselinearmapping;
-			piecewiselinearmapping["numpoints"] = desc->floatdesc.mapping.piecewiselinearmapping.numpoints;
-			// pointparamvalues 和 pointpositions 是指针，只在 numpoints > 0 时有效
-			// 这里不导出指针值，因为它们对 GDScript 没有直接用处
-			if (desc->floatdesc.mapping.piecewiselinearmapping.numpoints > 0) {
-				Array point_values;
-				Array point_positions;
-				for (int i = 0; i < desc->floatdesc.mapping.piecewiselinearmapping.numpoints; i++) {
-					if (desc->floatdesc.mapping.piecewiselinearmapping.pointparamvalues) {
-						point_values.append(desc->floatdesc.mapping.piecewiselinearmapping.pointparamvalues[i]);
-					}
-					if (desc->floatdesc.mapping.piecewiselinearmapping.pointpositions) {
-						point_positions.append(desc->floatdesc.mapping.piecewiselinearmapping.pointpositions[i]);
+			// 只有当 mapping type 是 PIECEWISE_LINEAR 时才访问 piecewiselinearmapping
+			// 否则里面的指针可能是未初始化的垃圾值
+			if (desc->floatdesc.mapping.type == FMOD_DSP_PARAMETER_FLOAT_MAPPING_TYPE_PIECEWISE_LINEAR) {
+				Dictionary piecewiselinearmapping;
+				int numpoints = desc->floatdesc.mapping.piecewiselinearmapping.numpoints;
+				piecewiselinearmapping["numpoints"] = numpoints;
+
+				// 安全地访问指针，只有当 numpoints > 0 且指针不为 nullptr 时才访问
+				if (numpoints > 0 && numpoints < 1000) {  // 添加上限检查防止垃圾值
+					float* pointparamvalues = desc->floatdesc.mapping.piecewiselinearmapping.pointparamvalues;
+					float* pointpositions = desc->floatdesc.mapping.piecewiselinearmapping.pointpositions;
+
+					if (pointparamvalues != nullptr && pointpositions != nullptr) {
+						Array point_values;
+						Array point_positions;
+						for (int i = 0; i < numpoints; i++) {
+							point_values.append(pointparamvalues[i]);
+							point_positions.append(pointpositions[i]);
+						}
+						piecewiselinearmapping["point_values"] = point_values;
+						piecewiselinearmapping["point_positions"] = point_positions;
 					}
 				}
-				piecewiselinearmapping["point_values"] = point_values;
-				piecewiselinearmapping["point_positions"] = point_positions;
+				mapping["piecewiselinearmapping"] = piecewiselinearmapping;
 			}
-
-			mapping["piecewiselinearmapping"] = piecewiselinearmapping;
 
 			info["mapping"] = mapping;
 			break;
@@ -491,32 +500,29 @@ namespace godot {
 			info["min"] = desc->intdesc.min;
 			info["max"] = desc->intdesc.max;
 			info["defaultval"] = desc->intdesc.defaultval;
-			if (desc->intdesc.valuenames != nullptr) {
-				Array options;
-				for (int i = 0; desc->intdesc.valuenames[i] != nullptr; i++) {
-					options.append(String::utf8(desc->intdesc.valuenames[i]));
-				}
-				info["options"] = options;
-				info["option_count"] = options.size();
-			}
+			// 注意：某些 FMOD DSP 的 valuenames 指针可能是未初始化的垃圾值
+			// 即使指针不为 nullptr，访问它也可能导致崩溃
+			// 因此暂时禁用 valuenames 的导出以保证稳定性
+			// 如果需要枚举值名称，建议查阅 FMOD 文档直接使用已知值
 			break;
 		}
 
 		case FMOD_DSP_PARAMETER_TYPE_BOOL: {
 			info["defaultval"] = desc->booldesc.defaultval != 0;
-			if (desc->booldesc.valuenames != nullptr) {
-				Array options;
-				for (int i = 0; desc->booldesc.valuenames[i] != nullptr; i++) {
-					options.append(String::utf8(desc->booldesc.valuenames[i]));
-				}
-				info["options"] = options;
-				info["option_count"] = options.size();
-			}
+			// 注意：某些 FMOD DSP 的 valuenames 指针可能是未初始化的垃圾值
+			// 即使指针不为 nullptr，访问它也可能导致崩溃
+			// 因此暂时禁用 valuenames 的导出以保证稳定性
 			break;
 		}
 
 		case FMOD_DSP_PARAMETER_TYPE_DATA: {
 			info["datatype"] = desc->datadesc.datatype;
+			break;
+		}
+
+		default: {
+			// 未知的参数类型，不添加额外字段
+			info["warning"] = "Unknown parameter type";
 			break;
 		}
 		}

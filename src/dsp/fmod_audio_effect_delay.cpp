@@ -109,17 +109,19 @@ namespace godot {
 		// 这防止多个抽头叠加导致音量过大
 		float normalize_scale = (total_signal > 1.0f) ? (1.0f / total_signal) : 1.0f;
 
-		// 干信号控制：如果 dry < 1，需要降低干信号
-		// 在串联结构中，干信号会自然传递，所以第一个 DSP 负责控制干信号电平
+		// 处理抽头：第一个活动的抽头负责干/湿混合
+		bool first_tap = true;
 
 		// Tap 1
 		if (tap_1_active) {
-			_create_tap_dsp(system, tap_1_delay_ms, tap_1_level, tap_1_pan, normalize_scale);
+			_create_tap_dsp(system, tap_1_delay_ms, tap_1_level, tap_1_pan, normalize_scale, first_tap);
+			first_tap = false;
 		}
 
 		// Tap 2
 		if (tap_2_active) {
-			_create_tap_dsp(system, tap_2_delay_ms, tap_2_level, tap_2_pan, normalize_scale);
+			_create_tap_dsp(system, tap_2_delay_ms, tap_2_level, tap_2_pan, normalize_scale, first_tap);
+			first_tap = false;
 		}
 
 		// Feedback
@@ -128,7 +130,7 @@ namespace godot {
 		}
 	}
 
-	void FmodAudioEffectDelay::_create_tap_dsp(FmodSystem* system, float delay_ms, float level_db, float pan, float normalize_scale) {
+	void FmodAudioEffectDelay::_create_tap_dsp(FmodSystem* system, float delay_ms, float level_db, float pan, float normalize_scale, bool is_first_tap) {
 		// 创建 Delay DSP
 		Ref<FmodDSP> delay_dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_DELAY);
 		if (!delay_dsp.is_valid()) return;
@@ -146,13 +148,14 @@ namespace godot {
 		// 计算电平：dB 转线性，然后应用归一化
 		float level_linear = FmodUtils::db_to_linear(level_db) * normalize_scale;
 
-		// 对于第一个 tap，我们需要控制干信号
-		// 对于后续 taps，干信号应该保持为 1.0（让前面信号通过）
-		// 但这样会导致干信号被多次传递...
-		
-		// 简化处理：所有 tap 都使用 dry=1.0，让信号传递
-		// 通过 normalize_scale 来控制整体音量
-		delay_dsp->set_wet_dry_mix(1.0f, level_linear, 1.0f);
+		// FMOD Delay DSP: set_wet_dry_mix(prewet, postwet, dry)
+		// prewet: 输入到湿信号的比例 (0-1)
+		// postwet: 湿信号输出比例 (0-1)  
+		// dry: 干信号通过比例 (0-1)
+		// 
+		// 第一个 tap 负责干/湿混合，后续 tap 只加湿信号
+		float dry_level = is_first_tap ? dry : 0.0f;
+		delay_dsp->set_wet_dry_mix(1.0f, level_linear, dry_level);
 
 		bus->add_dsp(-1, delay_dsp);
 		dsp_chain.push_back(delay_dsp);

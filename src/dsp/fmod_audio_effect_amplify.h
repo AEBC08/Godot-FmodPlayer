@@ -7,13 +7,13 @@ namespace godot {
 	class FmodAudioEffectAmplify : public FmodAudioEffect {
 		GDCLASS(FmodAudioEffectAmplify, FmodAudioEffect)
 
-	protected:
-		static void _bind_methods();
-
 	private:
 		float volume_db = 0.0f;											// 增益 (dB), 范围 -80 ~ 24
 
 		void _update_dsp_gains();										// 实时更新 DSP 增益参数
+
+	protected:
+		static void _bind_methods();
 
 	public:
 		FmodAudioEffectAmplify();

@@ -125,6 +125,27 @@
     <ClInclude Include="src\dsp\fmod_audio_effect_eq.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_hard_limiter.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_panner.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_phaser.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_pitch_shift.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_record.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_reverb.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dsp\fmod_audio_effect_spectrum_analyzer.h">
+      <Filter>Source Files\dsp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\fmod_server.cpp">
@@ -200,6 +221,27 @@
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
     <ClCompile Include="src\dsp\fmod_audio_effect_eq.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_hard_limiter.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_panner.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_phaser.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_pitch_shift.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_record.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_reverb.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fmod_audio_effect_spectrum_analyzer.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
   </ItemGroup>

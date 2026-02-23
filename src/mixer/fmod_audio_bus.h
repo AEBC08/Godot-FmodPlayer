@@ -16,6 +16,8 @@ namespace godot {
 		Ref<FmodChannelGroup> bus;
 		Vector<Ref<FmodAudioEffect>> audio_effects;
 
+		bool solo = false;
+		bool user_mute = false;						// 用户设置的静音 (独立于 solo)
 		bool bypass = false;
 	protected:
 		static void _bind_methods();
@@ -34,11 +36,16 @@ namespace godot {
 		void set_volume_db(const float volume_db);
 		float get_volume_db() const;
 
+		void set_solo(bool p_solo);
+		bool is_solo() const;
+
 		void set_mute(bool p_mute);
 		bool is_mute() const;
+		void apply_mute(bool p_any_solo);
 
 		void set_bypass(bool p_bypass);
 		bool is_bypass() const;
+		void sync_bypass();
 
 		// 效果器管理
 		void add_effect(Ref<FmodAudioEffect> effect, int index = 0);

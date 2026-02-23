@@ -6,6 +6,15 @@
 #include "dsp/fmod_audio_effect_compressor.h"
 #include "dsp/fmod_audio_effect_delay.h"
 #include "dsp/fmod_audio_effect_distortion.h"
+#include "dsp/fmod_audio_effect_eq.h"
+#include "dsp/fmod_audio_effect_hard_limiter.h"
+#include "dsp/fmod_audio_effect_panner.h"
+#include "dsp/fmod_audio_effect_phaser.h"
+#include "dsp/fmod_audio_effect_pitch_shift.h"
+#include "dsp/fmod_audio_effect_record.h"
+#include "dsp/fmod_audio_effect_reverb.h"
+#include "dsp/fmod_audio_effect_spectrum_analyzer.h"
+#include "dsp/fmod_audio_effect_stereo_enhance.h"
 #include "fmod_audio_bus_layout.h"
 #include "mixer/fmod_audio_bus.h"
 #include "playback/fmod_channel_group.h"
@@ -17,6 +26,18 @@
 #include <godot_cpp/classes/audio_effect_compressor.hpp>
 #include <godot_cpp/classes/audio_effect_delay.hpp>
 #include <godot_cpp/classes/audio_effect_distortion.hpp>
+#include <godot_cpp/classes/audio_effect_eq.hpp>
+#include <godot_cpp/classes/audio_effect_eq6.hpp>
+#include <godot_cpp/classes/audio_effect_eq10.hpp>
+#include <godot_cpp/classes/audio_effect_eq21.hpp>
+#include <godot_cpp/classes/audio_effect_hard_limiter.hpp>
+#include <godot_cpp/classes/audio_effect_panner.hpp>
+#include <godot_cpp/classes/audio_effect_phaser.hpp>
+#include <godot_cpp/classes/audio_effect_pitch_shift.hpp>
+#include <godot_cpp/classes/audio_effect_record.hpp>
+#include <godot_cpp/classes/audio_effect_reverb.hpp>
+#include <godot_cpp/classes/audio_effect_spectrum_analyzer.hpp>
+#include <godot_cpp/classes/audio_effect_stereo_enhance.hpp>
 
 namespace godot {
 	void FmodAudioBusLayout::_bind_methods() {
@@ -28,8 +49,14 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("set_bus_volume", "name", "volume_db"), &FmodAudioBusLayout::set_bus_volume);
 		ClassDB::bind_method(D_METHOD("get_bus_volume", "name"), &FmodAudioBusLayout::get_bus_volume);
 
+		ClassDB::bind_method(D_METHOD("set_bus_solo", "name", "mute"), &FmodAudioBusLayout::set_bus_solo);
+		ClassDB::bind_method(D_METHOD("bus_is_solo", "name"), &FmodAudioBusLayout::bus_is_solo);
+
 		ClassDB::bind_method(D_METHOD("set_bus_mute", "name", "mute"), &FmodAudioBusLayout::set_bus_mute);
 		ClassDB::bind_method(D_METHOD("bus_is_mute", "name"), &FmodAudioBusLayout::bus_is_mute);
+
+		ClassDB::bind_method(D_METHOD("set_bus_bypass", "name", "mute"), &FmodAudioBusLayout::set_bus_bypass);
+		ClassDB::bind_method(D_METHOD("bus_is_bypass", "name"), &FmodAudioBusLayout::bus_is_bypass);
 
 		ClassDB::bind_method(D_METHOD("add_bus_effect", "bus_name", "effect", "index"), &FmodAudioBusLayout::add_bus_effect, DEFVAL(0));
 		ClassDB::bind_method(D_METHOD("remove_bus_effect", "bus_name", "index"), &FmodAudioBusLayout::remove_bus_effect);
@@ -67,18 +94,8 @@ namespace godot {
 		int32_t effect_count = audio_server->get_bus_effect_count(audio_server_bus_index);
 		for (int32_t i = 0; i < effect_count; i++) {
 			Ref<AudioEffect> godot_effect = audio_server->get_bus_effect(audio_server_bus_index, i);
-			Ref<AudioEffectDistortion> godot_distortion = godot_effect;
-			if (godot_distortion.is_valid()) {
-				Ref<FmodAudioEffectDistortion> fmod_distortion;
-				fmod_distortion.instantiate();
-				fmod_distortion->set_mode(static_cast<FmodAudioEffectDistortion::Mode>((int)godot_distortion->get_mode()));
-				fmod_distortion->set_pre_gain(godot_distortion->get_pre_gain());
-				fmod_distortion->set_drive(godot_distortion->get_drive());
-				fmod_distortion->set_post_gain(godot_distortion->get_post_gain());
-				fmod_distortion->set_keep_hf_hz(godot_distortion->get_keep_hf_hz());
-				bus->add_effect(fmod_distortion, i);
-			}
-			
+
+			// Amplify 效果器 - 处理 AudioEffectAmplify
 			Ref<AudioEffectAmplify> godot_amplify = godot_effect;
 			if (godot_amplify.is_valid()) {
 				Ref<FmodAudioEffectAmplify> fmod_amplify;
@@ -87,6 +104,7 @@ namespace godot {
 				bus->add_effect(fmod_amplify, i);
 			}
 
+			// Filter 效果器 - 处理 AudioEffectFilter
 			Ref<AudioEffectFilter> godot_filter = godot_effect;
 			if (godot_filter.is_valid()) {
 				Ref<FmodAudioEffectFilter> fmod_filter;
@@ -98,6 +116,7 @@ namespace godot {
 				bus->add_effect(fmod_filter, i);
 			}
 
+			// Capture 效果器 - 处理 AudioEffectCapture
 			Ref<AudioEffectCapture> godot_capture = godot_effect;
 			if (godot_capture.is_valid()) {
 				Ref<FmodAudioEffectCapture> fmod_capture;
@@ -106,6 +125,7 @@ namespace godot {
 				bus->add_effect(fmod_capture, i);
 			}
 
+			// Chorus 效果器 - 处理 AudioEffectChorus
 			Ref<AudioEffectChorus> godot_chorus = godot_effect;
 			if (godot_chorus.is_valid()) {
 				Ref<FmodAudioEffectChorus> fmod_chorus;
@@ -124,6 +144,7 @@ namespace godot {
 				bus->add_effect(fmod_chorus, i);
 			}
 
+			// Compressor 效果器 - 处理 AudioEffectCompressor
 			Ref<AudioEffectCompressor> godot_compressor = godot_effect;
 			if (godot_compressor.is_valid()) {
 				Ref<FmodAudioEffectCompressor> fmod_compressor;
@@ -138,6 +159,7 @@ namespace godot {
 				bus->add_effect(fmod_compressor, i);
 			}
 
+			// Delay 效果器 - 处理 AudioEffectDelay
 			Ref<AudioEffectDelay> godot_delay = godot_effect;
 			if (godot_delay.is_valid()) {
 				Ref<FmodAudioEffectDelay> fmod_delay;
@@ -157,6 +179,158 @@ namespace godot {
 				fmod_delay->set_feedback_lowpass(godot_delay->get_feedback_lowpass());
 				bus->add_effect(fmod_delay, i);
 			}
+
+			// Distortion 效果器 - 处理 AudioEffectDistortion
+			Ref<AudioEffectDistortion> godot_distortion = godot_effect;
+			if (godot_distortion.is_valid()) {
+				Ref<FmodAudioEffectDistortion> fmod_distortion;
+				fmod_distortion.instantiate();
+				fmod_distortion->set_mode(static_cast<FmodAudioEffectDistortion::Mode>((int)godot_distortion->get_mode()));
+				fmod_distortion->set_pre_gain(godot_distortion->get_pre_gain());
+				fmod_distortion->set_drive(godot_distortion->get_drive());
+				fmod_distortion->set_post_gain(godot_distortion->get_post_gain());
+				fmod_distortion->set_keep_hf_hz(godot_distortion->get_keep_hf_hz());
+				bus->add_effect(fmod_distortion, i);
+			}
+
+			// EQ 效果器 - 处理 AudioEffectEQ6/10/21 以及基类 AudioEffectEQ
+			Ref<AudioEffectEQ> godot_eq = godot_effect;
+			if (godot_eq.is_valid()) {
+				// 根据频段数量确定使用哪个 FMOD EQ 类
+				int band_count = godot_eq->get_band_count();
+				Ref<FmodAudioEffectEQ> fmod_eq;
+
+				// 根据频段数量选择对应的预设
+				if (band_count == 6) {
+					fmod_eq = Ref<FmodAudioEffectEQ>(memnew(FmodAudioEffectEQ6));
+				} else if (band_count == 10) {
+					fmod_eq = Ref<FmodAudioEffectEQ>(memnew(FmodAudioEffectEQ10));
+				} else if (band_count == 21) {
+					fmod_eq = Ref<FmodAudioEffectEQ>(memnew(FmodAudioEffectEQ21));
+				} else {
+					// 其他频段数量，使用基础类并设置对应预设
+					fmod_eq.instantiate();
+					if (band_count <= 6) {
+						fmod_eq->set_preset(FmodAudioEffectEQ::PRESET_6_BANDS);
+					} else if (band_count <= 10) {
+						fmod_eq->set_preset(FmodAudioEffectEQ::PRESET_10_BANDS);
+					} else {
+						fmod_eq->set_preset(FmodAudioEffectEQ::PRESET_21_BANDS);
+					}
+				}
+
+				// 同步每个频段的增益
+				for (int band_idx = 0; band_idx < band_count; band_idx++) {
+					float gain_db = godot_eq->get_band_gain_db(band_idx);
+					fmod_eq->set_band_gain_db(band_idx, gain_db);
+				}
+
+				bus->add_effect(fmod_eq, i);
+			}
+
+			// HardLimiter 效果器 - 处理 AudioEffectHardLimiter
+			Ref<AudioEffectHardLimiter> godot_hard_limiter = godot_effect;
+			if (godot_hard_limiter.is_valid()) {
+				Ref<FmodAudioEffectHardLimiter> fmod_hard_limiter;
+				fmod_hard_limiter.instantiate();
+				fmod_hard_limiter->set_ceiling_db(godot_hard_limiter->get_ceiling_db());
+				fmod_hard_limiter->set_pre_gain_db(godot_hard_limiter->get_pre_gain_db());
+				fmod_hard_limiter->set_release(godot_hard_limiter->get_release());
+				bus->add_effect(fmod_hard_limiter, i);
+			}
+
+			// Panner 效果器 - 处理 AudioEffectPanner
+			Ref<AudioEffectPanner> godot_panner = godot_effect;
+			if (godot_panner.is_valid()) {
+				Ref<FmodAudioEffectPanner> fmod_panner;
+				fmod_panner.instantiate();
+				fmod_panner->set_pan(godot_panner->get_pan());
+				bus->add_effect(fmod_panner, i);
+			}
+
+			// Phaser 效果器 - 处理 AudioEffectPhaser
+			Ref<AudioEffectPhaser> godot_phaser = godot_effect;
+			if (godot_phaser.is_valid()) {
+				Ref<FmodAudioEffectPhaser> fmod_phaser;
+				fmod_phaser.instantiate();
+				fmod_phaser->set_depth(godot_phaser->get_depth());
+				fmod_phaser->set_feedback(godot_phaser->get_feedback());
+				fmod_phaser->set_range_max_hz(godot_phaser->get_range_max_hz());
+				fmod_phaser->set_range_min_hz(godot_phaser->get_range_min_hz());
+				fmod_phaser->set_rate_hz(godot_phaser->get_rate_hz());
+				bus->add_effect(fmod_phaser, i);
+			}
+
+			// PitchShift 效果器 - 处理 AudioEffectPitchShift
+			Ref<AudioEffectPitchShift> godot_pitch = godot_effect;
+			if (godot_pitch.is_valid()) {
+				Ref<FmodAudioEffectPitchShift> fmod_pitch;
+				fmod_pitch.instantiate();
+				fmod_pitch->set_pitch_scale(godot_pitch->get_pitch_scale());
+				fmod_pitch->set_fft_size(static_cast<FmodAudioEffectPitchShift::FFTSize>((int)godot_pitch->get_fft_size()));
+				fmod_pitch->set_oversampling(godot_pitch->get_oversampling());
+				bus->add_effect(fmod_pitch, i);
+			}
+
+			// Record 效果器 - 处理 AudioEffectRecord
+			Ref<AudioEffectRecord> godot_record = godot_effect;
+			if (godot_record.is_valid()) {
+				Ref<FmodAudioEffectRecord> fmod_record;
+				fmod_record.instantiate();
+				fmod_record->set_format(static_cast<FmodAudioEffectRecord::Format>((int)godot_record->get_format()));
+				bus->add_effect(fmod_record, i);
+			}
+
+			// Reverb 效果器 - 处理 AudioEffectReverb
+			Ref<AudioEffectReverb> godot_reverb = godot_effect;
+			if (godot_reverb.is_valid()) {
+				Ref<FmodAudioEffectReverb> fmod_reverb;
+				fmod_reverb.instantiate();
+				fmod_reverb->set_damping(godot_reverb->get_damping());
+				fmod_reverb->set_dry(godot_reverb->get_dry());
+				fmod_reverb->set_hpf(godot_reverb->get_hpf());
+				fmod_reverb->set_predelay_feedback(godot_reverb->get_predelay_feedback());
+				fmod_reverb->set_predelay_msec(godot_reverb->get_predelay_msec());
+				fmod_reverb->set_room_size(godot_reverb->get_room_size());
+				fmod_reverb->set_spread(godot_reverb->get_spread());
+				fmod_reverb->set_wet(godot_reverb->get_wet());
+				bus->add_effect(fmod_reverb, i);
+			}
+
+			// SpectrumAnalyzer 效果器 - 处理 AudioEffectSpectrumAnalyzer
+			Ref<AudioEffectSpectrumAnalyzer> godot_spectrum = godot_effect;
+			if (godot_spectrum.is_valid()) {
+				Ref<FmodAudioEffectSpectrumAnalyzer> fmod_spectrum;
+				fmod_spectrum.instantiate();
+				fmod_spectrum->set_fft_size(static_cast<FmodAudioEffectSpectrumAnalyzer::FFTSize>((int)godot_spectrum->get_fft_size()));
+				fmod_spectrum->set_buffer_length(godot_spectrum->get_buffer_length());
+				bus->add_effect(fmod_spectrum, i);
+			}
+
+			// StereoEnhance 效果器 - 处理 AudioEffectStereoEnhance
+			Ref<AudioEffectStereoEnhance> godot_stereo = godot_effect;
+			if (godot_stereo.is_valid()) {
+				Ref<FmodAudioEffectStereoEnhance> fmod_stereo;
+				fmod_stereo.instantiate();
+				fmod_stereo->set_pan_pullout(godot_stereo->get_pan_pullout());
+				fmod_stereo->set_time_pullout(godot_stereo->get_time_pullout());
+				fmod_stereo->set_surround(godot_stereo->get_surround());
+				bus->add_effect(fmod_stereo, i);
+			}
+		}
+	}
+
+	void FmodAudioBusLayout::_update_solo_mute() {
+		bool any_solo = false;
+		for (const auto& pair : audio_buses_map) {
+			if (pair.value->is_solo()) {
+				any_solo = true;
+				break;
+			}
+		}
+
+		for (const auto& pair : audio_buses_map) {
+			pair.value->apply_mute(any_solo);
 		}
 	}
 
@@ -188,49 +362,83 @@ namespace godot {
 	}
 
 	void FmodAudioBusLayout::set_bus_volume(const String& name, const float volume_db) {
-		ERR_FAIL_COND_MSG(!audio_buses_map.has(name), "Bus not found");
+		ERR_FAIL_COND_MSG(!audio_buses_map.has(name), vformat("Bus not found: %s", name));
 		Ref<FmodAudioBus> bus = audio_buses_map.get(name);
-		ERR_FAIL_COND_MSG(bus.is_null(), "Bus is null");
+		ERR_FAIL_COND_MSG(bus.is_null(), "Bus is invalid");
 		bus->set_volume_db(volume_db);
 	}
 
 	float FmodAudioBusLayout::get_bus_volume(const String& name) const {
-		ERR_FAIL_COND_V_MSG(!audio_buses_map.has(name), 0.0f, "Bus not found");
+		ERR_FAIL_COND_V_MSG(!audio_buses_map.has(name), 0.0f, vformat("Bus not found: %s", name));
 		Ref<FmodAudioBus> bus = audio_buses_map.get(name);
-		ERR_FAIL_COND_V_MSG(bus.is_null(), 0.0f, vformat("Bus not found: %s", name));
+		ERR_FAIL_COND_V_MSG(bus.is_null(), 0.0f, "Bus is invalid");
 		return bus->get_volume_db();
 	}
 
-	void FmodAudioBusLayout::set_bus_mute(const String& name, const bool mute) {
-		ERR_FAIL_COND_MSG(!audio_buses_map.has(name), "Bus not found");
+	void FmodAudioBusLayout::set_bus_solo(const String& name, const bool solo) {
+		ERR_FAIL_COND_MSG(!audio_buses_map.has(name), vformat("Bus not found: %s", name));
 		Ref<FmodAudioBus> bus = audio_buses_map.get(name);
-		ERR_FAIL_COND_MSG(bus.is_null(), "Bus is null");
+		ERR_FAIL_COND_MSG(bus.is_null(), "Bus is invalid");
+		bus->set_solo(solo);
+		_update_solo_mute();
+	}
+
+	bool FmodAudioBusLayout::bus_is_solo(const String& name) const {
+		ERR_FAIL_COND_V_MSG(!audio_buses_map.has(name), false, vformat("Bus not found: %s", name));
+		Ref<FmodAudioBus> bus = audio_buses_map.get(name);
+		ERR_FAIL_COND_V_MSG(bus.is_null(), false, "Bus is invalid");
+		return bus->is_solo();
+	}
+
+	void FmodAudioBusLayout::set_bus_mute(const String& name, const bool mute) {
+		ERR_FAIL_COND_MSG(!audio_buses_map.has(name), vformat("Bus not found: %s", name));
+		Ref<FmodAudioBus> bus = audio_buses_map.get(name);
+		ERR_FAIL_COND_MSG(bus.is_null(), "Bus is invalid");
 		bus->set_mute(mute);
+		_update_solo_mute();
 	}
 
 	bool FmodAudioBusLayout::bus_is_mute(const String& name) const {
-		ERR_FAIL_COND_V_MSG(!audio_buses_map.has(name), false, "Bus not found");
+		ERR_FAIL_COND_V_MSG(!audio_buses_map.has(name), false, vformat("Bus not found: %s", name));
 		Ref<FmodAudioBus> bus = audio_buses_map.get(name);
-		ERR_FAIL_COND_V_MSG(bus.is_null(), false, vformat("Bus not found: %s", name));
+		ERR_FAIL_COND_V_MSG(bus.is_null(), false, "Bus is invalid");
 		return bus->is_mute();
+	}
+
+	void FmodAudioBusLayout::set_bus_bypass(const String& name, const bool bypass) {
+		ERR_FAIL_COND_MSG(!audio_buses_map.has(name), vformat("Bus not found: %s", name));
+		Ref<FmodAudioBus> bus = audio_buses_map.get(name);
+		ERR_FAIL_COND_MSG(bus.is_null(), "Bus is invalid");
+		bus->set_bypass(bypass);
+		bus->sync_bypass();
+	}
+
+	bool FmodAudioBusLayout::bus_is_bypass(const String& name) const {
+		ERR_FAIL_COND_V_MSG(!audio_buses_map.has(name), false, vformat("Bus not found: %s", name));
+		Ref<FmodAudioBus> bus = audio_buses_map.get(name);
+		ERR_FAIL_COND_V_MSG(bus.is_null(), false, "Bus is invalid");
+		return bus->is_bypass();
 	}
 
 	void FmodAudioBusLayout::add_bus_effect(const String& bus_name, Ref<FmodAudioEffect> effect, const int index) {
 		ERR_FAIL_COND_MSG(effect.is_null(), "Effect is null");
+		ERR_FAIL_COND_MSG(!audio_buses_map.has(bus_name), vformat("Bus not found: %s", bus_name));
 		Ref<FmodAudioBus> bus = get_audio_bus(bus_name);
-		ERR_FAIL_COND_MSG(bus.is_null(), vformat("Bus not found: %s", bus_name));
+		ERR_FAIL_COND_MSG(bus.is_null(), "Bus is invalid");
 		bus->add_effect(effect, index);
 	}
 
 	void FmodAudioBusLayout::remove_bus_effect(const String& bus_name, const int index) {
+		ERR_FAIL_COND_MSG(!audio_buses_map.has(bus_name), vformat("Bus not found: %s", bus_name));
 		Ref<FmodAudioBus> bus = get_audio_bus(bus_name);
-		ERR_FAIL_COND_MSG(bus.is_null(), vformat("Bus not found: %s", bus_name));
+		ERR_FAIL_COND_MSG(bus.is_null(), "Bus is invalid");
 		bus->remove_effect(index);
 	}
 
 	Ref<FmodAudioEffect> FmodAudioBusLayout::get_bus_effect(const String& bus_name, const int index) const {
+		ERR_FAIL_COND_V_MSG(!audio_buses_map.has(bus_name), Ref<FmodAudioEffect>(), vformat("Bus not found: %s", bus_name));
 		Ref<FmodAudioBus> bus = get_audio_bus(bus_name);
-		ERR_FAIL_COND_V_MSG(bus.is_null(), Ref<FmodAudioEffect>(), vformat("Bus not found: %s", bus_name));
+		ERR_FAIL_COND_V_MSG(bus.is_null(), Ref<FmodAudioEffect>(), "Bus is invalid");
 		return bus->get_effect(index);
 	}
 
@@ -290,6 +498,9 @@ namespace godot {
 			sync_bus_state(bus_name, i);							// 同步音量和静音状态
 			_sync_bus_effects(bus, i);								// 效果器处理
 		}
+		// 应用 solo 静音
+		// bypass 已在每个 bus 的 set_bypass 中通过 sync_bypass 应用，无需额外操作
+		_update_solo_mute();
 	}
 
 	void FmodAudioBusLayout::sync_bus_state(const String& bus_name, int audio_server_bus_index) {
@@ -299,10 +510,9 @@ namespace godot {
 		Ref<FmodAudioBus> bus = get_audio_bus(bus_name);
 		if (bus.is_null()) return;
 
-		// 同步音量
 		bus->set_volume_db(audio_server->get_bus_volume_db(audio_server_bus_index));
-		
-		// 同步静音状态
 		bus->set_mute(audio_server->is_bus_mute(audio_server_bus_index));
+		bus->set_solo(audio_server->is_bus_solo(audio_server_bus_index));
+		bus->set_bypass(audio_server->is_bus_bypassing_effects(audio_server_bus_index));
 	}
 }

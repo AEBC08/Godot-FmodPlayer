@@ -143,6 +143,13 @@
     <ClInclude Include="src\dsp\fmod_audio_effect_delay.h" />
     <ClInclude Include="src\dsp\fmod_audio_effect_eq.h" />
     <ClInclude Include="src\dsp\fmod_audio_effect_filter.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_hard_limiter.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_panner.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_phaser.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_pitch_shift.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_record.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_reverb.h" />
+    <ClInclude Include="src\dsp\fmod_audio_effect_spectrum_analyzer.h" />
     <ClInclude Include="src\mixer\fmod_audio_bus.h" />
     <ClInclude Include="src\mixer\fmod_audio_bus_layout.h" />
     <ClInclude Include="src\dsp\fmod_dsp_connection.h" />
@@ -171,6 +178,13 @@
     <ClCompile Include="src\dsp\fmod_audio_effect_delay.cpp" />
     <ClCompile Include="src\dsp\fmod_audio_effect_eq.cpp" />
     <ClCompile Include="src\dsp\fmod_audio_effect_filter.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_hard_limiter.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_panner.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_phaser.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_pitch_shift.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_record.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_reverb.cpp" />
+    <ClCompile Include="src\dsp\fmod_audio_effect_spectrum_analyzer.cpp" />
     <ClCompile Include="src\mixer\fmod_audio_bus.cpp" />
     <ClCompile Include="src\mixer\fmod_audio_bus_layout.cpp" />
     <ClCompile Include="src\dsp\fmod_dsp_connection.cpp" />

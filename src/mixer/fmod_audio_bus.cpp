@@ -15,7 +15,12 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_mute", "mute"), &FmodAudioBus::set_mute);
 		ClassDB::bind_method(D_METHOD("is_mute"), &FmodAudioBus::is_mute);
+		ClassDB::bind_method(D_METHOD("apply_mute"), &FmodAudioBus::apply_mute);
 		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "mute"), "set_mute", "is_mute");
+
+		ClassDB::bind_method(D_METHOD("set_solo", "solo"), &FmodAudioBus::set_solo);
+		ClassDB::bind_method(D_METHOD("is_solo"), &FmodAudioBus::is_mute);
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "solo"), "set_solo", "is_solo");
 
 		ClassDB::bind_method(D_METHOD("set_bypass", "bypass"), &FmodAudioBus::set_bypass);
 		ClassDB::bind_method(D_METHOD("is_bypass"), &FmodAudioBus::is_bypass);
@@ -87,29 +92,47 @@ namespace godot {
 		return bus->get_volume_db();
 	}
 
+	void FmodAudioBus::set_solo(bool p_solo) {
+		solo = p_solo;
+	}
+
+	bool FmodAudioBus::is_solo() const {
+		return solo;
+	}
+
 	void FmodAudioBus::set_mute(bool p_mute) {
-		ERR_FAIL_COND(bus.is_null());
-		bus->set_mute(p_mute);
+		user_mute = p_mute;
+		// 不直接操作 FMOD，由 AudioBusLayout 统一调用 apply_mute
 	}
 
 	bool FmodAudioBus::is_mute() const {
-		if (bus.is_null()) return false;
-		return bus->get_mute();
+		return user_mute;
+	}
+
+	void FmodAudioBus::apply_mute(bool p_any_solo) {
+		ERR_FAIL_COND(bus.is_null());
+		if (bus.is_null()) return;
+		bool final_mute = user_mute || (p_any_solo && !solo);
+		bus->set_mute(final_mute);
 	}
 
 	void FmodAudioBus::set_bypass(bool p_bypass) {
 		bypass = p_bypass;
-		ERR_FAIL_COND(bus.is_null());
-		int dsp_count = bus->get_num_dsps();
-		for (int i = 0; i < dsp_count; i++) {
-			Ref<FmodDSP> dsp = bus->get_dsp(i);
-			if (dsp.is_valid())
-				dsp->set_bypass(bypass);
-		}
 	}
 
 	bool FmodAudioBus::is_bypass() const {
 		return bypass;
+	}
+
+	void FmodAudioBus::sync_bypass() {
+		ERR_FAIL_COND(bus.is_null());
+		int dsp_count = bus->get_num_dsps();
+		for (int i = 0; i < dsp_count; ++i) {
+			Ref<FmodDSP> dsp = bus->get_dsp(i);
+			if (dsp.is_valid()) {
+				dsp->set_bypass(bypass);
+			}
+		}
 	}
 
 	void FmodAudioBus::add_effect(Ref<FmodAudioEffect> effect, int index) {
@@ -117,6 +140,11 @@ namespace godot {
 		ERR_FAIL_COND_MSG(effect.is_null(), "Effect is null");
 		audio_effects.append(effect);
 		effect->apply_to(bus);
+
+		// 如果当前总线为 bypass，立即禁用新添加的效果器
+		if (bypass) {
+			sync_bypass();
+		}
 	}
 
 	void FmodAudioBus::remove_effect(int index) {

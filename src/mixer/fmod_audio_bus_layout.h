@@ -14,10 +14,10 @@ namespace godot {
 	private:
 		HashMap<String, Ref<FmodAudioBus>> audio_buses_map;
 
-		// 内部辅助方法
 		void _clear_buses_except_master();
 		Ref<FmodAudioBus> _ensure_master_bus();
 		void _sync_bus_effects(Ref<FmodAudioBus> bus, int audio_server_bus_index);
+		void _update_solo_mute();
 
 	protected:
 		static void _bind_methods();
@@ -32,8 +32,14 @@ namespace godot {
 		void set_bus_volume(const String& name, const float volume_db);
 		float get_bus_volume(const String& name) const;
 
+		void set_bus_solo(const String& name, const bool solo);
+		bool bus_is_solo(const String& name) const;
+
 		void set_bus_mute(const String& name, const bool mute);
 		bool bus_is_mute(const String& name) const;
+
+		void set_bus_bypass(const String& name, const bool bypass);
+		bool bus_is_bypass(const String& name) const;
 
 		// 效果器管理
 		void add_bus_effect(const String& bus_name, Ref<FmodAudioEffect> effect, const int index = 0);

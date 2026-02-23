@@ -136,6 +136,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\audio\fmod_audio_importer.h" />
     <ClInclude Include="src\dsp\fmod_audio_effect_amplify.h" />
     <ClInclude Include="src\dsp\fmod_audio_effect_capture.h" />
     <ClInclude Include="src\dsp\fmod_audio_effect_chorus.h" />

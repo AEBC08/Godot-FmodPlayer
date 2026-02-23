@@ -4,13 +4,15 @@ namespace godot {
     void FmodAudio::_bind_methods() {
         ClassDB::bind_method(D_METHOD("set_file_path", "path"), &FmodAudio::set_file_path);
         ClassDB::bind_method(D_METHOD("get_file_path"), &FmodAudio::get_file_path);
-        ADD_PROPERTY(PropertyInfo(Variant::STRING, "file_path", PROPERTY_HINT_FILE, "*.wav,*.mp3,*.ogg"), "set_file_path", "get_file_path");
+        // file_path 也需要存储，以便资源能记住原始文件路径
+        ADD_PROPERTY(PropertyInfo(Variant::STRING, "file_path", PROPERTY_HINT_FILE, "*.wav,*.mp3,*.ogg,*.flac,*.aiff"), "set_file_path", "get_file_path");
 
         ClassDB::bind_method(D_METHOD("get_length"), &FmodAudio::get_length);
         ClassDB::bind_method(D_METHOD("get_sound"), &FmodAudio::get_sound);
 
         ClassDB::bind_method(D_METHOD("set_data", "data"), &FmodAudio::set_data);
         ClassDB::bind_method(D_METHOD("get_data"), &FmodAudio::get_data);
+        // 数据必须存储，以便资源能被保存
         ADD_PROPERTY(PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_STORAGE), "set_data", "get_data");
     }
 

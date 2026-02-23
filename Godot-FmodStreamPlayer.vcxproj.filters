@@ -149,6 +149,9 @@
     <ClInclude Include="src\dsp\fmod_audio_effect_stereo_enhance.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
+    <ClInclude Include="src\audio\fmod_audio_importer.h">
+      <Filter>Header Files\audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\fmod_server.cpp">

@@ -1,5 +1,7 @@
 #include "register_types.h"
 
+#include "editor/fmod_audio_importer.h"
+#include "editor/fmod_audio_import_data.h"
 #include "audio/fmod_audio.h"
 #include "audio/fmod_audio_sample.h"
 #include "audio/fmod_audio_stream.h"
@@ -43,6 +45,13 @@ using namespace godot;
 static FmodServer* fmod_server_instance = nullptr;
 
 void initialize_example_module(ModuleInitializationLevel p_level) {
+	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
+		// 编辑器特有的类
+		GDREGISTER_CLASS(FmodAudioImportData);
+		GDREGISTER_CLASS(AudioImporterFmod);
+		return;
+	}
+	
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
@@ -113,7 +122,8 @@ extern "C" {
 
 		init_obj.register_initializer(initialize_example_module);
 		init_obj.register_terminator(uninitialize_example_module);
-		init_obj.set_minimum_library_initialization_level(MODULE_INITIALIZATION_LEVEL_SCENE);
+		// 使用 EDITOR 级别，确保编辑器类在编辑器启动时注册
+		init_obj.set_minimum_library_initialization_level(MODULE_INITIALIZATION_LEVEL_EDITOR);
 
 		return init_obj.init();
 	}

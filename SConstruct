@@ -8,7 +8,7 @@ env = SConscript("godot-cpp/SConstruct")
 # ����ͷ�ļ�·��
 env.Append(CPPPATH=["src/", "src/thirdparty/fmod/inc"])
 sources = (Glob("src/core/*.cpp") + Glob("src/audio/*.cpp") + Glob("src/playback/*.cpp") + 
-           Glob("src/mixer/*.cpp") + Glob("src/dsp/*.cpp") + Glob("src/nodes/*.cpp"))
+           Glob("src/mixer/*.cpp") + Glob("src/dsp/*.cpp") + Glob("src/nodes/*.cpp") + Glob("src/editor/*.cpp"))
 
 # --- ���� Windows ��Ⱦ ---
 # ����� Windows �ϱ��� Android��SCons ���ܻ����ر��� MinGW �����ӿ⡣

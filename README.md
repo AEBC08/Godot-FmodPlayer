@@ -108,6 +108,7 @@ First-class Godot Editor support:
 1. Download the latest release from the [Releases](https://github.com/LuYingYiLong/Godot-FmodPlayer/releases) page
 2. Extract the `addons/fmod_player` folder into your Godot project's `res://addons/` directory
 3. Ensure `fmod.dll` is placed alongside the GDExtension binary
+4. **Enable the Plugin**: In Godot Editor, go to `Project > Project Settings > Plugins`, find **FMOD Player Plugin** and enable it
 
 ### Option 2: Build from Source
 
@@ -130,6 +131,17 @@ scons platform=android target=template_debug arch=arm64
 - **Platforms:** `windows`, `android`
 - **Targets:** `template_debug`, `template_release`, `editor`
 - **Architectures:** `x86_64`, `arm64`
+
+#### Enable the Plugin
+After building, go to `Project > Project Settings > Plugins` in Godot Editor, find **FMOD Player Plugin** and enable it.
+
+---
+
+## 📖 Documentation
+
+📚 **Full documentation available at:** [https://godot-fmodplayerdocs.readthedocs.io/zh-cn/latest/](https://godot-fmodplayerdocs.readthedocs.io/zh-cn/latest/)
+
+The documentation includes detailed usage guides, API reference, code examples, and platform-specific instructions.
 
 ---
 
@@ -157,7 +169,7 @@ func _ready():
 
 ```gdscript
 func add_reverb():
-    var system = FmodServer.main_system
+    var system = FmodServer.get_main_system()
     
     # Create reverb DSP
     var reverb = system.create_dsp_by_type(FmodDSP.DSP_TYPE_SFXREVERB)
@@ -186,7 +198,7 @@ func play_explosion():
 
 ```gdscript
 func _process(delta):
-    var system = FmodServer.main_system
+    var system = FmodServer.get_main_system()
     var cpu_usage = system.get_cpu_usage()
     var channels = system.get_channels_playing()
     

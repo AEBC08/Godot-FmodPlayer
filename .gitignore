@@ -377,4 +377,5 @@ src/**/.sconsign.dblite
 .sconsign.dblite
 
 addons/bin/fmod.dll
+src/thirdparty/fmod/
 .vscode/

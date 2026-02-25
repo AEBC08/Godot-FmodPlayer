@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://bqxnxqwe3v1a"]
+
+[ext_resource type="Script" path="res://addons/fmod_player_plugin/audio_latency_simple.gd" id="1_testg"]
+
+[node name="LatencyTest" type="Node"]
+script = ExtResource("1_testg")
+pulse_duration_ms = 20.0
+detection_threshold = 0.05
+warmup_iterations = 3
+test_iterations = 10

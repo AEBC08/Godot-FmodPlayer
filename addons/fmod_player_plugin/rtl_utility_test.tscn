@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://rtlutility01"]
+
+[ext_resource type="Script" path="res://addons/fmod_player_plugin/rtl_utility_test.gd" id="1_rtl"]
+
+[node name="RTLUtilityTest" type="Node"]
+script = ExtResource("1_rtl")
+signal_type = 0
+pulse_duration_ms = 10.0
+signal_frequency = 1000.0
+signal_volume = 0.8
+play_mode = 0
+loop_interval = 2.0
+auto_stop_time = 0.0
+use_fmod = false

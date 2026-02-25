@@ -29,6 +29,7 @@ namespace godot {
 
 		Ref<FmodAudioStream> stream;
 		bool playing = false;
+		bool stream_paused = false;
 		double volume_db = 0.0;
 		double pitch = 1.0;
 		bool auto_play = false;
@@ -38,9 +39,14 @@ namespace godot {
 		Ref<FmodAudioStream> get_stream() const;
 
 		void play(const double from_position = 0.0);
+		void seek(const double to_position);
 		void stop();
+
 		void set_playing(const bool playing);
 		bool is_playing() const;
+
+		void set_stream_paused(const bool paused);
+		bool get_stream_paused() const;
 
 		double get_playback_position() const;
 

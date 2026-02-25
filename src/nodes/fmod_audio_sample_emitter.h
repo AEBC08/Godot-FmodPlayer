@@ -1,7 +1,7 @@
 #ifndef FMOD_AUDIO_SAMPLE_EMITTER_H
 #define FMOD_AUDIO_SAMPLE_EMITTER_H
 
-#include "audio/fmod_audio_sample.h"
+#include "audio/fmod_audio_stream.h"
 #include "playback/fmod_channel.h"
 #include "playback/fmod_channel_group.h"
 #include "core/fmod_system.h"
@@ -10,31 +10,35 @@
 #include <godot_cpp/classes/engine.hpp>
 
 namespace godot {
-	class FmodAudioSampleEmitter : public Node {
-		GDCLASS(FmodAudioSampleEmitter, Node)
 
-	private:
-		Ref<FmodChannelGroup> internal_channel_group;
+// 音频样本发射器 - 用于一次性播放短音频（如音效）
+// 使用 FmodAudioStream 并自动设置 MODE_SAMPLE 标志
+class FmodAudioSampleEmitter : public Node {
+	GDCLASS(FmodAudioSampleEmitter, Node)
 
-	protected:
-		static void _bind_methods();
+private:
+	Ref<FmodChannelGroup> internal_channel_group;
 
-	public:
-		FmodAudioSampleEmitter();
+protected:
+	static void _bind_methods();
 
-		void _notification(int p_what);
+public:
+	FmodAudioSampleEmitter();
 
-		Ref<FmodAudioSample> sample;
-		bool auto_emit = false;
+	void _notification(int p_what);
 
-		void emit();
+	Ref<FmodAudioStream> stream;  // 改为使用 FmodAudioStream
+	bool auto_emit = false;
 
-		void set_sample(Ref<FmodAudioSample> new_sample);
-		Ref<FmodAudioSample> get_sample() const;
+	void emit();
 
-		void set_auto_emit(const bool enable);
-		bool is_autoemit_enabled() const;
-	};
-}
+	void set_stream(Ref<FmodAudioStream> new_stream);  // 重命名
+	Ref<FmodAudioStream> get_stream() const;           // 重命名
+
+	void set_auto_emit(const bool enable);
+	bool is_autoemit_enabled() const;
+};
+
+} // namespace godot
 
 #endif // !FMOD_AUDIO_SAMPLE_EMITTER_H

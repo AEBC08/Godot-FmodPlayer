@@ -2,14 +2,18 @@
 extends EditorPlugin
 
 var importer: AudioImporterFmod
+var inspector: FmodAudioPreviewInspector
 
 func _enter_tree():
-	# 创建并添加 FMOD 音频导入器
 	importer = AudioImporterFmod.new()
 	add_import_plugin(importer)
+	inspector = FmodAudioPreviewInspector.new()
+	add_inspector_plugin(inspector)
 
 func _exit_tree():
-	# 移除导入器
 	if importer:
 		remove_import_plugin(importer)
 		importer = null
+	if inspector:
+		remove_inspector_plugin(inspector)
+		inspector = null

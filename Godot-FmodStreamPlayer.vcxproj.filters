@@ -45,6 +45,12 @@
     <Filter Include="Source Files\nodes">
       <UniqueIdentifier>{160b6e6d-568c-4c0b-8b72-3ee980b14e59}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\editor">
+      <UniqueIdentifier>{26404aeb-255d-46fa-a2e0-b97982fbf9c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\editor">
+      <UniqueIdentifier>{20c9d372-f92a-4997-8e31-8d1184ecfbcc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\fmod_server.h">
@@ -57,12 +63,6 @@
       <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\audio\fmod_sound.h">
-      <Filter>Header Files\audio</Filter>
-    </ClInclude>
-    <ClInclude Include="src\audio\fmod_audio.h">
-      <Filter>Header Files\audio</Filter>
-    </ClInclude>
-    <ClInclude Include="src\audio\fmod_audio_sample.h">
       <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="src\audio\fmod_audio_stream.h">
@@ -149,7 +149,19 @@
     <ClInclude Include="src\dsp\fmod_audio_effect_stereo_enhance.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="src\audio\fmod_audio_importer.h">
+    <ClInclude Include="src\editor\fmod_audio_importer.h">
+      <Filter>Header Files\editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audio\fmod_audio_steam_flac.h">
+      <Filter>Header Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\editor\fmod_audio_preview_property.h">
+      <Filter>Header Files\editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\editor\fmod_audio_preview_inspector.h">
+      <Filter>Header Files\editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audio\fmod_sound_lock.h">
       <Filter>Header Files\audio</Filter>
     </ClInclude>
   </ItemGroup>
@@ -161,12 +173,6 @@
       <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\audio\fmod_sound.cpp">
-      <Filter>Source Files\audio</Filter>
-    </ClCompile>
-    <ClCompile Include="src\audio\fmod_audio.cpp">
-      <Filter>Source Files\audio</Filter>
-    </ClCompile>
-    <ClCompile Include="src\audio\fmod_audio_sample.cpp">
       <Filter>Source Files\audio</Filter>
     </ClCompile>
     <ClCompile Include="src\audio\fmod_audio_stream.cpp">
@@ -252,6 +258,21 @@
     </ClCompile>
     <ClCompile Include="src\dsp\fmod_audio_effect_stereo_enhance.cpp">
       <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editor\fmod_audio_importer.cpp">
+      <Filter>Source Files\editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\fmod_audio_stream_flac.cpp">
+      <Filter>Source Files\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editor\fmod_audio_preview_inspector.cpp">
+      <Filter>Source Files\editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editor\fmod_audio_preview_property.cpp">
+      <Filter>Source Files\editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\fmod_sound_lock.cpp">
+      <Filter>Source Files\audio</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

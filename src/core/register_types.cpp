@@ -1,11 +1,12 @@
 #include "register_types.h"
 
 #include "editor/fmod_audio_importer.h"
-#include "editor/fmod_audio_import_data.h"
-#include "audio/fmod_audio.h"
-#include "audio/fmod_audio_sample.h"
+#include "editor/fmod_audio_preview_inspector.h"
+#include "editor/fmod_audio_preview_property.h"
 #include "audio/fmod_audio_stream.h"
+#include "audio/fmod_audio_stream_flac.h"
 #include "audio/fmod_sound.h"
+#include "audio/fmod_sound_lock.h"
 #include "core/fmod_server.h"
 #include "core/fmod_system.h"
 #include "dsp/fmod_audio_effect.h"
@@ -47,8 +48,9 @@ static FmodServer* fmod_server_instance = nullptr;
 void initialize_example_module(ModuleInitializationLevel p_level) {
 	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
 		// 编辑器特有的类
-		GDREGISTER_CLASS(FmodAudioImportData);
 		GDREGISTER_CLASS(AudioImporterFmod);
+		GDREGISTER_CLASS(FmodAudioPreviewInspector);
+		GDREGISTER_CLASS(FmodAudioPreviewProperty);
 		return;
 	}
 	
@@ -56,14 +58,17 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 		return;
 	}
 
+	// 音频核心类
 	GDREGISTER_CLASS(FmodChannelControl);
 	GDREGISTER_CLASS(FmodChannel);
 	GDREGISTER_CLASS(FmodChannelGroup);
 	GDREGISTER_CLASS(FmodDSPConnection);
 	GDREGISTER_CLASS(FmodDSP);
 	GDREGISTER_CLASS(FmodSound);
+	GDREGISTER_CLASS(FmodSoundLock);
 	GDREGISTER_CLASS(FmodSystem);
 
+	// 音频效果类
 	GDREGISTER_ABSTRACT_CLASS(FmodAudioEffect);
 	GDREGISTER_CLASS(FmodAudioEffectAmplify);
 	GDREGISTER_CLASS(FmodAudioEffectFilter);
@@ -85,13 +90,15 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(FmodAudioEffectSpectrumAnalyzer);
 	GDREGISTER_CLASS(FmodAudioEffectStereoEnhance);
 
+	// 音频总线类
 	GDREGISTER_CLASS(FmodAudioBus);
 	GDREGISTER_CLASS(FmodAudioBusLayout);
 
-	GDREGISTER_ABSTRACT_CLASS(FmodAudio);
-	GDREGISTER_CLASS(FmodAudioSample);
+	// 音频流类
 	GDREGISTER_CLASS(FmodAudioStream);
+	GDREGISTER_CLASS(FmodAudioStreamFLAC);
 
+	// 音频播放器类
 	GDREGISTER_CLASS(FmodAudioStreamPlayer);
 	GDREGISTER_CLASS(FmodAudioSampleEmitter);
 
@@ -106,12 +113,8 @@ void uninitialize_example_module(ModuleInitializationLevel p_level) {
 	}
 
 	if (fmod_server_instance) {
-		// 先删除 FmodServer 实例
-		// Object 的析构会自动断开所有信号连接
 		memdelete(fmod_server_instance);
 		fmod_server_instance = nullptr;
-		
-		// 然后再从 Engine 注销
 		Engine::get_singleton()->unregister_singleton("FmodServer");
 	}
 }
@@ -122,7 +125,6 @@ extern "C" {
 
 		init_obj.register_initializer(initialize_example_module);
 		init_obj.register_terminator(uninitialize_example_module);
-		// 使用 EDITOR 级别，确保编辑器类在编辑器启动时注册
 		init_obj.set_minimum_library_initialization_level(MODULE_INITIALIZATION_LEVEL_EDITOR);
 
 		return init_obj.init();

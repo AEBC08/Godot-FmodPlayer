@@ -4,10 +4,90 @@
 #include "core/fmod_server.h"
 #include "playback/fmod_channel.h"
 #include "core/fmod_system.h"
+#include "audio/fmod_sound_lock.h"
 
 namespace godot {
 	class FmodSound : public RefCounted {
 		GDCLASS(FmodSound, RefCounted)
+
+	public:
+		enum FmodSoundType {
+			FMOD_SOUND_TYPE_UNKNOWN,
+			FMOD_SOUND_TYPE_AIFF,
+			FMOD_SOUND_TYPE_ASF,
+			FMOD_SOUND_TYPE_DLS,
+			FMOD_SOUND_TYPE_FLAC,
+			FMOD_SOUND_TYPE_FSB,
+			FMOD_SOUND_TYPE_IT,
+			FMOD_SOUND_TYPE_MIDI,
+			FMOD_SOUND_TYPE_MOD,
+			FMOD_SOUND_TYPE_MPEG,
+			FMOD_SOUND_TYPE_OGGVORBIS,
+			FMOD_SOUND_TYPE_PLAYLIST,
+			FMOD_SOUND_TYPE_RAW,
+			FMOD_SOUND_TYPE_S3M,
+			FMOD_SOUND_TYPE_USER,
+			FMOD_SOUND_TYPE_WAV,
+			FMOD_SOUND_TYPE_XM,
+			FMOD_SOUND_TYPE_XMA,
+			FMOD_SOUND_TYPE_AUDIOQUEUE,
+			FMOD_SOUND_TYPE_AT9,
+			FMOD_SOUND_TYPE_VORBIS,
+			FMOD_SOUND_TYPE_MEDIA_FOUNDATION,
+			FMOD_SOUND_TYPE_MEDIACODEC,
+			FMOD_SOUND_TYPE_FADPCM,
+			FMOD_SOUND_TYPE_OPUS,
+			FMOD_SOUND_TYPE_MAX
+		};
+
+		enum FmodSoundFormat {
+			FMOD_SOUND_FORMAT_NONE,
+			FMOD_SOUND_FORMAT_PCM8,
+			FMOD_SOUND_FORMAT_PCM16,
+			FMOD_SOUND_FORMAT_PCM24,
+			FMOD_SOUND_FORMAT_PCM32,
+			FMOD_SOUND_FORMAT_PCMFLOAT,
+			FMOD_SOUND_FORMAT_BITSTREAM,
+			FMOD_SOUND_FORMAT_MAX
+		};
+
+		enum FmodTagType {
+			FMOD_TAG_TYPE_UNKNOWN,
+			FMOD_TAG_TYPE_ID3V1,
+			FMOD_TAG_TYPE_ID3V2,
+			FMOD_TAG_TYPE_VORBISCOMMENT,
+			FMOD_TAG_TYPE_SHOUTCAST,
+			FMOD_TAG_TYPE_ICECAST,
+			FMOD_TAG_TYPE_ASF,
+			FMOD_TAG_TYPE_MIDI,
+			FMOD_TAG_TYPE_PLAYLIST,
+			FMOD_TAG_TYPE_FMOD,
+			FMOD_TAG_TYPE_USER,
+			FMOD_TAG_TYPE_MAX
+		};
+
+		enum FmodTagDataType {
+			FMOD_TAG_DATA_TYPE_BINARY,
+			FMOD_TAG_DATA_TYPE_INT,
+			FMOD_TAG_DATA_TYPE_FLOAT,
+			FMOD_TAG_DATA_TYPE_STRING,
+			FMOD_TAG_DATA_TYPE_STRING_UTF16,
+			FMOD_TAG_DATA_TYPE_STRING_UTF16BE,
+			FMOD_TAG_DATA_TYPE_STRING_UTF8,
+			FMOD_TAG_DATA_TYPE_MAX
+		};
+
+		enum FmodOpenState {
+			FMOD_OPEN_STATE_READY,
+			FMOD_OPEN_STATE_LOADING,
+			FMOD_OPEN_STATE_ERROR,
+			FMOD_OPEN_STATE_CONNECTING,
+			FMOD_OPEN_STATE_BUFFERING,
+			FMOD_OPEN_STATE_SEEKING,
+			FMOD_OPEN_STATE_PLAYING,
+			FMOD_OPEN_STATE_SETPOSITION,
+			FMOD_OPEN_STATE_MAX
+		};
 
 	protected:
 		static void _bind_methods();
@@ -23,14 +103,48 @@ namespace godot {
 		static Ref<FmodSound> load_from_file(const String& p_path);
 
 		// 格式信息
-		String get_name() const;								// 获取一个声音的名称
-		Dictionary get_format() const;							// 获取声音的格式信息
-		double get_length() const;								// 获取声音时长
-		Dictionary get_num_tags() const;						// 获取元数据标签数量
+		String get_name() const;										// 获取一个声音的名称
+		Dictionary get_format() const;									// 获取声音的格式信息
+		double get_length(
+			FmodSystem::FmodTimeunit time_unit = FmodSystem::TIMEUNIT_MS
+		) const;														// 获取声音时长
+		Dictionary get_num_tags() const;								// 获取元数据标签数量
 		Dictionary get_tag(
-			const int index, const String& name) const;			// 获取元数据标签
+			const int index, const String& name) const;					// 获取元数据标签
 
+		// 数据读取
+		Dictionary get_open_state() const;								// 读取声音在非阻挡标志打开后所处的状态，或流缓冲区的当前状态
+		PackedByteArray read_data(const unsigned int length) const;		// 利用 FMOD 内部编解码器，将打开的声音读取数据到指定缓冲区
+		void seek_data(const unsigned int pcm);							// 寻找用于数据读取的声音，使用 FMOD 内部编解码器
+		Ref<FmodSoundLock> lock(
+			const unsigned int offset,
+			const unsigned int length
+		) const;														// 提供声音的一部分或全部采样数据，用于直接操作
+
+		// 音乐
+		int get_music_num_channels() const;								// 获取 MOD/S3M/XM/IT/MIDI 文件内的音乐通道数量
+		void set_music_channel_volume(
+			const int channel,
+			const float volume_db
+		) const;														// 设置 MOD/S3M/XM/IT/MIDI 音乐通道的音量
+		float get_music_channel_volume(const int channel) const;		// 获取 MOD/S3M/XM/IT/MIDI 音乐通道的音量
+		void set_music_speed(const float speed);						// 设置 MOD/S3M/XM/IT/MIDI 音乐的相对速度
+		float get_music_speed() const;									// 获取 MOD/S3M/XM/IT/MIDI 音乐的相对速度
+
+		// 同步/标记
+		int64_t get_sync_point(const int index) const;					// 获取一个同步点
+		Dictionary get_sync_point_info(
+			const int64_t point,
+			FmodSystem::FmodTimeunit time_unit = FmodSystem::TIMEUNIT_MS
+		) const;														// 获取嵌入同步点上的信息
+		int get_num_sub_sounds() const;									// 获取一个声音内的子声音数量
 	};
 }
+
+VARIANT_ENUM_CAST(FmodSound::FmodSoundType);
+VARIANT_ENUM_CAST(FmodSound::FmodSoundFormat);
+VARIANT_ENUM_CAST(FmodSound::FmodTagType);
+VARIANT_ENUM_CAST(FmodSound::FmodTagDataType);
+VARIANT_ENUM_CAST(FmodSound::FmodOpenState);
 
 #endif // !FMOD_SOUND_H

@@ -1,28 +1,71 @@
 #ifndef FMOD_AUDIO_STREAM_H
 #define FMOD_AUDIO_STREAM_H
 
-#include "audio/fmod_audio.h"
+#include "audio/fmod_sound.h"
 #include "core/fmod_server.h"
 #include <godot_cpp/classes/resource.hpp>
 #include <godot_cpp/core/class_db.hpp>
 
 namespace godot {
-	class FmodAudioStream : public FmodAudio {
-		GDCLASS(FmodAudioStream, FmodAudio)
+	class FmodAudioStream : public Resource {
+		GDCLASS(FmodAudioStream, Resource)
 
-	private:
+	public:
+		// FMOD 创建模式标志
+		enum CreateMode {
+			MODE_DEFAULT = 0,
+			MODE_STREAM = 1 << 0,       // 流式加载（从磁盘流式播放）
+			MODE_SAMPLE = 1 << 1,       // 样本模式（加载到内存）
+			MODE_LOOP = 1 << 2,         // 循环播放
+			MODE_LOOP_BIDI = 1 << 3,    // 双向循环
+		};
 
 	protected:
 		static void _bind_methods();
-		virtual Ref<FmodSound> _create_sound() override;
+
+		// 音频数据（由导入器填充或运行时加载）
+		PackedByteArray audio_data;
+		bool data_loaded = false;
+
+		// Sound 对象（延迟创建）
+		Ref<FmodSound> sound;
+
+		// 创建标志
+		unsigned int create_mode_flags = MODE_STREAM;
+
+		// 创建 FMOD Sound
+		virtual Ref<FmodSound> _create_sound();
 
 	public:
 		FmodAudioStream();
 		virtual ~FmodAudioStream();
 
-		void set_file_path(const String& p_path) override;
+		// 音频数据设置（用于从内存加载）
+		void set_audio_data(const PackedByteArray& p_data);
+		PackedByteArray get_audio_data() const;
+
+		// 获取/设置创建模式标志
+		void set_mode_flags(int p_flags);
+		int get_mode_flags() const;
+		void add_mode_flag(CreateMode p_flag);
+		void remove_mode_flag(CreateMode p_flag);
+		bool has_mode_flag(CreateMode p_flag) const;
+
+		// 获取 Sound（延迟创建）
+		Ref<FmodSound> get_sound();
+
+		// 音频信息
+		double get_length() const;
+		bool is_data_loaded() const;
+
+		// 运行时加载外部文件（静态方法）
+		static Ref<FmodAudioStream> load_from_file(const String& p_path, int p_flags = MODE_STREAM);
+
+		// 清理资源
+		void clear();
 	};
 }
 
-#endif // !FMOD_AUDIO_STREAM_H
+VARIANT_ENUM_CAST(FmodAudioStream::CreateMode);
 
+#endif // !FMOD_AUDIO_STREAM_H

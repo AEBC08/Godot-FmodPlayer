@@ -8,11 +8,16 @@ namespace godot {
 		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stream", PROPERTY_HINT_RESOURCE_TYPE, "FmodAudioStream"), "set_stream", "get_stream");
 		
 		ClassDB::bind_method(D_METHOD("play", "from_position"), &FmodAudioStreamPlayer::play, DEFVAL(0.0));
+		ClassDB::bind_method(D_METHOD("seek", "to_position"), &FmodAudioStreamPlayer::play);
 		ClassDB::bind_method(D_METHOD("stop"), &FmodAudioStreamPlayer::stop);
 
 		ClassDB::bind_method(D_METHOD("set_playing", "playing"), &FmodAudioStreamPlayer::set_playing);
 		ClassDB::bind_method(D_METHOD("is_playing"), &FmodAudioStreamPlayer::is_playing);
 		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "set_playing", "is_playing");
+
+		ClassDB::bind_method(D_METHOD("set_stream_paused", "paused"), &FmodAudioStreamPlayer::set_stream_paused);
+		ClassDB::bind_method(D_METHOD("get_stream_paused"), &FmodAudioStreamPlayer::get_stream_paused);
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "stream_paused"), "set_stream_paused", "get_stream_paused");
 
 		ClassDB::bind_method(D_METHOD("get_playback_position"), &FmodAudioStreamPlayer::get_playback_position);
 
@@ -174,6 +179,11 @@ namespace godot {
 		}
 	}
 
+	void FmodAudioStreamPlayer::seek(const double to_position) {
+		ERR_FAIL_COND(!internal_channel.is_valid() || !internal_channel->channel_is_valid());
+		internal_channel->set_position(int(to_position * 1000));
+	}
+
 	void FmodAudioStreamPlayer::stop() {
 		if (internal_channel.is_valid() && internal_channel->channel_is_valid()) {
 			playing = false;
@@ -193,6 +203,20 @@ namespace godot {
 	bool FmodAudioStreamPlayer::is_playing() const {
 		if (internal_channel.is_null() || internal_channel->channel_is_null()) return false;
 		return playing;
+	}
+
+	void FmodAudioStreamPlayer::set_stream_paused(const bool paused) {
+		stream_paused = paused;
+		if (internal_channel.is_valid() && internal_channel->channel_is_valid()) {
+			internal_channel->set_paused(paused);
+		}
+	}
+
+	bool FmodAudioStreamPlayer::get_stream_paused() const {
+		if (internal_channel.is_valid() && internal_channel->channel_is_valid()) {
+			return internal_channel->get_paused();
+		}
+		return stream_paused;
 	}
 
 	double FmodAudioStreamPlayer::get_playback_position() const {

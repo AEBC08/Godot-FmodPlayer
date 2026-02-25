@@ -239,7 +239,8 @@ namespace godot {
 		);
 		Dictionary result;
 		result["name"] = String::utf8(name);
-		// ���ɱ�׼GUID��ʽ: {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}
+
+		// 生成标准GUID格式: {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}
 		String guid_string = vformat("{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
 			guid.Data1,
 			guid.Data2,
@@ -270,9 +271,6 @@ namespace godot {
 
 	void FmodSystem::set_network_proxy(const String& p_proxy) {
 		ERR_FAIL_COND(!system);
-
-		// ָ��������ʽ������: (���û��ָ���˿ڣ���Ĭ��Ϊ8888�˿�) host:portwww.fmod.com:8888
-		// ֧�ֻ�����֤����ʽ����: user:password@host:portbob:sekrit123@www.fmod.com:8888
 		const char* data = p_proxy.utf8().get_data();
 		FMOD_ERR_CHECK(system->setNetworkProxy(data));
 	}
@@ -303,14 +301,14 @@ namespace godot {
 		FMOD_ERR_CHECK_V(system->getVersion(&version, &buildnumber), Dictionary());
 		Dictionary result;
 		unsigned int product = 0, major = 0, minor = 0;
-		product = (version >> 16) & 0xFFFF;		// ��Ʒ�汾����16λ��
-		major = (version >> 8) & 0xFF;			// ��Ҫ�汾���м�8λ��
-		minor = version & 0xFF;					// ��Ҫ�汾����8λ��
+		product = (version >> 16) & 0xFFFF;		// 产品版本号(高16位)
+		major = (version >> 8) & 0xFF;			// 主要版本号(中间8位)
+		minor = version & 0xFF;					// 次要版本号(低8位)
 		String version_str = vformat("%x.%x.%x", product, major, minor);
 		result["version"] = version_str;
-		product = (buildnumber >> 16) & 0xFFFF; // ��Ʒ�汾����16λ��
-		major = (buildnumber >> 8) & 0xFF;      // ��Ҫ�汾���м�8λ��
-		minor = buildnumber & 0xFF;             // ��Ҫ�汾����8λ��
+		product = (buildnumber >> 16) & 0xFFFF; // 产品版本号(高16位)
+		major = (buildnumber >> 8) & 0xFF;      // 主要版本号(中间8位)
+		minor = buildnumber & 0xFF;             // 次要版本号(低8位)
 		String buildnumber_str = vformat("%x.%x.%x", product, major, minor);
 		result["build_number"] = buildnumber_str;
 		return result;
@@ -368,30 +366,30 @@ namespace godot {
 
 		FMOD_SPEAKERMODE fmod_source = static_cast<FMOD_SPEAKERMODE>((int)source_speaker_mode);
 		FMOD_SPEAKERMODE fmod_target = static_cast<FMOD_SPEAKERMODE>((int)target_speaker_mode);
-
-		// ��ȡʵ����Ҫ��������
 		int source_channels = 0;
+
+		// 获取实际需要的大小
 		int target_channels = 0;
 		FMOD_ERR_CHECK_V(system->getSpeakerModeChannels(fmod_source, &source_channels), PackedFloat32Array());
 		FMOD_ERR_CHECK_V(system->getSpeakerModeChannels(fmod_target, &target_channels), PackedFloat32Array());
-
 		int needed_size = source_channels * target_channels;
 
-		// ���ûָ��array_length��ʹ����Ҫ�ĳߴ�
+		// 若用户指定array_length，使用需要的尺寸
 		if (array_length <= 0) {
 			array_length = needed_size;
 		}
 
-		// ��������
+		// 分配内存
 		float* matrix = (float*)memalloc(array_length * sizeof(float));
+		
 		ERR_FAIL_COND_V(!matrix, PackedFloat32Array());
-
-		// ��ʼ��Ϊ0
 		for (int i = 0; i < array_length; i++) {
+
 			matrix[i] = 0.0f;
+
 		}
 
-		// ��ȡĬ�ϻ�������
+		// 获取默认混音矩阵
 		FMOD_RESULT result = system->getDefaultMixMatrix(
 			fmod_source,
 			fmod_target,
@@ -405,11 +403,15 @@ namespace godot {
 			return PackedFloat32Array();
 		}
 
-		// ת��ΪPackedFloat32Array
+		// 转换为PackedFloat32Array
 		PackedFloat32Array mix_matrix;
-		mix_matrix.resize(needed_size);				// ֻ����ʵ�����õ�����
+
+		// 只复制实际需要的数据
+		mix_matrix.resize(needed_size);				
+
+		// 应用矩阵
 		for (int i = 0; i < needed_size; i++) {
-			mix_matrix[i] = matrix[i * hop];		// Ӧ������
+			mix_matrix[i] = matrix[i * hop];		
 		}
 
 		memfree(matrix);
@@ -426,21 +428,20 @@ namespace godot {
 	Ref<FmodSound> FmodSystem::create_sound_from_file(const String p_path, unsigned int mode) {
 		ERR_FAIL_COND_V(!system, nullptr);
 
-		// ����Ƿ�Ϊ��Դ�ļ������������ô���Դ�ļ����� FmodSound
+		// 检查是否为资源文件路径，如果是则使用资源文件加载 FmodSound
 		if (p_path.begins_with("res://")) {
 			return create_sound_from_res(p_path, mode);
 		}
 
-		// �����ַ������󣬷�ֹ����ָ��
+		// 转换字符串为对象，防止野指针
 		CharString path_utf8 = ProjectSettings::get_singleton()->globalize_path(p_path).utf8();
 		const char* path_cstr = path_utf8.get_data();
-
-		// ʵ���� FmodSound
 		FMOD::Sound* sound_ptr = nullptr;
+
 		FMOD_ERR_CHECK_V(system->createSound(
 			path_cstr,
 			mode,
-			nullptr,							// �ļ����ز���Ҫ exinfo
+			nullptr,							
 			&sound_ptr
 		), Ref<FmodSound>());
 
@@ -453,7 +454,6 @@ namespace godot {
 	Ref<FmodSound> FmodSystem::create_sound_from_memory(const PackedByteArray& data, unsigned int mode) {
 		ERR_FAIL_COND_V(!system || data.is_empty(), Ref<FmodSound>());
 
-		// ʵ���� FmodSound
 		Ref<FmodSound> sound;
 		sound.instantiate();
 		sound->data = data;
@@ -461,7 +461,6 @@ namespace godot {
 		exinfo.cbsize = sizeof(exinfo);
 		exinfo.length = sound->data.size();
 
-		// �� FmodSystem ������Ƶ
 		FMOD_ERR_CHECK_V(system->createSound(
 			(const char*)sound->data.ptr(),
 			mode,
@@ -475,26 +474,25 @@ namespace godot {
 	Ref<FmodSound> FmodSystem::create_sound_from_res(const String p_path, unsigned int mode) {
 		ERR_FAIL_COND_V(!system, Ref<FmodSound>());
 
-		// ���ļ�
+		// 从文件加载
 		Ref<FileAccess> file = FileAccess::open(p_path, FileAccess::READ);
 		ERR_FAIL_COND_V(file.is_null(), Ref<FmodSound>());
 
-		// ��ȡ�ļ����ݵ��ڴ�
+		// 读取文件数据到内存
 		PackedByteArray data = file->get_buffer(file->get_length());
 		ERR_FAIL_COND_V(data.is_empty(), nullptr);
 
-		// ���ڴ�ģʽ���� FMOD Sound
+		// 以内存模式创建 FMOD Sound
 		return create_sound_from_memory(data, mode);
 	}
 
 	Ref<FmodSound> FmodSystem::create_stream_from_file(const String p_path, unsigned int mode) {
 		ERR_FAIL_COND_V(!system, Ref<FmodSound>());
 
-		// �����ַ������󣬷�ֹ����ָ��
+		// 转换字符串为对象，防止野指针
 		CharString path_utf8 = ProjectSettings::get_singleton()->globalize_path(p_path).utf8();
 		const char* path_cstr = path_utf8.get_data();
 
-		// ʵ���� FmodSound
 		FMOD::Sound* sound_ptr = nullptr;
 		FMOD_ERR_CHECK_V(system->createStream(
 			path_cstr,
@@ -512,7 +510,7 @@ namespace godot {
 	Ref<FmodDSP> FmodSystem::create_dsp(const String& name) {
 		ERR_FAIL_COND_V(!system, Ref<FmodDSP>());
 
-		// ����һ����̬�������ṹ�� (���뱣����Ч����Ϊ FMOD �ڲ���������)
+		// 创建动态 DSP 描述结构 (需保持有效，因为 FMOD 内部会引用)
 		static FMOD_DSP_DESCRIPTION desc = {};
 		desc.pluginsdkversion = FMOD_PLUGIN_SDK_VERSION;
 		strcpy(desc.name, name.utf8().get_data());
@@ -522,7 +520,6 @@ namespace godot {
 		desc.process = fmod_dsp_process_callback;
 		desc.release = fmod_dsp_release_callback;
 
-		// ���� DSP
 		FMOD::DSP* dsp_ptr = nullptr;
 		FMOD_ERR_CHECK_V(system->createDSP(
 			&desc,
@@ -532,18 +529,15 @@ namespace godot {
 		Ref<FmodDSP> dsp;
 		dsp.instantiate();
 		dsp->setup(dsp_ptr);
-
 		return dsp;
 	}
 
 	Ref<FmodDSP> FmodSystem::create_dsp_by_type(unsigned int type) {
 		FMOD::DSP* dsp_ptr = nullptr;
 		FMOD_ERR_CHECK_V(system->createDSPByType((FMOD_DSP_TYPE)type, &dsp_ptr), Ref<FmodDSP>());
-
 		Ref<FmodDSP> dsp;
 		dsp.instantiate();
 		dsp->setup(dsp_ptr);
-
 		return dsp;
 	}
 
@@ -566,7 +560,6 @@ namespace godot {
 			Ref<FmodChannel>()
 		);
 
-		// ���� Channel
 		FMOD::Channel* fmod_channel = nullptr;
 		FMOD_ERR_CHECK_V(system->playSound(
 			sound->sound,
@@ -575,13 +568,11 @@ namespace godot {
 			&fmod_channel
 		), nullptr);
 
-		// ��� FmodChannel �Ƿ����
 		if (!fmod_channel) {
 			UtilityFunctions::push_error("playSound returned null channel");
 			return nullptr;
 		}
 
-		// ���� Godot ��װ����
 		Ref<FmodChannel> channel;
 		channel.instantiate();
 		channel->setup(fmod_channel);
@@ -594,7 +585,6 @@ namespace godot {
 			Ref<FmodChannel>()
 		);
 
-		// ���� Channel
 		FMOD::Channel* fmod_channel = nullptr;
 		FMOD_ERR_CHECK_V(system->playDSP(
 			dsp->dsp,
@@ -603,13 +593,11 @@ namespace godot {
 			&fmod_channel
 		), Ref<FmodChannel>());
 
-		// ��� FmodChannel �Ƿ����
 		if (!fmod_channel) {
 			UtilityFunctions::push_error("playSound returned null channel");
 			return Ref<FmodChannel>();
 		}
 
-		// ���� Godot ��װ����
 		Ref<FmodChannel> channel;
 		channel.instantiate();
 		channel->setup(fmod_channel);
@@ -631,30 +619,23 @@ namespace godot {
 	Dictionary FmodSystem::get_dsp_info_by_type(unsigned int type) const {
 		ERR_FAIL_COND_V(!system, Dictionary());
 
-		// ��ȡ��Ϣ
 		FMOD_DSP_TYPE fmod_type = static_cast<FMOD_DSP_TYPE>(type);
 		const FMOD_DSP_DESCRIPTION* desc = nullptr;
 		FMOD_ERR_CHECK_V(system->getDSPInfoByType(fmod_type, &desc), Dictionary());
+
 		Dictionary info;
-
-		// ������Ϣ
-		info["name"] = String::utf8(desc->name);			// ����
-		info["version"] = desc->version;                    // �汾
-		info["pluginsdkversion"] = desc->pluginsdkversion;  // ���SDK�汾
-
-		// �����������
-		info["numinputbuffers"] = desc->numinputbuffers;    // ���뻺��������
-		info["numoutputbuffers"] = desc->numoutputbuffers;  // �������������
-
-		// �ص������Ĵ��ڱ�־ (�Ƿ��Զ��� DSP )
+		info["name"] = String::utf8(desc->name);			
+		info["version"] = desc->version;                    
+		info["plugin_sdk_version"] = desc->pluginsdkversion;  
+		info["num_input_buffers"] = desc->numinputbuffers;    
+		info["num_output_buffers"] = desc->numoutputbuffers;  
 		info["has_create"] = (desc->create != nullptr);
 		info["has_release"] = (desc->release != nullptr);
 		info["has_reset"] = (desc->reset != nullptr);
 		info["has_process"] = (desc->process != nullptr);
 		info["has_setposition"] = (desc->setposition != nullptr);
 		info["has_read"] = (desc->read != nullptr);
-		info["has_shouldiprocess"] = (desc->shouldiprocess != nullptr);
-
+		info["has_should_i_process"] = (desc->shouldiprocess != nullptr);
 		return info;
 	}
 

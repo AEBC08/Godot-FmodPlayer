@@ -201,7 +201,12 @@ namespace godot {
 
 	void FmodChannelControl::add_dsp(const int index, Ref<FmodDSP> dsp) {
 		ERR_FAIL_COND(!channel_control);
-		FMOD_ERR_CHECK(channel_control->addDSP(index, dsp->dsp));
+		ERR_FAIL_COND_MSG(dsp.is_null(), "DSP is null");
+		ERR_FAIL_COND_MSG(!dsp->dsp, "DSP internal pointer is null");
+		FMOD_RESULT result = channel_control->addDSP(index, dsp->dsp);
+		if (result != FMOD_OK) {
+			UtilityFunctions::push_error("Failed to add DSP: ", FMOD_ErrorString(result));
+		}
 	}
 
 	void FmodChannelControl::remove_dsp(Ref<FmodDSP> dsp) {

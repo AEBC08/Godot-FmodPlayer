@@ -140,6 +140,13 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_channel", "id"), &FmodSystem::get_channel);
 		ClassDB::bind_method(D_METHOD("get_dsp_info_by_type", "type"), &FmodSystem::get_dsp_info_by_type);
 		ClassDB::bind_method(D_METHOD("get_master_channel_group"), &FmodSystem::get_master_channel_group);
+
+		ClassDB::bind_method(D_METHOD("get_record_num_drivers"), &FmodSystem::get_record_num_drivers);
+		ClassDB::bind_method(D_METHOD("get_record_driver_info", "id"), &FmodSystem::get_record_driver_info);
+		ClassDB::bind_method(D_METHOD("get_record_position", "id"), &FmodSystem::get_record_position);
+		ClassDB::bind_method(D_METHOD("record_start", "id", "sound", "loop"), &FmodSystem::record_start);
+		ClassDB::bind_method(D_METHOD("record_stop", "id"), &FmodSystem::record_stop);
+		ClassDB::bind_method(D_METHOD("is_recording", "id"), &FmodSystem::is_recording);
 	}
 
 	FmodSystem::FmodSystem() {
@@ -226,7 +233,7 @@ namespace godot {
 		return num;
 	}
 
-	Dictionary FmodSystem::get_driver_info(int id) const {
+	Dictionary FmodSystem::get_driver_info(const int id) const {
 		ERR_FAIL_COND_V(!system, Dictionary());
 		char name[256] = { 0 };
 		FMOD_GUID guid;
@@ -239,25 +246,14 @@ namespace godot {
 		);
 		Dictionary result;
 		result["name"] = String::utf8(name);
-
-		// 生成标准GUID格式: {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}
-		String guid_string = vformat("{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
-			guid.Data1,
-			guid.Data2,
-			guid.Data3,
-			guid.Data4[0], guid.Data4[1],
-			guid.Data4[2], guid.Data4[3],
-			guid.Data4[4], guid.Data4[5],
-			guid.Data4[6], guid.Data4[7]
-		);
-		result["guid"] = guid_string;
+		result["guid"] = FmodUtils::guid_to_string(guid);
 		result["system_rate"] = system_rate;
 		result["speaker_mode"] = static_cast<FmodSpeakerMode>((int)speaker_mode);
 		result["speaker_mode_channels"] = speaker_mode_channels;
 		return result;
 	}
 
-	void FmodSystem::set_driver(int driver) {
+	void FmodSystem::set_driver(const int driver) {
 		ERR_FAIL_COND(!system);
 		FMOD_ERR_CHECK(system->setDriver(driver));
 	}
@@ -282,7 +278,7 @@ namespace godot {
 		return String::utf8(proxy);
 	}
 
-	void FmodSystem::set_network_timeout(int timeout) {
+	void FmodSystem::set_network_timeout(const int timeout) {
 		ERR_FAIL_COND(!system);
 		FMOD_ERR_CHECK(system->setNetworkTimeout(timeout));
 	}
@@ -647,5 +643,69 @@ namespace godot {
 		channel_group.instantiate();
 		channel_group->setup(channel_group_ptr);
 		return channel_group;
+	}
+
+	Dictionary FmodSystem::get_record_num_drivers() const {
+		ERR_FAIL_COND_V(!system, Dictionary());
+		int numdrivers = 0, numconnected = 0;
+		FMOD_ERR_CHECK_V(system->getRecordNumDrivers(&numdrivers, &numconnected), Dictionary());
+		Dictionary result;
+		result["num_drivers"] = numdrivers;
+		result["num_connected"] = numconnected;
+		return result;
+	}
+
+	Dictionary FmodSystem::get_record_driver_info(const int id) const {
+		ERR_FAIL_COND_V(!system, Dictionary());
+
+		char name[512] = { 0 };
+		FMOD_GUID guid;
+		int systemrate = 0;
+		FMOD_SPEAKERMODE speakermode = FMOD_SPEAKERMODE_DEFAULT;
+		int speakermodechannels = 0;
+		FMOD_DRIVER_STATE state;
+		FMOD_ERR_CHECK_V(system->getRecordDriverInfo(
+			id,
+			name,
+			512,
+			&guid,
+			&systemrate,
+			&speakermode,
+			&speakermodechannels,
+			&state
+		), Dictionary());
+
+		Dictionary info;
+		info["name"] = String::utf8(name);
+		info["guid"] = FmodUtils::guid_to_string(guid);
+		info["system_rate"] = systemrate;
+		info["speaker_mode"] = (int)speakermode;
+		info["speaker_mode_channels"] = speakermodechannels;
+		info["state"] = (int)state;
+		return info;
+	}
+
+	int FmodSystem::get_record_position(const int id) const {
+		ERR_FAIL_COND_V(!system, 0);
+		unsigned int position = 0;
+		FMOD_ERR_CHECK_V(system->getRecordPosition(id, &position), 0);
+		return position;
+	}
+
+	void FmodSystem::record_start(const int id, Ref<FmodSound> sound, const bool loop) {
+		ERR_FAIL_COND(!system || sound.is_null() || !sound->sound);
+		FMOD_ERR_CHECK(system->recordStart(id, sound->sound, loop));
+	}
+
+	void FmodSystem::record_stop(const int id) {
+		ERR_FAIL_COND(!system);
+		FMOD_ERR_CHECK(system->recordStop(id));
+	}
+
+	bool FmodSystem::is_recording(const int id) const {
+		ERR_FAIL_COND_V(!system, false);
+		bool recording = false;
+		FMOD_ERR_CHECK_V(system->isRecording(id, &recording), false);
+		return recording;
 	}
 }

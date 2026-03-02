@@ -56,13 +56,13 @@ if env["platform"] == "android":
         env.Append(CXXFLAGS=['-g', '-O0'])
     
     library = env.SharedLibrary(
-        "addons/bin/libfmod_player{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        "addons/fmod_player/bin/libfmod_player{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
         source=sources,
     )
 
 elif env["platform"] == "macos":
     library = env.SharedLibrary(
-        "addons/bin/fmod_player.{}.{}.framework/fmod_player.{}.{}".format(
+        "addons/fmod_player/bin/fmod_player.{}.{}.framework/fmod_player.{}.{}".format(
             env["platform"], env["target"], env["platform"], env["target"]
         ),
         source=sources,
@@ -71,12 +71,12 @@ elif env["platform"] == "macos":
 elif env["platform"] == "ios":
     if env["ios_simulator"]:
         library = env.StaticLibrary(
-            "addons/bin/fmod_player.{}.{}.simulator.a".format(env["platform"], env["target"]),
+            "addons/fmod_player/bin/fmod_player.{}.{}.simulator.a".format(env["platform"], env["target"]),
             source=sources,
         )
     else:
         library = env.StaticLibrary(
-            "addons/bin/fmod_player.{}.{}.a".format(env["platform"], env["target"]),
+            "addons/fmod_player/bin/fmod_player.{}.{}.a".format(env["platform"], env["target"]),
             source=sources,
         )
 
@@ -88,7 +88,7 @@ else:
     env.Append(LIBPATH=["src/thirdparty/fmod/lib/x64"])
     env.Append(LIBS=["fmod_vc"])
     library = env.SharedLibrary(
-        "addons/bin/fmod_player{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        "addons/fmod_player/bin/fmod_player{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
         source=sources,
     )
 

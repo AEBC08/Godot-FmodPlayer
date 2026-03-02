@@ -29,9 +29,24 @@ namespace godot {
 		// 实际采样率可以在 DSP 创建时获取
 		int sample_rate = 48000;
 		int channels = 2;
-		buffer_size = static_cast<int>(buffer_length * sample_rate * channels);
+		int new_size = static_cast<int>(buffer_length * sample_rate * channels);
+		
+		// 确保缓冲区大小至少有一些空间
+		if (new_size < 1024) {
+			new_size = 1024;
+		}
+		
+		// 限制最大缓冲区大小，防止内存溢出
+		const int max_size = sample_rate * channels * 10; // 最大10秒
+		if (new_size > max_size) {
+			new_size = max_size;
+		}
+		
+		buffer_size = new_size;
 		
 		std::lock_guard<std::mutex> lock(buffer_mutex);
+		// 如果 DSP 正在运行，这里可能会有竞争条件
+		// 但为了改变缓冲区大小，我们必须这样做
 		ring_buffer.resize(static_cast<size_t>(buffer_size));
 		ring_buffer.clear();
 	}
@@ -52,13 +67,22 @@ namespace godot {
 		
 		// 创建自定义 DSP
 		Ref<FmodDSP> dsp = create_custom_dsp(system);
-		ERR_FAIL_COND_MSG(!dsp.is_valid(), "Failed to create capture DSP");
+		if (!dsp.is_valid()) {
+			UtilityFunctions::push_error("FmodAudioEffectCapture: Failed to create custom DSP");
+			return;
+		}
+		
+		// 检查 DSP 内部指针
+		if (!dsp->dsp) {
+			UtilityFunctions::push_error("FmodAudioEffectCapture: DSP internal pointer is null after setup");
+			return;
+		}
 		
 		// 添加到 DSP 链
 		dsp_chain.push_back(dsp);
 		
-		// 添加到总线
-		bus->add_dsp(0, dsp);
+		// 添加到总线（-1 表示添加到末尾）
+		bus->add_dsp(-1, dsp);
 		
 		dsp_created = true;
 	}
@@ -95,6 +119,11 @@ namespace godot {
 		FMOD_BOOL inputsidle,
 		FMOD_DSP_PROCESS_OPERATION op) {
 		
+		// 安全检查：输入输出缓冲区数组
+		if (!inbufferarray || !outbufferarray) {
+			return;
+		}
+		
 		if (op == FMOD_DSP_PROCESS_QUERY) {
 			// 设置输出格式与输入相同
 			outbufferarray->buffernumchannels[0] = inbufferarray->buffernumchannels[0];
@@ -104,19 +133,25 @@ namespace godot {
 		}
 		
 		if (op == FMOD_DSP_PROCESS_PERFORM) {
-			// 获取输入数据
+			// 安全检查：输入输出缓冲区
 			float* in = (float*)inbufferarray->buffers[0];
+			float* out = (float*)outbufferarray->buffers[0];
 			int ch = inbufferarray->buffernumchannels[0];
 			
+			if (!in || !out || ch <= 0) {
+				return;
+			}
+			
 			// 旁路输出 - 直接拷贝输入到输出（Capture 不改变音频）
-			memcpy(outbufferarray->buffers[0], in, length * ch * sizeof(float));
+			memcpy(out, in, length * ch * sizeof(float));
 			
 			// 写入环形缓冲区
 			if (dsp_state->instance) {
 				CaptureDSPState* state = static_cast<CaptureDSPState*>(dsp_state->instance);
 				state->channels = ch;
 				
-				if (state->ring_buffer && state->buffer_mutex) {
+				// 安全地访问环形缓冲区
+				if (state->ring_buffer && state->buffer_mutex && state->pushed_frames && state->discarded_frames) {
 					std::lock_guard<std::mutex> lock(*state->buffer_mutex);
 					
 					// 写入数据（交错格式）

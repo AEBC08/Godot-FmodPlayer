@@ -138,6 +138,7 @@ namespace godot {
 	void FmodAudioBus::add_effect(Ref<FmodAudioEffect> effect, int index) {
 		ERR_FAIL_COND(bus.is_null());
 		ERR_FAIL_COND_MSG(effect.is_null(), "Effect is null");
+		
 		audio_effects.append(effect);
 		effect->apply_to(bus);
 

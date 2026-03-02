@@ -17,6 +17,10 @@ namespace godot {
 		
 	public:
 		void resize(size_t p_size) {
+			// 确保最小大小，防止除以零
+			if (p_size < 16) {
+				p_size = 16;
+			}
 			buffer.resize(p_size);
 			size = p_size;
 			write_pos = 0;
@@ -30,6 +34,7 @@ namespace godot {
 		
 		// 返回可写入的空间
 		size_t space_left() const {
+			if (size == 0) return 0;
 			if (write_pos >= read_pos) {
 				return size - (write_pos - read_pos) - 1;
 			} else {
@@ -39,6 +44,7 @@ namespace godot {
 		
 		// 返回可读取的数据量
 		size_t data_left() const {
+			if (size == 0) return 0;
 			if (write_pos >= read_pos) {
 				return write_pos - read_pos;
 			} else {
@@ -48,6 +54,7 @@ namespace godot {
 		
 		// 写入数据，返回实际写入的数量
 		size_t write(const float* data, size_t count) {
+			if (size == 0 || !data) return 0;
 			size_t to_write = MIN(count, space_left());
 			for (size_t i = 0; i < to_write; i++) {
 				buffer[write_pos] = data[i];
@@ -58,6 +65,7 @@ namespace godot {
 		
 		// 读取数据，返回实际读取的数量
 		size_t read(float* data, size_t count) {
+			if (size == 0 || !data) return 0;
 			size_t to_read = MIN(count, data_left());
 			for (size_t i = 0; i < to_read; i++) {
 				data[i] = buffer[read_pos];

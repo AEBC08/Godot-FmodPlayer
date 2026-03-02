@@ -1,24 +1,31 @@
 #ifndef FMOD_SYSTEM_H
-#define FMOD_SYSTEM_H
+#define FMOD_SYSTEM_H
+
 #include "fmod_utils.hpp"
 #include <fmod.hpp>
 #include <fmod_errors.h>
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/file_access.hpp>
-#include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/core/class_db.hpp>
+
 namespace godot {
 	class FmodSound;
 	class FmodChannel;
 	class FmodChannelGroup;
-	class FmodDSP;
+	class FmodDSP;
+
 	class FmodSystem : public Object {
-		GDCLASS(FmodSystem, Object)
-	private:
+		GDCLASS(FmodSystem, Object)
+
+	private:
+
 	protected:
-		static void _bind_methods();
+		static void _bind_methods();
+
 	public:
 		FmodSystem();
-		~FmodSystem();
+		~FmodSystem();
+
 		enum FmodInitFlags {
 			INIT_NORMAL = 0x00000000,
 			INIT_STREAM_FROM_UPDATE = 0x00000001,
@@ -33,7 +40,9 @@ namespace godot {
 			INIT_PREFER_DOLBY_DOWNMIX = 0x00080000,
 			INIT_THREAD_UNSAFE = 0x00100000,
 			INIT_PROFILE_METER_ALL = 0x00200000,
-			INIT_MEMORY_TRACKING = 0x00400000		};
+			INIT_MEMORY_TRACKING = 0x00400000
+		};
+
 		enum FmodOutputType {
 			OUTPUTTYPE_AUTODETECT,
 			OUTPUTTYPE_UNKNOWN,
@@ -52,13 +61,16 @@ namespace godot {
 			OUTPUTTYPE_AUDIO3D,
 			OUTPUTTYPE_WEBAUDIO,
 			OUTPUTTYPE_NNAUDIO,
-			OUTPUTTYPE_WINSONIC,			OUTPUTTYPE_AAUDIO,
+			OUTPUTTYPE_WINSONIC,
+			OUTPUTTYPE_AAUDIO,
 			OUTPUTTYPE_AUDIOWORKLET,
 			OUTPUTTYPE_PHASE,
-			OUTPUTTYPE_OHAUDIO,
+			OUTPUTTYPE_OHAUDIO,
+
 			OUTPUTTYPE_MAX,
 			OUTPUTTYPE_FORCEINT = 65536
-		};
+		};
+
 		enum FmodSpeakerMode
 		{
 			SPEAKERMODE_DEFAULT,
@@ -69,10 +81,12 @@ namespace godot {
 			SPEAKERMODE_SURROUND,
 			SPEAKERMODE_5POINT1,
 			SPEAKERMODE_7POINT1,
-			SPEAKERMODE_7POINT1POINT4,
+			SPEAKERMODE_7POINT1POINT4,
+
 			SPEAKERMODE_MAX,
 			SPEAKERMODE_FORCEINT = 65536
-		};
+		};
+
 		enum FmodMode {
 			MODE_DEFAULT = 0x00000000,
 			MODE_LOOP_OFF = 0x00000001,
@@ -103,7 +117,8 @@ namespace godot {
 			MODE_IGNORETAGS = 0x02000000,
 			MODE_LOWMEM = 0x08000000,
 			MODE_VIRTUAL_PLAYFROMSTART = 0x80000000
-		};
+		};
+
 		enum FmodTimeunit {
 			TIMEUNIT_MS = 0x00000001,
 			TIMEUNIT_PCM = 0x00000002,
@@ -113,10 +128,13 @@ namespace godot {
 			TIMEUNIT_MODORDER = 0x00000100,
 			TIMEUNIT_MODROW = 0x00000200,
 			TIMEUNIT_MODPATTERN = 0x00000400
-		};
-		FMOD::System* system = nullptr;
+		};
+
+		FMOD::System* system = nullptr;
+
 		bool system_is_valid() const;															// 检查 FMOD System 是否有效
-		bool system_is_null() const;															// 检查 FMOD System 是否无效
+		bool system_is_null() const;															// 检查 FMOD System 是否无效
+
 		// 管理
 		static FmodSystem* create_system(const int max_channels, FmodInitFlags flags);			// 创建 FMOD System 实例
 		void init(const int max_channels, FmodInitFlags flags);									// 初始化 FMOD System
@@ -124,19 +142,22 @@ namespace godot {
 		void release();																			// 关闭并释放该对象及其资源
 		void update();																			// 更新 FMOD System
 		void mixer_suspend();																	// 暂停调音器线程，放弃使用音频硬件，同时保持内部状态
-		void mixer_resume();																	// 恢复混音线程并重新获取音频硬件访问权限
+		void mixer_resume();																	// 恢复混音线程并重新获取音频硬件访问权限
+
 		// 设备选择
 		void set_output(FmodOutputType output_type);											// 设置用于运行混音器的输出接口类型
 		FmodOutputType get_output() const;														// 获取用于运行混音器的输出接口类型
 		int get_num_drivers() const;															// 获取所选输出类型可用的输出驱动器数量
-		Dictionary get_driver_info(int id) const;												// 获取由其索引指定的声音设备的识别信息，且针对所选输出模式
-		void set_driver(int driver);															// 设置所选输出类型的输出驱动
-		int64_t get_driver() const;																// 获取所选输出类型的输出驱动
+		Dictionary get_driver_info(const int id) const;											// 获取由其索引指定的声音设备的识别信息，且针对所选输出模式
+		void set_driver(const int driver);															// 设置所选输出类型的输出驱动
+		int64_t get_driver() const;																// 获取所选输出类型的输出驱动
+
 		// 网络配置
 		void set_network_proxy(const String& p_proxy);											// 设置一个代理服务器，用于所有后续的互联网连接
 		String get_network_proxy() const;														// 获取用于互联网流媒体的代理服务器的URL
-		void set_network_timeout(int timeout);													// 设置网络流的超时
-		int64_t get_network_timeout() const;													// 获取网络流的超时
+		void set_network_timeout(const int timeout);											// 设置网络流的超时
+		int64_t get_network_timeout() const;													// 获取网络流的超时
+
 		// 信息
 		Dictionary get_version() const;															// 获取 Fmod 版本
 		uint64_t get_output_handle() const;														// 获取输出类型特定的内部原生接口
@@ -168,11 +189,21 @@ namespace godot {
 		Ref<FmodChannel> get_channel(const int64_t id);											// 通过 ID 获取 Channel 的句柄
 		Dictionary get_dsp_info_by_type(unsigned int type) const;								// 获取内置 DSP 描述结构信息
 		Ref<FmodChannelGroup> get_master_channel_group();										// 获取所有声音最终路由到的主通道组
+
+		// 录音
+		Dictionary get_record_num_drivers() const;												// 获取该输出模式下可用的录音设备数量
+		Dictionary get_record_driver_info(const int id) const;									// 获取音频设备的识别信息，这些信息由其索引指定，且针对输出模式
+		int get_record_position(const int id) const;											// 获取 PCM 采样中记录缓冲区的当前记录位置
+		void record_start(const int id, Ref<FmodSound> sound, const bool loop);					// 启动录制引擎，录制到预设的声音对象
+		void record_stop(const int id);															// 停止录制引擎向预设的声音对象录制
+		bool is_recording(const int id) const;													// 检索 FMOD 录制 API 的状态，即是否正在录制
 	};
-}
+}
+
 VARIANT_ENUM_CAST(FmodSystem::FmodInitFlags);
 VARIANT_ENUM_CAST(FmodSystem::FmodOutputType);
 VARIANT_ENUM_CAST(FmodSystem::FmodSpeakerMode);
 VARIANT_ENUM_CAST(FmodSystem::FmodMode);
-VARIANT_ENUM_CAST(FmodSystem::FmodTimeunit);
+VARIANT_ENUM_CAST(FmodSystem::FmodTimeunit);
+
 #endif // !FMOD_SYSTEM_H

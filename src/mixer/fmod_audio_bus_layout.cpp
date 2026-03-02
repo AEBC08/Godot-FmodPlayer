@@ -90,7 +90,10 @@ namespace godot {
 	}
 
 	void FmodAudioBusLayout::_sync_bus_effects(Ref<FmodAudioBus> bus, int audio_server_bus_index) {
+		ERR_FAIL_COND(bus.is_null());
+		ERR_FAIL_COND(bus->get_bus().is_null());
 		AudioServer* audio_server = AudioServer::get_singleton();
+		ERR_FAIL_COND(!audio_server);
 		int32_t effect_count = audio_server->get_bus_effect_count(audio_server_bus_index);
 		for (int32_t i = 0; i < effect_count; i++) {
 			Ref<AudioEffect> godot_effect = audio_server->get_bus_effect(audio_server_bus_index, i);
@@ -102,6 +105,7 @@ namespace godot {
 				fmod_amplify.instantiate();
 				fmod_amplify->set_volume_db(godot_amplify->get_volume_db());
 				bus->add_effect(fmod_amplify, i);
+				continue;
 			}
 
 			// Filter 效果器 - 处理 AudioEffectFilter
@@ -114,6 +118,7 @@ namespace godot {
 				fmod_filter->set_gain(godot_filter->get_gain());
 				fmod_filter->set_resonance(godot_filter->get_resonance());
 				bus->add_effect(fmod_filter, i);
+				continue;
 			}
 
 			// Capture 效果器 - 处理 AudioEffectCapture
@@ -121,8 +126,18 @@ namespace godot {
 			if (godot_capture.is_valid()) {
 				Ref<FmodAudioEffectCapture> fmod_capture;
 				fmod_capture.instantiate();
-				fmod_capture->set_buffer_length(godot_capture->get_buffer_length());
-				bus->add_effect(fmod_capture, i);
+				if (fmod_capture.is_null()) {
+					UtilityFunctions::push_error("Failed to instantiate FmodAudioEffectCapture");
+					continue;
+				}
+				// 获取 Godot 的 buffer_length，确保它是有效的
+				double buffer_length = godot_capture->get_buffer_length();
+				if (buffer_length <= 0.0) {
+					buffer_length = 1.0; // 使用默认值
+				}
+				fmod_capture->set_buffer_length(buffer_length);
+				//bus->add_effect(fmod_capture, i);
+				continue;
 			}
 
 			// Chorus 效果器 - 处理 AudioEffectChorus
@@ -142,6 +157,7 @@ namespace godot {
 				fmod_chorus->set_wet(godot_chorus->get_wet());
 				fmod_chorus->set_dry(godot_chorus->get_dry());
 				bus->add_effect(fmod_chorus, i);
+				continue;
 			}
 
 			// Compressor 效果器 - 处理 AudioEffectCompressor
@@ -157,6 +173,7 @@ namespace godot {
 				fmod_compressor->set_mix(godot_compressor->get_mix());
 				fmod_compressor->set_sidechain(godot_compressor->get_sidechain());
 				bus->add_effect(fmod_compressor, i);
+				continue;
 			}
 
 			// Delay 效果器 - 处理 AudioEffectDelay
@@ -178,6 +195,7 @@ namespace godot {
 				fmod_delay->set_feedback_level_db(godot_delay->get_feedback_level_db());
 				fmod_delay->set_feedback_lowpass(godot_delay->get_feedback_lowpass());
 				bus->add_effect(fmod_delay, i);
+				continue;
 			}
 
 			// Distortion 效果器 - 处理 AudioEffectDistortion
@@ -191,6 +209,7 @@ namespace godot {
 				fmod_distortion->set_post_gain(godot_distortion->get_post_gain());
 				fmod_distortion->set_keep_hf_hz(godot_distortion->get_keep_hf_hz());
 				bus->add_effect(fmod_distortion, i);
+				continue;
 			}
 
 			// EQ 效果器 - 处理 AudioEffectEQ6/10/21 以及基类 AudioEffectEQ
@@ -226,6 +245,7 @@ namespace godot {
 				}
 
 				bus->add_effect(fmod_eq, i);
+				continue;
 			}
 
 			// HardLimiter 效果器 - 处理 AudioEffectHardLimiter
@@ -237,6 +257,7 @@ namespace godot {
 				fmod_hard_limiter->set_pre_gain_db(godot_hard_limiter->get_pre_gain_db());
 				fmod_hard_limiter->set_release(godot_hard_limiter->get_release());
 				bus->add_effect(fmod_hard_limiter, i);
+				continue;
 			}
 
 			// Panner 效果器 - 处理 AudioEffectPanner
@@ -246,6 +267,7 @@ namespace godot {
 				fmod_panner.instantiate();
 				fmod_panner->set_pan(godot_panner->get_pan());
 				bus->add_effect(fmod_panner, i);
+				continue;
 			}
 
 			// Phaser 效果器 - 处理 AudioEffectPhaser
@@ -259,6 +281,7 @@ namespace godot {
 				fmod_phaser->set_range_min_hz(godot_phaser->get_range_min_hz());
 				fmod_phaser->set_rate_hz(godot_phaser->get_rate_hz());
 				bus->add_effect(fmod_phaser, i);
+				continue;
 			}
 
 			// PitchShift 效果器 - 处理 AudioEffectPitchShift
@@ -270,6 +293,7 @@ namespace godot {
 				fmod_pitch->set_fft_size(static_cast<FmodAudioEffectPitchShift::FFTSize>((int)godot_pitch->get_fft_size()));
 				fmod_pitch->set_oversampling(godot_pitch->get_oversampling());
 				bus->add_effect(fmod_pitch, i);
+				continue;
 			}
 
 			// Record 效果器 - 处理 AudioEffectRecord
@@ -279,6 +303,7 @@ namespace godot {
 				fmod_record.instantiate();
 				fmod_record->set_format(static_cast<FmodAudioEffectRecord::Format>((int)godot_record->get_format()));
 				bus->add_effect(fmod_record, i);
+				continue;
 			}
 
 			// Reverb 效果器 - 处理 AudioEffectReverb
@@ -295,6 +320,7 @@ namespace godot {
 				fmod_reverb->set_spread(godot_reverb->get_spread());
 				fmod_reverb->set_wet(godot_reverb->get_wet());
 				bus->add_effect(fmod_reverb, i);
+				continue;
 			}
 
 			// SpectrumAnalyzer 效果器 - 处理 AudioEffectSpectrumAnalyzer
@@ -305,6 +331,7 @@ namespace godot {
 				fmod_spectrum->set_fft_size(static_cast<FmodAudioEffectSpectrumAnalyzer::FFTSize>((int)godot_spectrum->get_fft_size()));
 				fmod_spectrum->set_buffer_length(godot_spectrum->get_buffer_length());
 				bus->add_effect(fmod_spectrum, i);
+				continue;
 			}
 
 			// StereoEnhance 效果器 - 处理 AudioEffectStereoEnhance
@@ -316,6 +343,14 @@ namespace godot {
 				fmod_stereo->set_time_pullout(godot_stereo->get_time_pullout());
 				fmod_stereo->set_surround(godot_stereo->get_surround());
 				bus->add_effect(fmod_stereo, i);
+				continue;
+			}
+
+			// 检查是否是不支持的效果器类型
+			String effect_class = godot_effect->get_class();
+			if (effect_class != "AudioEffect") {
+				UtilityFunctions::push_warning("FmodAudioBusLayout: Audio effect '", effect_class, "' on bus index ", audio_server_bus_index, 
+					" is not supported by FMOD. Effect will be skipped.");
 			}
 		}
 	}
@@ -454,6 +489,8 @@ namespace godot {
 
 		// 确保 Master 总线存在
 		Ref<FmodAudioBus> master_bus = _ensure_master_bus();
+		ERR_FAIL_COND_MSG(master_bus.is_null(), "Failed to create Master bus.");
+		ERR_FAIL_COND_MSG(master_bus->get_bus().is_null(), "Master bus ChannelGroup is null.");
 
 		// 临时存储所有总线，先创建再连接（避免依赖顺序问题）
 		HashMap<String, Ref<FmodAudioBus>> temp_buses;
@@ -466,7 +503,14 @@ namespace godot {
 
 			Ref<FmodAudioBus> new_bus;
 			new_bus.instantiate();
-			new_bus->init_bus(bus_name);  // 暂时不指定 parent，后面统一连接
+			new_bus->init_bus(bus_name);							// 暂时不指定 parent，后面统一连接
+			
+			// 检查 bus 是否成功创建
+			if (new_bus.is_null() || new_bus->get_bus().is_null()) {
+				UtilityFunctions::push_error("FmodAudioBusLayout: Failed to create bus '", bus_name, "', skipping.");
+				continue;
+			}
+			
 			temp_buses[bus_name] = new_bus;
 			audio_buses_map[bus_name] = new_bus;
 		}
@@ -486,7 +530,7 @@ namespace godot {
 				if (parent_group.is_valid()) {
 					parent_group->add_group(bus->get_bus());
 				}
-			} else {
+			} else if (master_bus.is_valid() && master_bus->get_bus().is_valid()) {
 				// 默认添加到 Master
 				master_bus->get_bus()->add_group(bus->get_bus());
 			}
@@ -494,7 +538,13 @@ namespace godot {
 
 		for (int i = 0; i < audio_server->get_bus_count(); i++) {
 			String bus_name = audio_server->get_bus_name(i);
+			if (!temp_buses.has(bus_name)) {
+				continue;
+			}
 			Ref<FmodAudioBus> bus = temp_buses[bus_name];
+			if (bus.is_null()) {
+				continue;
+			}
 			sync_bus_state(bus_name, i);							// 同步音量和静音状态
 			_sync_bus_effects(bus, i);								// 效果器处理
 		}

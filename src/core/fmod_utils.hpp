@@ -74,6 +74,20 @@ namespace FmodUtils {
         return positive ? linear : -linear;
     }
 
+    // 生成标准GUID格式: {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}
+    static godot::String guid_to_string(const FMOD_GUID& guid) {
+        godot::String guid_string = godot::vformat("{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
+            guid.Data1,
+            guid.Data2,
+            guid.Data3,
+            guid.Data4[0], guid.Data4[1],
+            guid.Data4[2], guid.Data4[3],
+            guid.Data4[4], guid.Data4[5],
+            guid.Data4[6], guid.Data4[7]
+        );
+		return guid_string;
+    }
+
 	template <typename T>
 	static godot::Ref<T> load(const godot::String& p_path) {
 		godot::ResourceLoader* loader = godot::ResourceLoader::get_singleton();

@@ -112,13 +112,23 @@ namespace godot {
 		FMOD::System* fmod_system = system->system;
 		ERR_FAIL_COND_V(!fmod_system, Ref<FmodDSP>());
 		
-		FMOD_DSP_DESCRIPTION* desc = get_dsp_description();
-		ERR_FAIL_COND_V(!desc, Ref<FmodDSP>());
+		// 为每个实例创建独立的 DSP 描述符副本
+		// 注意：FMOD_DSP_DESCRIPTION 中的回调是静态的，但 userdata 需要指向当前实例
+		FMOD_DSP_DESCRIPTION* base_desc = get_dsp_description();
+		ERR_FAIL_COND_V(!base_desc, Ref<FmodDSP>());
+		
+		// 分配新的描述符（FMOD 会复制这个结构，所以我们可以使用栈内存）
+		FMOD_DSP_DESCRIPTION desc;
+		memcpy(&desc, base_desc, sizeof(FMOD_DSP_DESCRIPTION));
+		
+		// 关键：设置 userdata 为当前效果器实例
+		// 这样回调函数才能识别是哪个实例
+		desc.userdata = this;
 		
 		FMOD::DSP* dsp_ptr = nullptr;
-		FMOD_RESULT result = fmod_system->createDSP(desc, &dsp_ptr);
+		FMOD_RESULT result = fmod_system->createDSP(&desc, &dsp_ptr);
 		if (result != FMOD_OK || !dsp_ptr) {
-			UtilityFunctions::push_error("Failed to create custom DSP");
+			UtilityFunctions::push_error("Failed to create custom DSP: ", FMOD_ErrorString(result));
 			return Ref<FmodDSP>();
 		}
 		
@@ -133,6 +143,11 @@ namespace godot {
 // C 回调函数实现
 extern "C" {
 	FMOD_RESULT F_CALL fmod_custom_dsp_create_callback(FMOD_DSP_STATE* dsp_state) {
+		// 安全检查
+		if (!dsp_state) {
+			return FMOD_ERR_INVALID_PARAM;
+		}
+		
 		// 获取 userdata 中的效果对象指针
 		void* userdata = nullptr;
 		FMOD_DSP_STATE_FUNCTIONS* funcs = dsp_state->functions;
@@ -140,7 +155,7 @@ extern "C" {
 			funcs->getuserdata(dsp_state, &userdata);
 		}
 		
-		// 如果没有 userdata，直接返回成功
+		// 如果没有 userdata，分配一个空状态并返回
 		if (!userdata) {
 			// 分配一个空的自定义状态
 			godot::CustomDSPState* state = new godot::CustomDSPState();
@@ -150,7 +165,9 @@ extern "C" {
 		
 		// 调用 C++ 虚函数
 		godot::FmodAudioEffect* effect = static_cast<godot::FmodAudioEffect*>(userdata);
-		effect->_on_dsp_create(dsp_state);
+		if (effect) {
+			effect->_on_dsp_create(dsp_state);
+		}
 		
 		return FMOD_OK;
 	}
@@ -163,6 +180,11 @@ extern "C" {
 		FMOD_BOOL inputsidle,
 		FMOD_DSP_PROCESS_OPERATION op
 	) {
+		// 安全检查
+		if (!dsp_state || !inbufferarray || !outbufferarray) {
+			return FMOD_ERR_INVALID_PARAM;
+		}
+		
 		// 从 instance 获取自定义状态
 		if (!dsp_state->instance) {
 			// 没有自定义状态，直接旁路
@@ -199,6 +221,10 @@ extern "C" {
 	}
 	
 	FMOD_RESULT F_CALL fmod_custom_dsp_release_callback(FMOD_DSP_STATE* dsp_state) {
+		if (!dsp_state) {
+			return FMOD_ERR_INVALID_PARAM;
+		}
+		
 		if (!dsp_state->instance) {
 			return FMOD_OK;
 		}

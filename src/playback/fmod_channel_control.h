@@ -19,8 +19,11 @@ namespace godot {
         FmodChannelControl();
         virtual ~FmodChannelControl();
 
+		bool channel_control_is_valid() const;						// 检查底层 FMOD::ChannelControl 对象是否有效
+		bool channel_control_is_null() const;						// 检查底层 FMOD::ChannelControl 对象是否无效s
+
         // 播放
-        bool is_playing() const;									// 检索播放状态
+        bool is_playing() const;									// 检查播放状态
 		void stop();												// 停止该频道 (或嵌套 ChannelGroups 中的所有频道) 的播放
 
 		void set_paused(const bool paused);							// 设置暂停状态

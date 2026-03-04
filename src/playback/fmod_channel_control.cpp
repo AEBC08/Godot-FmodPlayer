@@ -2,6 +2,9 @@
 
 namespace godot {
 	void FmodChannelControl::_bind_methods() {
+		ClassDB::bind_method(D_METHOD("channel_control_is_valid"), &FmodChannelControl::channel_control_is_valid);
+		ClassDB::bind_method(D_METHOD("channel_control_is_null"), &FmodChannelControl::channel_control_is_null);
+
 		ClassDB::bind_method(D_METHOD("is_playing"), &FmodChannelControl::is_playing);
 		ClassDB::bind_method(D_METHOD("stop"), &FmodChannelControl::stop);
 
@@ -75,6 +78,14 @@ namespace godot {
 		if (channel_control) {
 			channel_control->setUserData(this);
 		}
+	}
+
+	bool FmodChannelControl::channel_control_is_valid() const {
+		return channel_control != nullptr;
+	}
+
+	bool FmodChannelControl::channel_control_is_null() const {
+		return channel_control == nullptr;
 	}
 
 	bool FmodChannelControl::is_playing() const {

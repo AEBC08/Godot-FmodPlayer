@@ -2,6 +2,9 @@
 
 namespace godot {
 	void FmodChannelGroup::_bind_methods() {
+		ClassDB::bind_method(D_METHOD("channel_group_is_valid"), &FmodChannelGroup::channel_group_is_valid);
+		ClassDB::bind_method(D_METHOD("channel_group_is_null"), &FmodChannelGroup::channel_group_is_null);
+
 		ClassDB::bind_method(D_METHOD("get_num_channels"), &FmodChannelGroup::get_num_channels);
 		ClassDB::bind_method(D_METHOD("get_channel", "index"), &FmodChannelGroup::get_channel);
 
@@ -28,6 +31,14 @@ namespace godot {
 		_setup_control(p_channel_group);  // 调用基类方法设置 channel_control
 		channel_group = p_channel_group;  // 存储派生类特有的指针
 		//set_callback(); 暂时没用
+	}
+
+	bool FmodChannelGroup::channel_group_is_valid() const {
+		return channel_group != nullptr;
+	}
+
+	bool FmodChannelGroup::channel_group_is_null() const {
+		return channel_group == nullptr;
 	}
 
 	int FmodChannelGroup::get_num_channels() const {

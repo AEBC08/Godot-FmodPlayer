@@ -26,67 +26,68 @@ namespace godot {
 
 		FMOD::Channel* channel = nullptr;
 		
-		// �����ڱ�����
-		float occlusion_scale = 1.0f;									// �ڱ�ǿ����������
-		float direct_occlusion_bias = 0.0f;								// ֱ�����ڱ�ƫ��
-		float reverb_occlusion_bias = 0.0f;								// �����ڱ�ƫ��
+		// 3D音频遮挡全局系数
+		float occlusion_scale = 1.0f;									// 遮挡强度缩放系数，范围 0.0 到 +∞，控制整体遮挡强度
+		float direct_occlusion_bias = 0.0f;								// 直接声遮挡偏置值，用于调整直接声的遮挡起始点
+		float reverb_occlusion_bias = 0.0f;								// 混响声遮挡偏置值，用于调整混响声的遮挡起始点
 
-		// ���׿���
-		bool enable_lowpass = true;										// �Ƿ����õ�ͨ�˲�
-		float min_direct_occlusion = 0.0f;								// ֱ�����ڱ���Сֵ
-		float max_direct_occlusion = 1.0f;								// ֱ�����ڱ����ֵ
-		float min_reverb_occlusion = 0.0f;								// �����ڱ���Сֵ
-		float max_reverb_occlusion = 1.0f;								// �����ڱ����ֵ
+		// 遮挡阈值与限制
+		bool enable_lowpass = true;										// 是否启用低通滤波器来模拟遮挡效果
+		float min_direct_occlusion = 0.0f;								// 直接声遮挡最小值，取值范围 0.0 ~ 1.0
+		float max_direct_occlusion = 1.0f;								// 直接声遮挡最大值，取值范围 0.0 ~ 1.0
+		float min_reverb_occlusion = 0.0f;								// 混响声遮挡最小值，取值范围 0.0 ~ 1.0
+		float max_reverb_occlusion = 1.0f;								// 混响声遮挡最大值，取值范围 0.0 ~ 1.0
 
-		// ƽ������
-		bool smooth_occlusion = true;									// �Ƿ�ƽ������
-		float delta = 0.16f;											// ֮֡���ʱ��
-		float occlusion_speed = 5.0f;									// ƽ���ٶ�
-		float current_direct = 0.0f;									// ��ǰʵ��ֵ������ƽ����
-		float current_reverb = 0.0f;									// ��ǰʵ��ֵ������ƽ����
+		// 遮挡平滑处理相关参数
+		bool smooth_occlusion = true;									// 是否启用遮挡值平滑过渡
+		float delta = 0.16f;											// 时间步长（通常为帧间隔），用于平滑计算
+		float occlusion_speed = 5.0f;									// 遮挡值变化速度，越大变化越快
+		float current_direct = 0.0f;									// 当前直接声遮挡值，用于平滑过渡
+		float current_reverb = 0.0f;									// 当前混响声遮挡值，用于平滑过渡
 
 		void setup(FMOD::Channel* p_channel);
 
-		bool channel_is_valid() const;									// ��� Channel �Ƿ���Ч
-		bool channel_is_null() const;									// ��� Channel �Ƿ���Ч
+		bool channel_is_valid() const;									// 检查 Channel 是否有效
+		bool channel_is_null() const;									// 检查 Channel 是否无效
 
-		void set_frequency(const double frequency);						// ���ò���Ƶ�ʻ򲥷�Ƶ�ʣ���Ϊ FMOD_CREATESAMPLE ���������� (��FMOD_CREATESTREAM��FMOD_CREATECOMPRESSEDSAMPLE) ����ͨ��������Ƶ�������Ų���
-		double get_frequency() const;									// ��ȡ����Ƶ�ʻ򲥷�����
+		void set_frequency(const double frequency);						// 设置播放频率或播放频率
+		double get_frequency() const;									// 获取播放频率或播放速率
 
-		void set_priority(const int64_t priority);						// ��������������������ȼ�
-		int64_t get_priority() const;									// ��ȡ��������������������ȼ�
+		void set_priority(const int priority);							// 设置虚拟语音排序的优先级
+		int get_priority() const;										// 获取虚拟语音排序的优先级
 		
 		void set_position(int position,
 			FmodSystem::FmodTimeunit timeunit = FmodSystem::TIMEUNIT_MS
-		);																// ���õ�ǰ����λ��
+		);																// 设置当前播放位置
 		int get_position(
 			FmodSystem::FmodTimeunit timeunit = FmodSystem::TIMEUNIT_MS
-		) const;														// ��ȡ��ǰ����λ��
+		) const;														// 获取当前播放位置
 		
-		void set_channel_group(Ref<FmodChannelGroup> p_channel_group);	// ���øö�������� ChannelGroup
-		Ref<FmodChannelGroup> get_channel_group() const;				// ��ȡ�ö�������� ChannelGroup
+		void set_channel_group(Ref<FmodChannelGroup> p_channel_group);	// 设置该对象输出的 ChannelGroup
+		Ref<FmodChannelGroup> get_channel_group() const;				// 获取该对象输出的 ChannelGroup
 
-		void set_loop_count(const int64_t loop_count);					// ����ѭ��������ֹͣ��0 ������һ���Բ��š���1 ������ѭ��һ��Ȼ��ֹͣ����-1 ������ѭ����Զ��
-		int64_t get_loop_count() const;									// ��ȡֹͣǰҪѭ���Ĵ���
+		void set_loop_count(const int loop_count);						// 设置循环次数后停止
+		int get_loop_count() const;										// 获取停止前要循环的次数
 
-		void set_loop_points(const int64_t start,
-			const int64_t end,
+		void set_loop_points(
+			const unsigned int start,
+			const unsigned int end,
 			FmodSystem::FmodTimeunit timeunit = FmodSystem::TIMEUNIT_MS
-		);																// ����ѭ���������յ�
+		);																// 设置环路的起点和终点
 		Dictionary get_loop_points(
 			FmodSystem::FmodTimeunit timeunit = FmodSystem::TIMEUNIT_MS
-		) const;														// ��ȡѭ���������յ�
+		) const;														// 获取环路的起点和终点
 
-		bool is_virtual() const;										// ������������ϵͳ�Ƿ�����ģ��Ƶ��
-		Ref<FmodSound> get_current_sound() const;						// ��ȡ��ǰ���ŵ�����
-		int64_t get_index() const;										// �����ö�����ϵͳͨ�����е�����
+		bool is_virtual() const;										// 获取该频道是否被虚拟语音系统模拟
+		Ref<FmodSound> get_current_sound() const;						// 获取当前播放的声音
+		int get_index() const;											// 获取该对象在系统通道池中的索引
 
 		void _on_callback(
 			FMOD_CHANNELCONTROL_TYPE controltype,
 			FMOD_CHANNELCONTROL_CALLBACK_TYPE callbacktype,
 			void* commanddata1,
 			void* commanddata2
-		) override;														// �����ص�
+		) override;
 	};
 }
 

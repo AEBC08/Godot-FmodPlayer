@@ -76,16 +76,16 @@ namespace godot {
 		return (double)frequency;
 	}
 
-	void FmodChannel::set_priority(const int64_t priority) {
+	void FmodChannel::set_priority(const int priority) {
 		ERR_FAIL_COND(!channel);
 		FMOD_ERR_CHECK(channel->setPriority((int)priority));
 	}
 
-	int64_t FmodChannel::get_priority() const {
+	int FmodChannel::get_priority() const {
 		if (!channel) return 0;
 		int priority = 0;
 		FMOD_ERR_CHECK(channel->getPriority(&priority));
-		return (int64_t)priority;
+		return (int)priority;
 	}
 
 	void FmodChannel::set_position(int position, FmodSystem::FmodTimeunit timeunit) {
@@ -111,19 +111,19 @@ namespace godot {
 		return internal_channel_group;
 	}
 
-	void FmodChannel::set_loop_count(const int64_t loop_count) {
+	void FmodChannel::set_loop_count(const int loop_count) {
 		ERR_FAIL_COND(!channel);
-		FMOD_ERR_CHECK(channel->setLoopCount((int)loop_count));
+		FMOD_ERR_CHECK(channel->setLoopCount(loop_count));
 	}
 
-	int64_t FmodChannel::get_loop_count() const {
+	int FmodChannel::get_loop_count() const {
 		if (!channel) return 0;
 		int loop_count = 0;
 		FMOD_ERR_CHECK(channel->getLoopCount(&loop_count));
-		return (int64_t)loop_count;
+		return loop_count;
 	}
 
-	void FmodChannel::set_loop_points(const int64_t start, const int64_t end, FmodSystem::FmodTimeunit timeunit) {
+	void FmodChannel::set_loop_points(const unsigned int start, const unsigned int end, FmodSystem::FmodTimeunit timeunit) {
 		ERR_FAIL_COND(!channel);
 		FMOD_TIMEUNIT fmod_timeunit = static_cast<FMOD_TIMEUNIT>((int)timeunit);
 		FMOD_ERR_CHECK(channel->setLoopPoints((unsigned int)start, fmod_timeunit, (unsigned int)end, fmod_timeunit));
@@ -166,7 +166,7 @@ namespace godot {
 		return sound;
 	}
 
-	int64_t FmodChannel::get_index() const {
+	int FmodChannel::get_index() const {
 		if (!channel) return -1;
 		int index = -1;
 		FMOD_ERR_CHECK(channel->getIndex(&index));

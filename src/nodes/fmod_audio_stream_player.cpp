@@ -134,7 +134,7 @@ namespace godot {
 		return stream;
 	}
 
-	void FmodAudioStreamPlayer::play(const double from_position) {
+	void FmodAudioStreamPlayer::play(const float from_position) {
 		// 延迟设置音频总线
 		StringName actual_bus = get_bus();
 		Ref<FmodAudioBus> audio_bus = FmodServer::get_audio_bus_layout()->get_audio_bus(actual_bus);
@@ -179,7 +179,7 @@ namespace godot {
 		}
 	}
 
-	void FmodAudioStreamPlayer::seek(const double to_position) {
+	void FmodAudioStreamPlayer::seek(const float to_position) {
 		ERR_FAIL_COND(!internal_channel.is_valid() || !internal_channel->channel_is_valid());
 		internal_channel->set_position(int(to_position * 1000));
 	}
@@ -219,30 +219,30 @@ namespace godot {
 		return stream_paused;
 	}
 
-	double FmodAudioStreamPlayer::get_playback_position() const {
+	float FmodAudioStreamPlayer::get_playback_position() const {
 		if (internal_channel.is_null() || internal_channel->channel_is_null()) return 0.0;
-		return (double)internal_channel->get_position() / 1000.0;
+		return internal_channel->get_position() / 1000.0;
 	}
 
-	void FmodAudioStreamPlayer::set_volume_db(const double new_volume_db) {
+	void FmodAudioStreamPlayer::set_volume_db(const float new_volume_db) {
 		volume_db = new_volume_db;
 
 		if (internal_channel.is_null() || internal_channel->channel_is_null()) return;
 		internal_channel->set_volume_db(volume_db);
 	}
 
-	double FmodAudioStreamPlayer::get_volume_db() const {
+	float FmodAudioStreamPlayer::get_volume_db() const {
 		return volume_db;
 	}
 
-	void FmodAudioStreamPlayer::set_pitch(const double new_pitch) {
+	void FmodAudioStreamPlayer::set_pitch(const float new_pitch) {
 		pitch = new_pitch;
 
 		if (internal_channel.is_null() || internal_channel->channel_is_null()) return;
 		internal_channel->set_pitch(pitch);
 	}
 
-	double FmodAudioStreamPlayer::get_pitch() const {
+	float FmodAudioStreamPlayer::get_pitch() const {
 		return pitch;
 	}
 

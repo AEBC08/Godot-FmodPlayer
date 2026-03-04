@@ -24,6 +24,9 @@ namespace godot {
 
 		void setup(FMOD::ChannelGroup* p_channel_group);
 
+		bool channel_group_is_valid() const;												// 检查 ChannelGroup 是否有效
+		bool channel_group_is_null() const;													// 检查 ChannelGroup 是否无效
+
 		// Channel 管理
 		int get_num_channels() const;														// 获取汇入该组的 Channel 数量
 		Ref<FmodChannel> get_channel(const int index) const;								// 获取指定索引处的 Channel

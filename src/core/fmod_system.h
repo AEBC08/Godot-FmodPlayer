@@ -149,7 +149,7 @@ namespace godot {
 		FmodOutputType get_output() const;														// 获取用于运行混音器的输出接口类型
 		int get_num_drivers() const;															// 获取所选输出类型可用的输出驱动器数量
 		Dictionary get_driver_info(const int id) const;											// 获取由其索引指定的声音设备的识别信息，且针对所选输出模式
-		void set_driver(const int driver);															// 设置所选输出类型的输出驱动
+		void set_driver(const int driver);														// 设置所选输出类型的输出驱动
 		int64_t get_driver() const;																// 获取所选输出类型的输出驱动
 
 		// 网络配置

@@ -62,7 +62,8 @@ Built-in 16+ audio effects for real-time processing:
 | ✂️ **Hard Limiter** | Peak limiting |
 | 🎧 **Stereo Enhance** | Stereo width control |
 | 📡 **Spectrum Analyzer** | Real-time frequency analysis |
-| 🎙️ **Record** | Audio capture functionality |
+| 🎙️ **Capture** | Audio capture functionality |
+| 🎙️ **Record** | Audio recording functionality |
 | 🎨 **Panner** | Stereo positioning |
 
 ### 🎚️ Dynamic Mixing & Bus System
@@ -75,15 +76,13 @@ Professional-grade audio mixing:
 
 ### 📊 Performance Monitoring
 Built-in integration with Godot's Performance Monitor:
-- **CPU Usage** - Track FMOD mixer CPU consumption
-- **Memory Usage** - Monitor audio memory allocation
-- **Channel Statistics** - Active voice count and channel info
-- **File Usage** - Track streaming buffer status
+- **CPU Usage** - Track FMOD mixer CPU consumption (DSP, Stream, Geometry, Update, Convolution)
+- **File Usage** - Track streaming and sample bytes read
 
 ### 🛠️ Editor Integration
 First-class Godot Editor support:
 - **Audio Importer** - Import and configure audio assets directly in the editor
-- **Inspector Properties** - Full property exposure for all audio parameters
+- **Audio Preview** - Preview audio files in the inspector
 - **Custom Icons** - Visual distinction for all FMOD-related nodes and resources
 
 ---
@@ -91,7 +90,7 @@ First-class Godot Editor support:
 ## 📋 Requirements
 
 - **Godot:** 4.1 or later
-- **Platforms:** Windows (x64), Android (arm64)
+- **Platforms:** Windows (x64), Android (arm64, arm32, x86, x86_64)
 - **Compiler:** C++17 (MSVC v145+ on Windows, NDK for Android)
 - **FMOD:** Core API libraries (included in `src/thirdparty/fmod/`)
 
@@ -106,8 +105,8 @@ First-class Godot Editor support:
 ### Option 1: Pre-built Binaries (Recommended)
 
 1. Download the latest release from the [Releases](https://github.com/LuYingYiLong/Godot-FmodPlayer/releases) page
-2. Extract the `addons/fmod_player` folder into your Godot project's `res://addons/` directory
-3. Ensure `fmod.dll` is placed alongside the GDExtension binary
+2. Extract the `addons/` folder into your Godot project
+3. Ensure `fmod.dll` (Windows) or `libfmod.so` (Android) is placed alongside the GDExtension binary
 4. **Enable the Plugin**: In Godot Editor, go to `Project > Project Settings > Plugins`, find **FMOD Player Plugin** and enable it
 
 ### Option 2: Build from Source
@@ -130,7 +129,7 @@ scons platform=android target=template_debug arch=arm64
 #### Available Options
 - **Platforms:** `windows`, `android`
 - **Targets:** `template_debug`, `template_release`, `editor`
-- **Architectures:** `x86_64`, `arm64`
+- **Architectures:** `x86_64`, `arm64`, `arm32`, `x86_32`
 
 #### Enable the Plugin
 After building, go to `Project > Project Settings > Plugins` in Godot Editor, find **FMOD Player Plugin** and enable it.
@@ -186,24 +185,22 @@ func add_reverb():
 ```gdscript
 func play_explosion():
     var emitter = $FmodAudioSampleEmitter
-    var sample = FmodAudioSample.new()
-    sample.file_path = "res://sfx/explosion.wav"
+    var stream = FmodAudioStream.new()
+    stream.file_path = "res://sfx/explosion.wav"
     
-    emitter.sample = sample
-    emitter.bus = "SFX"
-    emitter.play()
+    emitter.stream = stream
+    emitter.emit()
 ```
 
 ### Performance Monitoring
 
 ```gdscript
 func _process(delta):
-    var system = FmodServer.get_main_system()
-    var cpu_usage = system.get_cpu_usage()
-    var channels = system.get_channels_playing()
+    var dsp = Performance.get_monitor(Performance.FMOD_CPU_USAGE_DSP)
+    var stream = Performance.get_monitor(Performance.FMOD_CPU_USAGE_STREAM)
     
-    print("DSP CPU: %.2f%%" % cpu_usage["dsp"])
-    print("Active channels: %d" % channels["real"])
+    print("DSP CPU: %.2f%%" % dsp)
+    print("Stream CPU: %.2f%%" % stream)
 ```
 
 ---
@@ -211,22 +208,56 @@ func _process(delta):
 ## 🏗️ Project Structure
 
 ```
-addons/fmod_player/
-├── bin/
-│   ├── fmod_player.gdextension    # GDExtension configuration
-│   ├── fmod.dll                   # FMOD runtime (Windows)
-│   ├── fmod_player.windows.*.dll  # Windows builds
-│   └── icons/                     # Class icons
-└── ...
-
-src/
-├── core/           # FMOD system and server
-├── audio/          # Audio resources (Stream, Sample, Sound)
-├── playback/       # Channel and ChannelGroup control
-├── mixer/          # AudioBus and BusLayout
-├── dsp/            # DSP effects (16+ types)
-├── nodes/          # Godot Node interfaces
-└── editor/         # Editor plugins and importers
+.
+├── addons/
+│   ├── fmod_player/
+│   │   ├── bin/
+│   │   │   ├── fmod_player.gdextension    # GDExtension configuration
+│   │   │   ├── fmod.dll                   # FMOD runtime (Windows)
+│   │   │   ├── fmod_player.windows.*.dll  # Windows builds
+│   │   │   ├── libfmod_player.android.*.so # Android builds
+│   │   │   └── icons/                     # Class icons (SVG)
+│   │   └── ...
+│   └── fmod_player_plugin/                # Editor plugin
+│       ├── plugin.cfg
+│       └── fmod_player_plugin.gd
+│
+├── src/
+│   ├── core/           # FMOD system and server
+│   │   ├── fmod_server.h/.cpp
+│   │   ├── fmod_system.h/.cpp
+│   │   └── fmod_utils.hpp
+│   ├── audio/          # Audio resources (Stream, Sound)
+│   │   ├── fmod_audio_stream.h/.cpp
+│   │   ├── fmod_audio_stream_flac.h/.cpp
+│   │   ├── fmod_sound.h/.cpp
+│   │   └── fmod_sound_lock.h/.cpp
+│   ├── playback/       # Channel and ChannelGroup control
+│   │   ├── fmod_channel_control.h/.cpp
+│   │   ├── fmod_channel.h/.cpp
+│   │   └── fmod_channel_group.h/.cpp
+│   ├── mixer/          # AudioBus and BusLayout
+│   │   ├── fmod_audio_bus.h/.cpp
+│   │   └── fmod_audio_bus_layout.h/.cpp
+│   ├── dsp/            # DSP effects (16+ types)
+│   │   ├── fmod_dsp.h/.cpp
+│   │   ├── fmod_dsp_connection.h/.cpp
+│   │   ├── fmod_audio_effect.h/.cpp
+│   │   └── fmod_audio_effect_*.h/.cpp
+│   ├── nodes/          # Godot Node interfaces
+│   │   ├── fmod_audio_stream_player.h/.cpp
+│   │   └── fmod_audio_sample_emitter.h/.cpp
+│   ├── editor/         # Editor plugins and importers
+│   │   ├── fmod_audio_importer.h/.cpp
+│   │   ├── fmod_audio_preview_inspector.h/.cpp
+│   │   └── fmod_audio_preview_property.h/.cpp
+│   └── thirdparty/fmod/  # FMOD SDK
+│       ├── inc/        # Header files
+│       └── lib/        # Library files
+│
+├── godot-cpp/          # GDExtension bindings (git submodule)
+├── SConstruct          # SCons build script
+└── README.md
 ```
 
 ---
@@ -247,8 +278,7 @@ src/
 
 | Class | Description |
 |-------|-------------|
-| `FmodAudioStream` | Streaming audio resource |
-| `FmodAudioSample` | In-memory audio resource |
+| `FmodAudioStream` | Streaming audio resource (also used for one-shot samples) |
 | `FmodAudioBus` | Audio bus for mixing |
 | `FmodAudioBusLayout` | Bus layout management |
 
@@ -264,6 +294,7 @@ src/
 | Class | Description |
 |-------|-------------|
 | `FmodDSP` | Low-level DSP wrapper |
+| `FmodDSPConnection` | DSP connection routing |
 | `FmodAudioEffect*` | High-level effect classes (16 types) |
 
 ---
@@ -295,6 +326,6 @@ This project is licensed under the MIT License - see [LICENSE.txt](LICENSE.txt) 
 ---
 
 <p align="center">
-  <sub>FMOD Studio is a trademark of Firelight Technologies Pty Ltd.<br>
+  <sub>FMOD is a trademark of Firelight Technologies Pty Ltd.<br>
   This plugin is not officially affiliated with or endorsed by Firelight Technologies.</sub>
 </p>

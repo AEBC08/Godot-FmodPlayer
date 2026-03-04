@@ -30,16 +30,16 @@ namespace godot {
 		Ref<FmodAudioStream> stream;
 		bool playing = false;
 		bool stream_paused = false;
-		double volume_db = 0.0;
-		double pitch = 1.0;
+		float volume_db = 0.0;
+		float pitch = 1.0;
 		bool auto_play = false;
 		StringName bus;
 
 		void set_stream(Ref<FmodAudioStream> new_stream);
 		Ref<FmodAudioStream> get_stream() const;
 
-		void play(const double from_position = 0.0);
-		void seek(const double to_position);
+		void play(const float from_position = 0.0);
+		void seek(const float to_position);
 		void stop();
 
 		void set_playing(const bool playing);
@@ -48,13 +48,13 @@ namespace godot {
 		void set_stream_paused(const bool paused);
 		bool get_stream_paused() const;
 
-		double get_playback_position() const;
+		float get_playback_position() const;
 
-		void set_volume_db(const double new_volume_db);
-		double get_volume_db() const;
+		void set_volume_db(const float new_volume_db);
+		float get_volume_db() const;
 
-		void set_pitch(const double new_pitch);
-		double get_pitch() const;
+		void set_pitch(const float new_pitch);
+		float get_pitch() const;
 
 		void set_auto_play(const bool enable);
 		bool is_autoplay_enabled() const;

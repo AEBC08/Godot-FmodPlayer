@@ -132,7 +132,11 @@ namespace godot {
 	double FmodSound::get_length(FmodSystem::FmodTimeunit time_unit) const {
 		unsigned int length = 0;
 		FMOD_ERR_CHECK(sound->getLength(&length, time_unit));
-		return (double)length / 1000.0;
+		// 只有时间单位（MS）才需要转换为秒，字节数和采样数直接返回
+		if (time_unit == FmodSystem::TIMEUNIT_MS) {
+			return (double)length / 1000.0;
+		}
+		return (double)length;
 	}
 
 	Dictionary FmodSound::get_num_tags() const {

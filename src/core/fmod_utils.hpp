@@ -7,6 +7,9 @@
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
+#include <godot_cpp/classes/editor_interface.hpp>
+#include <godot_cpp/classes/theme.hpp>
+#include <godot_cpp/classes/texture2d.hpp>
 #include <cmath>
 #include <algorithm>
 
@@ -86,6 +89,22 @@ namespace FmodUtils {
             guid.Data4[6], guid.Data4[7]
         );
 		return guid_string;
+    }
+
+    static godot::Ref<godot::Texture2D> get_editor_theme_icon(const godot::String& name) {
+        godot::EditorInterface* editor_interface = godot::EditorInterface::get_singleton();
+        if (editor_interface == nullptr) return godot::Ref<godot::Texture2D>();
+        godot::Ref<godot::Theme> theme = editor_interface->get_editor_theme();
+        if (theme.is_null()) return godot::Ref<godot::Texture2D>();
+		return theme->get_icon(name, "EditorIcons");
+    }
+
+    static godot::Color get_editor_theme_color(const godot::String& name, const godot::String& theme_type) {
+        godot::EditorInterface* editor_interface = godot::EditorInterface::get_singleton();
+        if (editor_interface == nullptr) return godot::Color();
+        godot::Ref<godot::Theme> theme = editor_interface->get_editor_theme();
+        if (theme.is_null()) return godot::Color();
+        return theme->get_color(name, theme_type);
     }
 
 	template <typename T>

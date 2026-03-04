@@ -6,6 +6,8 @@
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/classes/editor_interface.hpp>
+#include <godot_cpp/classes/theme.hpp>
 
 namespace godot {
 	class FmodAudioStreamPlayer : public Node {

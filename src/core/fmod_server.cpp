@@ -23,7 +23,11 @@ namespace godot {
 		ERR_FAIL_COND(singleton != nullptr);
 		singleton = this;
 
-		main_system = FmodSystem::create_system(32, FmodSystem::INIT_PROFILE_ENABLE);
+		FmodSystem::FmodInitFlags mode = FmodSystem::INIT_NORMAL;
+		if (Engine::get_singleton()->is_editor_hint()) {
+			mode = FmodSystem::INIT_PROFILE_ENABLE;
+		}
+		main_system = FmodSystem::create_system(32, mode);
 		if (!main_system || main_system->system_is_null()) {
 			UtilityFunctions::print_rich("[b][color=WHITE][bgcolor=RED]Failed to init main system![/bgcolor][/color][/b]");
 			return;

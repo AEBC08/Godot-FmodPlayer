@@ -9,28 +9,28 @@
 #include <godot_cpp/classes/h_box_container.hpp>
 #include <godot_cpp/classes/label.hpp>
 #include <godot_cpp/classes/v_box_container.hpp>
+#include "core/fmod_utils.hpp"
 
 namespace godot {
-	// 音频预览控件（非 EditorProperty，直接作为自定义控件）
-	class FmodAudioPreviewProperty : public VBoxContainer {
-		GDCLASS(FmodAudioPreviewProperty, VBoxContainer)
+	class FmodAudioPreviewProperty : public ColorRect {
+		GDCLASS(FmodAudioPreviewProperty, ColorRect)
 
 	private:
 		// 预览区域
-		ColorRect* waveform_display = nullptr;
-		Control* play_indicator = nullptr;
+		ColorRect* _preview = nullptr;
+		Control* _indicator = nullptr;
 
 		// 控制栏
-		Button* play_button = nullptr;
-		Button* stop_button = nullptr;
-		Label* current_time_label = nullptr;
-		Label* duration_label = nullptr;
+		Button* _play_button = nullptr;
+		Button* _stop_button = nullptr;
+		Label* _current_label = nullptr;
+		Label* _duration_label = nullptr;
 
 		// 音频播放器
-		FmodAudioStreamPlayer* audio_player = nullptr;
+		FmodAudioStreamPlayer* _player = nullptr;
 
 		// 当前音频流
-		Ref<FmodAudioStream> current_stream;
+		Ref<FmodAudioStream> stream;
 
 		// 播放状态
 		bool is_playing = false;
@@ -53,13 +53,12 @@ namespace godot {
 		void _notification(int p_what);
 
 	public:
-		// 设置要预览的音频流
 		void set_stream(const Ref<FmodAudioStream>& p_stream);
 		Ref<FmodAudioStream> get_stream() const;
 
 		FmodAudioPreviewProperty();
 		~FmodAudioPreviewProperty();
 	};
-} // namespace godot
+}
 
 #endif // !FMOD_AUDIO_PREVIEW_PROPERTY_H

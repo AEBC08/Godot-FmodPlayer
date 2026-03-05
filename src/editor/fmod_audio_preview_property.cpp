@@ -1,5 +1,7 @@
 #include "fmod_audio_preview_property.h"
 
+#include <cstring>
+
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/input_event_mouse_button.hpp>
 #include <godot_cpp/classes/input_event_mouse_motion.hpp>
@@ -15,6 +17,7 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("_on_indicator_gui_input", "event"), &FmodAudioPreviewProperty::_on_indicator_gui_input);
 		ClassDB::bind_method(D_METHOD("_on_play_pressed"), &FmodAudioPreviewProperty::_on_play_pressed);
 		ClassDB::bind_method(D_METHOD("_on_stop_pressed"), &FmodAudioPreviewProperty::_on_stop_pressed);
+		ClassDB::bind_method(D_METHOD("_generate_waveform_async"), &FmodAudioPreviewProperty::_generate_waveform_async);
 	}
 
 	FmodAudioPreviewProperty::FmodAudioPreviewProperty() {
@@ -190,162 +193,185 @@ namespace godot {
 	}
 
 	void FmodAudioPreviewProperty::_draw_waveform() {
+		if (stream.is_null() || !stream->is_data_loaded()) return;
+		
+		Size2 size = _preview->get_size();
+		int width = size.width;
+		if (width <= 0) return;
+		
+		// 检查是否需要生成波形
+		if (cached_waveform_stream != stream || cached_waveform_points.is_empty()) {
+			if (!waveform_generating) {
+				waveform_generating = true;
+				call_deferred("_generate_waveform_async");
+			}
+			if (cached_waveform_points.is_empty()) return;
+		}
+		
+		// 缩放并绘制缓存的波形
+		PackedVector2Array scaled_points;
+		scaled_points.resize(cached_waveform_points.size());
+		
+		for (int i = 0; i < cached_waveform_points.size() / 2; i++) {
+			float x_norm = cached_waveform_points[i * 2].x;
+			float min_y_norm = cached_waveform_points[i * 2].y;
+			float max_y_norm = cached_waveform_points[i * 2 + 1].y;
+			
+			scaled_points.set(i * 2, Vector2(x_norm * width, min_y_norm * size.height));
+			scaled_points.set(i * 2 + 1, Vector2(x_norm * width, max_y_norm * size.height));
+		}
+		
+		Color waveform_color = FmodUtils::get_editor_theme_color("contrast_color_2", "Editor");
+		PackedColorArray colors = { waveform_color };
+		RenderingServer::get_singleton()->canvas_item_add_multiline(
+			_preview->get_canvas_item(), scaled_points, colors);
+	}
+
+	void FmodAudioPreviewProperty::_generate_waveform_async() {
 		if (stream.is_null() || !stream->is_data_loaded()) {
+			waveform_generating = false;
 			return;
 		}
-
-		Ref<FmodSound> sound = stream->get_sound();
-		if (sound.is_null()) {
+		
+		FmodSystem* system = FmodServer::get_main_system();
+		if (!system || system->system_is_null()) {
+			waveform_generating = false;
 			return;
 		}
-
-		// 获取音频格式信息
-		Dictionary format = sound->get_format();
+		
+		unsigned int decode_mode = FmodSystem::FMOD_MODE_OPENMEMORY | FmodSystem::FMOD_MODE_CREATESAMPLE;
+		Ref<FmodSound> temp_sound = system->create_sound_from_memory(stream->get_audio_data(), decode_mode);
+		if (temp_sound.is_null()) {
+			waveform_generating = false;
+			return;
+		}
+		
+		Dictionary format = temp_sound->get_format();
 		int channels = format.get("channels", 1);
 		int bits = format.get("bits", 16);
 		int sound_format = format.get("format", FmodSound::FMOD_SOUND_FORMAT_PCM16);
-
-		// 获取 PCM 数据长度（字节），并确保转换为 unsigned int
-		double pcm_bytes = sound->get_length(FmodSystem::TIMEUNIT_PCMBYTES);
+		
+		double pcm_bytes = temp_sound->get_length(FmodSystem::FMOD_TIME_UNIT_PCMBYTES);
 		if (pcm_bytes <= 0) {
+			waveform_generating = false;
 			return;
 		}
 		
-		// 限制最大读取 30MB，避免大文件导致内存问题
 		const unsigned int max_read_bytes = 30 * 1024 * 1024;
 		unsigned int read_length = (unsigned int)pcm_bytes;
-		if (read_length > max_read_bytes) {
-			read_length = max_read_bytes;
+		if (read_length > max_read_bytes) read_length = max_read_bytes;
+		
+		PackedByteArray data;
+		Ref<FmodSoundLock> lock = temp_sound->lock(0, read_length);
+		if (lock.is_valid()) {
+			data = lock->get_data1();
+			PackedByteArray data2 = lock->get_data2();
+			if (!data2.is_empty()) {
+				int offset = data.size();
+				data.resize(offset + data2.size());
+				memcpy(data.ptrw() + offset, data2.ptr(), data2.size());
+			}
 		}
 		
-		PackedByteArray data = sound->read_data(read_length);
 		if (data.is_empty()) {
+			waveform_generating = false;
 			return;
 		}
-
-		Size2 size = _preview->get_size();
-		int width = size.width;
-		if (width <= 0) {
-			return;
-		}
-
-		Rect2 rect = Rect2(Point2(), size);
-		PackedVector2Array points;
-		points.resize(width * 2);
-
-		// 计算每个采样点的字节数和帧大小
+		
 		int bytes_per_sample = bits / 8;
-		if (bytes_per_sample <= 0) bytes_per_sample = 2; // 默认16位
+		if (bytes_per_sample <= 0) bytes_per_sample = 2;
 		int frame_size = bytes_per_sample * channels;
-
-		// 计算总采样帧数
 		int total_frames = data.size() / frame_size;
 		if (total_frames <= 0) {
+			waveform_generating = false;
 			return;
 		}
-
-		for (int i = 0; i < width; i++) {
-			// 计算当前像素对应的采样范围
-			int start_frame = (int)(i * (float)total_frames / width);
-			int end_frame = (int)((i + 1) * (float)total_frames / width);
+		
+		const int waveform_width = 1000;
+		PackedVector2Array points;
+		points.resize(waveform_width * 2);
+		
+		for (int i = 0; i < waveform_width; i++) {
+			int start_frame = (int)(i * (float)total_frames / waveform_width);
+			int end_frame = (int)((i + 1) * (float)total_frames / waveform_width);
 			if (end_frame > total_frames) end_frame = total_frames;
 			if (start_frame >= end_frame) start_frame = end_frame - 1;
 			if (start_frame < 0) start_frame = 0;
-
-			// 计算该范围内的 min/max 振幅
+			
 			float max_val = -1.0f;
 			float min_val = 1.0f;
-
+			
 			for (int frame = start_frame; frame < end_frame; frame++) {
 				int frame_offset = frame * frame_size;
 				float sample_sum = 0.0f;
-
-				// 混合所有通道
+				
 				for (int ch = 0; ch < channels; ch++) {
 					int sample_offset = frame_offset + ch * bytes_per_sample;
 					if (sample_offset + bytes_per_sample > data.size()) continue;
-
+					
 					float sample_val = 0.0f;
 					const uint8_t* ptr = data.ptr() + sample_offset;
-
+					
 					switch (sound_format) {
 						case FmodSound::FMOD_SOUND_FORMAT_PCM8:
-							// 8位PCM是无符号的，范围 0-255，需要转换为 -1 到 1
 							sample_val = (float)(*ptr) / 127.5f - 1.0f;
 							break;
-
 						case FmodSound::FMOD_SOUND_FORMAT_PCM16: {
-							// 16位PCM是带符号的，小端序
 							int16_t val = (int16_t)(ptr[0] | (ptr[1] << 8));
 							sample_val = (float)val / 32767.0f;
+							break;
 						}
-						break;
-
-					case FmodSound::FMOD_SOUND_FORMAT_PCM24: {
-						// 24位PCM是带符号的，小端序
-						int32_t val = (int32_t)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16));
-						if (val & 0x800000) val |= 0xFF000000; // 符号扩展
-						sample_val = (float)val / 8388607.0f;
-					}
-					break;
-
-					case FmodSound::FMOD_SOUND_FORMAT_PCM32: {
-						// 32位PCM是带符号的，小端序
-						int32_t val = (int32_t)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24));
-						sample_val = (float)val / 2147483647.0f;
-					}
-					break;
-
-					case FmodSound::FMOD_SOUND_FORMAT_PCMFLOAT:
-						// 32位浮点直接读取
-						sample_val = *(const float*)ptr;
-						break;
-
-					default:
-						// 默认按16位处理
-						if (bits == 8) {
-							sample_val = (float)(*ptr) / 127.5f - 1.0f;
-						} else {
-							int16_t val = (int16_t)(ptr[0] | (ptr[1] << 8));
-							sample_val = (float)val / 32767.0f;
+						case FmodSound::FMOD_SOUND_FORMAT_PCM24: {
+							int32_t val = (int32_t)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16));
+							if (val & 0x800000) val |= 0xFF000000;
+							sample_val = (float)val / 8388607.0f;
+							break;
 						}
-						break;
+						case FmodSound::FMOD_SOUND_FORMAT_PCM32: {
+							int32_t val = (int32_t)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24));
+							sample_val = (float)val / 2147483647.0f;
+							break;
+						}
+						case FmodSound::FMOD_SOUND_FORMAT_PCMFLOAT:
+							sample_val = *(const float*)ptr;
+							break;
+						default:
+							if (bits == 8) {
+								sample_val = (float)(*ptr) / 127.5f - 1.0f;
+							} else {
+								int16_t val = (int16_t)(ptr[0] | (ptr[1] << 8));
+								sample_val = (float)val / 32767.0f;
+							}
+							break;
 					}
-
 					sample_sum += sample_val;
 				}
-
-				// 平均所有通道
+				
 				float sample_avg = channels > 0 ? sample_sum / channels : sample_sum;
 				if (sample_avg > max_val) max_val = sample_avg;
 				if (sample_avg < min_val) min_val = sample_avg;
 			}
-
-			// 将振幅值映射到垂直位置（范围 -1~1 映射到 0~1）
+			
 			float max_y = max_val * 0.5f + 0.5f;
 			float min_y = min_val * 0.5f + 0.5f;
-
-			// 确保至少有1像素的显示
+			
 			if (max_y - min_y < 0.01f) {
 				float mid = (max_y + min_y) * 0.5f;
 				max_y = mid + 0.005f;
 				min_y = mid - 0.005f;
 			}
-
-			// 计算线段端点
-			points.set(i * 2 + 0, Vector2(i + 1, rect.position.y + min_y * rect.size.y));
-			points.set(i * 2 + 1, Vector2(i + 1, rect.position.y + max_y * rect.size.y));
+			
+			points.set(i * 2 + 0, Vector2((float)i / waveform_width, min_y));
+			points.set(i * 2 + 1, Vector2((float)i / waveform_width, max_y));
 		}
-
-		// 获取编辑器主题颜色并绘制
-		Color waveform_color = FmodUtils::get_editor_theme_color("contrast_color_2", "Editor");
-		PackedColorArray colors = { waveform_color };
-
-		RenderingServer::get_singleton()->canvas_item_add_multiline(
-			_preview->get_canvas_item(),
-			points,
-			colors
-		);
+		
+		cached_waveform_points = points;
+		cached_waveform_stream = stream;
+		waveform_generating = false;
+		
+		if (_preview) {
+			_preview->queue_redraw();
+		}
 	}
 
 	void FmodAudioPreviewProperty::_draw_indicator() {

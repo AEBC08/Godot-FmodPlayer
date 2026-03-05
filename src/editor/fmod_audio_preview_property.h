@@ -37,8 +37,14 @@ namespace godot {
 		float playback_position = 0.0f;
 		float stream_duration = 0.0f;
 
+		// 缓存的波形数据
+		PackedVector2Array cached_waveform_points;
+		Ref<FmodAudioStream> cached_waveform_stream;
+		bool waveform_generating = false;
+
 		void _draw_waveform();
 		void _draw_indicator();
+		void _generate_waveform_async();
 		void _on_indicator_gui_input(const Ref<InputEvent>& p_event);
 		void _update_playback_position(float p_position);
 		void _update_time_labels();

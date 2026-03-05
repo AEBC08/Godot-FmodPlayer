@@ -6,8 +6,6 @@
 #include "audio/fmod_sound.h"
 #include "dsp/fmod_dsp.h"
 #include "playback/fmod_channel_control.h"
-#include <godot_cpp/classes/ref_counted.hpp>
-#include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 namespace godot {
@@ -57,10 +55,10 @@ namespace godot {
 		int get_priority() const;										// 获取虚拟语音排序的优先级
 		
 		void set_position(int position,
-			FmodSystem::FmodTimeunit timeunit = FmodSystem::TIMEUNIT_MS
+			FmodSystem::FmodTimeUnit timeunit = FmodSystem::FMOD_TIME_UNIT_MS
 		);																// 设置当前播放位置
 		int get_position(
-			FmodSystem::FmodTimeunit timeunit = FmodSystem::TIMEUNIT_MS
+			FmodSystem::FmodTimeUnit timeunit = FmodSystem::FMOD_TIME_UNIT_MS
 		) const;														// 获取当前播放位置
 		
 		void set_channel_group(Ref<FmodChannelGroup> p_channel_group);	// 设置该对象输出的 ChannelGroup
@@ -72,10 +70,10 @@ namespace godot {
 		void set_loop_points(
 			const unsigned int start,
 			const unsigned int end,
-			FmodSystem::FmodTimeunit timeunit = FmodSystem::TIMEUNIT_MS
+			FmodSystem::FmodTimeUnit timeunit = FmodSystem::FMOD_TIME_UNIT_MS
 		);																// 设置环路的起点和终点
 		Dictionary get_loop_points(
-			FmodSystem::FmodTimeunit timeunit = FmodSystem::TIMEUNIT_MS
+			FmodSystem::FmodTimeUnit timeunit = FmodSystem::FMOD_TIME_UNIT_MS
 		) const;														// 获取环路的起点和终点
 
 		bool is_virtual() const;										// 获取该频道是否被虚拟语音系统模拟

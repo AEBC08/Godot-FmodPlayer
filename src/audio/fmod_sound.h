@@ -106,7 +106,7 @@ namespace godot {
 		String get_name() const;										// 获取一个声音的名称
 		Dictionary get_format() const;									// 获取声音的格式信息
 		double get_length(
-			FmodSystem::FmodTimeunit time_unit = FmodSystem::TIMEUNIT_MS
+			FmodSystem::FmodTimeUnit time_unit = FmodSystem::FMOD_TIME_UNIT_MS
 		) const;														// 获取声音时长
 		Dictionary get_num_tags() const;								// 获取元数据标签数量
 		Dictionary get_tag(
@@ -135,7 +135,7 @@ namespace godot {
 		int64_t get_sync_point(const int index) const;					// 获取一个同步点
 		Dictionary get_sync_point_info(
 			const int64_t point,
-			FmodSystem::FmodTimeunit time_unit = FmodSystem::TIMEUNIT_MS
+			FmodSystem::FmodTimeUnit time_unit = FmodSystem::FMOD_TIME_UNIT_MS
 		) const;														// 获取嵌入同步点上的信息
 		int get_num_sub_sounds() const;									// 获取一个声音内的子声音数量
 	};

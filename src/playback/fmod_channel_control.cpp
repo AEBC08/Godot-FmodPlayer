@@ -91,7 +91,12 @@ namespace godot {
 	bool FmodChannelControl::is_playing() const {
 		if (!channel_control) return false;
 		bool isplaying = false;
-		FMOD_ERR_CHECK(channel_control->isPlaying(&isplaying));
+		FMOD_RESULT result = channel_control->isPlaying(&isplaying);
+		// FMOD_ERR_INVALID_HANDLE 表示 channel 已停止并失效，这是正常情况
+		if (result == FMOD_ERR_INVALID_HANDLE) {
+			return false;
+		}
+		FMOD_ERR_CHECK(result);
 		return isplaying;
 	}
 
@@ -119,7 +124,7 @@ namespace godot {
 	}
 
 	FmodSystem::FmodMode FmodChannelControl::get_mode() const {
-		if (!channel_control) return FmodSystem::MODE_DEFAULT;
+		if (!channel_control) return FmodSystem::FMOD_MODE_DEFAULT;
 		FMOD_MODE fmod_mode;
 		FMOD_ERR_CHECK(channel_control->getMode(&fmod_mode));
 		FmodSystem::FmodMode mode = static_cast<FmodSystem::FmodMode>((int)fmod_mode);

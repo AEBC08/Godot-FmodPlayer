@@ -73,7 +73,7 @@ namespace godot {
 		ClassDB::bind_static_method("FmodSound", D_METHOD("load_from_file", "path"), &FmodSound::load_from_file);
 		ClassDB::bind_method(D_METHOD("get_name"), &FmodSound::get_name);
 		ClassDB::bind_method(D_METHOD("get_format"), &FmodSound::get_format);
-		ClassDB::bind_method(D_METHOD("get_length", "time_unit"), &FmodSound::get_length, DEFVAL(FmodSystem::TIMEUNIT_MS));
+		ClassDB::bind_method(D_METHOD("get_length", "time_unit"), &FmodSound::get_length, DEFVAL(FmodSystem::FMOD_TIME_UNIT_MS));
 		ClassDB::bind_method(D_METHOD("get_num_tags"), &FmodSound::get_num_tags);
 		ClassDB::bind_method(D_METHOD("get_tag", "index", "name"), &FmodSound::get_tag, DEFVAL(String()));
 
@@ -89,7 +89,7 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_music_speed"), &FmodSound::get_music_speed);
 
 		ClassDB::bind_method(D_METHOD("get_sync_point", "index"), &FmodSound::get_sync_point);
-		ClassDB::bind_method(D_METHOD("get_sync_point_info", "point", "time_unit"), &FmodSound::get_sync_point_info, DEFVAL(FmodSystem::TIMEUNIT_MS));
+		ClassDB::bind_method(D_METHOD("get_sync_point_info", "point", "time_unit"), &FmodSound::get_sync_point_info, DEFVAL(FmodSystem::FMOD_TIME_UNIT_MS));
 		ClassDB::bind_method(D_METHOD("get_num_sub_sounds"), &FmodSound::get_num_sub_sounds);
 	}
 
@@ -104,7 +104,7 @@ namespace godot {
 	}
 
 	Ref<FmodSound> FmodSound::load_from_file(const String& p_path) {
-		return FmodServer::get_main_system()->create_sound_from_file(p_path, FmodSystem::MODE_DEFAULT);
+		return FmodServer::get_main_system()->create_sound_from_file(p_path, FmodSystem::FMOD_MODE_DEFAULT);
 	}
 
 	String FmodSound::get_name() const {
@@ -129,11 +129,11 @@ namespace godot {
 		return info;
 	}
 
-	double FmodSound::get_length(FmodSystem::FmodTimeunit time_unit) const {
+	double FmodSound::get_length(FmodSystem::FmodTimeUnit time_unit) const {
 		unsigned int length = 0;
 		FMOD_ERR_CHECK(sound->getLength(&length, time_unit));
 		// 只有时间单位（MS）才需要转换为秒，字节数和采样数直接返回
-		if (time_unit == FmodSystem::TIMEUNIT_MS) {
+		if (time_unit == FmodSystem::FMOD_TIME_UNIT_MS) {
 			return (double)length / 1000.0;
 		}
 		return (double)length;
@@ -338,7 +338,7 @@ namespace godot {
 		return (int64_t)(uintptr_t)point;
 	}
 
-	Dictionary FmodSound::get_sync_point_info(const int64_t point_ptr, FmodSystem::FmodTimeunit time_unit) const {
+	Dictionary FmodSound::get_sync_point_info(const int64_t point_ptr, FmodSystem::FmodTimeUnit time_unit) const {
 		ERR_FAIL_COND_V(!sound, Dictionary());
 
 		FMOD_SYNCPOINT* point = reinterpret_cast<FMOD_SYNCPOINT*>(static_cast<uintptr_t>(point_ptr));

@@ -80,19 +80,19 @@ Ref<FmodSound> FmodAudioStream::_create_sound() {
 	}
 
 	// 转换创建标志为 FMOD 标志
-	unsigned int fmod_mode = FmodSystem::MODE_OPENMEMORY;
+	unsigned int fmod_mode = FmodSystem::FMOD_MODE_OPENMEMORY;
 	
 	if (has_mode_flag(MODE_STREAM)) {
-		fmod_mode |= FmodSystem::MODE_CREATESTREAM;
+		fmod_mode |= FmodSystem::FMOD_MODE_CREATESTREAM;
 	} else {
-		fmod_mode |= FmodSystem::MODE_CREATESAMPLE;
+		fmod_mode |= FmodSystem::FMOD_MODE_CREATESAMPLE | FmodSystem::FMOD_MODE_LOOP_OFF;
 	}
 	
 	if (has_mode_flag(MODE_LOOP)) {
-		fmod_mode |= FmodSystem::MODE_LOOP_NORMAL;
+		fmod_mode |= FmodSystem::FMOD_MODE_LOOP_NORMAL;
 	}
 	if (has_mode_flag(MODE_LOOP_BIDI)) {
-		fmod_mode |= FmodSystem::MODE_LOOP_BIDI;
+		fmod_mode |= FmodSystem::FMOD_MODE_LOOP_BIDI;
 	}
 
 	return system->create_sound_from_memory(audio_data, fmod_mode);

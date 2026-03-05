@@ -23,14 +23,33 @@ namespace godot {
 		ERR_FAIL_COND(singleton != nullptr);
 		singleton = this;
 
-		FmodSystem::FmodInitFlags mode = FmodSystem::INIT_NORMAL;
-		if (Engine::get_singleton()->is_editor_hint()) {
-			mode = FmodSystem::INIT_PROFILE_ENABLE;
+		ProjectSettings* settings = ProjectSettings::get_singleton();
+
+		int max_channels = 32;
+		if (settings && settings->has_setting("audio/fmod/max_channels")) {
+			max_channels = settings->get_setting("audio/fmod/max_channels");
 		}
-		main_system = FmodSystem::create_system(32, mode);
+
+		bool enable_profile = true;
+		FmodSystem::FmodInitFlags mode = FmodSystem::FMOD_INIT_FLAG_NORMAL;
+		if (Engine::get_singleton()->is_editor_hint()) {
+			if (settings && settings->has_setting("audio/fmod/enable_profile")) {
+				enable_profile = settings->get_setting("audio/fmod/enable_profile");
+			}
+			if (enable_profile) {
+				mode = FmodSystem::FMOD_INIT_FLAG_PROFILE_ENABLE;
+			}
+		}
+
+		main_system = FmodSystem::create_system(max_channels, mode);
 		if (!main_system || main_system->system_is_null()) {
 			UtilityFunctions::print_rich("[b][color=WHITE][bgcolor=RED]Failed to init main system![/bgcolor][/color][/b]");
 			return;
+		}
+
+		if (Engine::get_singleton()->is_editor_hint() && enable_profile && settings && settings->has_setting("audio/fmod/network_proxy")) {
+			String proxy = settings->get_setting("audio/fmod/network_proxy");
+			main_system->set_network_proxy(proxy);
 		}
 
 		UtilityFunctions::print("    _____                    _ ____  _                       ");

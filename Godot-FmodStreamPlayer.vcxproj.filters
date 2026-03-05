@@ -164,6 +164,9 @@
     <ClInclude Include="src\audio\fmod_sound_lock.h">
       <Filter>Header Files\audio</Filter>
     </ClInclude>
+    <ClInclude Include="src\playback\fmod_sound_group.h">
+      <Filter>Header Files\playback</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\fmod_server.cpp">
@@ -273,6 +276,9 @@
     </ClCompile>
     <ClCompile Include="src\audio\fmod_sound_lock.cpp">
       <Filter>Source Files\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\playback\fmod_sound_group.cpp">
+      <Filter>Source Files\playback</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

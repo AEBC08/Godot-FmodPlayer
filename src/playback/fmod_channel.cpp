@@ -13,8 +13,8 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_priority"), &FmodChannel::get_priority);
 		ADD_PROPERTY(PropertyInfo(Variant::INT, "priority"), "set_priority", "get_priority");
 
-		ClassDB::bind_method(D_METHOD("set_position", "position", "timeunit"), &FmodChannel::set_position, DEFVAL(FmodSystem::TIMEUNIT_MS));
-		ClassDB::bind_method(D_METHOD("get_position", "timeunit"), &FmodChannel::get_position, DEFVAL(FmodSystem::TIMEUNIT_MS));
+		ClassDB::bind_method(D_METHOD("set_position", "position", "timeunit"), &FmodChannel::set_position, DEFVAL(FmodSystem::FMOD_TIME_UNIT_MS));
+		ClassDB::bind_method(D_METHOD("get_position", "timeunit"), &FmodChannel::get_position, DEFVAL(FmodSystem::FMOD_TIME_UNIT_MS));
 
 		ClassDB::bind_method(D_METHOD("set_channel_group", "channel_group"), &FmodChannel::set_channel_group);
 		ClassDB::bind_method(D_METHOD("get_channel_group"), &FmodChannel::get_channel_group);
@@ -24,7 +24,7 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_loop_count"), &FmodChannel::get_loop_count);
 		ADD_PROPERTY(PropertyInfo(Variant::INT, "loop_count"), "set_loop_count", "get_loop_count");
 
-		ClassDB::bind_method(D_METHOD("set_loop_points", "start", "end", "timeunit"), &FmodChannel::set_loop_points, DEFVAL(FmodSystem::TIMEUNIT_MS));
+		ClassDB::bind_method(D_METHOD("set_loop_points", "start", "end", "timeunit"), &FmodChannel::set_loop_points, DEFVAL(FmodSystem::FMOD_TIME_UNIT_MS));
 		ClassDB::bind_method(D_METHOD("get_loop_points"), &FmodChannel::get_loop_points);
 
 		ClassDB::bind_method(D_METHOD("is_virtual"), &FmodChannel::is_virtual);
@@ -88,12 +88,12 @@ namespace godot {
 		return (int)priority;
 	}
 
-	void FmodChannel::set_position(int position, FmodSystem::FmodTimeunit timeunit) {
+	void FmodChannel::set_position(int position, FmodSystem::FmodTimeUnit timeunit) {
 		ERR_FAIL_COND(!channel);
 		FMOD_ERR_CHECK(channel->setPosition(position, timeunit));
 	}
 
-	int FmodChannel::get_position(FmodSystem::FmodTimeunit timeunit) const {
+	int FmodChannel::get_position(FmodSystem::FmodTimeUnit timeunit) const {
 		if (!channel) return 0.0;
 		unsigned int position = 0;
 		FMOD_ERR_CHECK(channel->getPosition(&position, timeunit));
@@ -123,13 +123,13 @@ namespace godot {
 		return loop_count;
 	}
 
-	void FmodChannel::set_loop_points(const unsigned int start, const unsigned int end, FmodSystem::FmodTimeunit timeunit) {
+	void FmodChannel::set_loop_points(const unsigned int start, const unsigned int end, FmodSystem::FmodTimeUnit timeunit) {
 		ERR_FAIL_COND(!channel);
 		FMOD_TIMEUNIT fmod_timeunit = static_cast<FMOD_TIMEUNIT>((int)timeunit);
 		FMOD_ERR_CHECK(channel->setLoopPoints((unsigned int)start, fmod_timeunit, (unsigned int)end, fmod_timeunit));
 	}
 
-	Dictionary FmodChannel::get_loop_points(FmodSystem::FmodTimeunit timeunit) const {
+	Dictionary FmodChannel::get_loop_points(FmodSystem::FmodTimeUnit timeunit) const {
 		if (!channel) return Dictionary();
 		FMOD_TIMEUNIT fmod_timeunit = static_cast<FMOD_TIMEUNIT>((int)timeunit);
 		unsigned int start, end;

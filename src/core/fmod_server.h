@@ -10,7 +10,6 @@
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
-#include <godot_cpp/classes/engine.hpp>
 
 namespace godot {
 	class FmodAudioBus;

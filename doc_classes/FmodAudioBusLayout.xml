@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="FmodAudioBusLayout" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Manages the layout and hierarchy of audio buses.
+	</brief_description>
+	<description>
+		FmodAudioBusLayout manages the complete hierarchy of audio buses in the FMOD audio system. It maintains a collection of [FmodAudioBus] instances and their relationships.
+		The layout automatically synchronizes with Godot's AudioServer bus layout, allowing seamless integration with Godot's built-in audio system.
+		Key features:
+		- Bus hierarchy management (master bus + sub-buses)
+		- Volume, solo, and mute state control per bus
+		- Effect chain management for each bus
+		- Synchronization with Godot AudioServer
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="add_bus_effect">
+			<return type="void" />
+			<param index="0" name="bus_name" type="String" />
+			<param index="1" name="effect" type="FmodAudioEffect" />
+			<param index="2" name="index" type="int" default="0" />
+			<description>
+				Adds an [FmodAudioEffect] to the specified bus at the given [param index] in the effect chain.
+			</description>
+		</method>
+		<method name="bus_is_bypass">
+			<return type="bool" />
+			<param index="0" name="bus_name" type="String" />
+			<description>
+				Returns [code]true[/code] if effects bypass is enabled for the specified bus.
+			</description>
+		</method>
+		<method name="bus_is_mute">
+			<return type="bool" />
+			<param index="0" name="bus_name" type="String" />
+			<description>
+				Returns [code]true[/code] if the specified bus is muted.
+			</description>
+		</method>
+		<method name="bus_is_solo">
+			<return type="bool" />
+			<param index="0" name="bus_name" type="String" />
+			<description>
+				Returns [code]true[/code] if the specified bus is in solo mode.
+			</description>
+		</method>
+		<method name="create_audio_bus">
+			<return type="void" />
+			<param index="0" name="name" type="String" />
+			<param index="1" name="parent" type="FmodAudioBus" default="null" />
+			<description>
+				Creates a new audio bus with the specified [param name] and optional [param parent].
+				The master bus is created automatically and should not be created manually.
+			</description>
+		</method>
+		<method name="get_audio_bus" qualifiers="const">
+			<return type="FmodAudioBus" />
+			<param index="0" name="name" type="String" />
+			<description>
+				Returns the [FmodAudioBus] with the specified [param name].
+				Returns [code]null[/code] if no bus with that name exists.
+			</description>
+		</method>
+		<method name="get_bus_effect" qualifiers="const">
+			<return type="FmodAudioEffect" />
+			<param index="0" name="bus_name" type="String" />
+			<param index="1" name="index" type="int" />
+			<description>
+				Returns the [FmodAudioEffect] at the specified [param index] on the named bus.
+				Returns [code]null[/code] if the bus or effect doesn't exist.
+			</description>
+		</method>
+		<method name="get_bus_volume" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="bus_name" type="String" />
+			<description>
+				Returns the volume of the specified bus in decibels.
+			</description>
+		</method>
+		<method name="has_audio_bus" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="name" type="String" />
+			<description>
+				Returns [code]true[/code] if a bus with the specified [param name] exists in the layout.
+			</description>
+		</method>
+		<method name="remove_audio_bus">
+			<return type="void" />
+			<param index="0" name="name" type="String" />
+			<description>
+				Removes the audio bus with the specified [param name] from the layout.
+				[b]Note:[/b] The master bus cannot be removed.
+			</description>
+		</method>
+		<method name="remove_bus_effect">
+			<return type="void" />
+			<param index="0" name="bus_name" type="String" />
+			<param index="1" name="index" type="int" />
+			<description>
+				Removes the effect at the specified [param index] from the named bus.
+			</description>
+		</method>
+		<method name="set_bus_bypass">
+			<return type="void" />
+			<param index="0" name="bus_name" type="String" />
+			<param index="1" name="bypass" type="bool" />
+			<description>
+				Enables or disables effects bypass for the specified bus.
+			</description>
+		</method>
+		<method name="set_bus_mute">
+			<return type="void" />
+			<param index="0" name="bus_name" type="String" />
+			<param index="1" name="mute" type="bool" />
+			<description>
+				Sets the mute state of the specified bus.
+			</description>
+		</method>
+		<method name="set_bus_solo">
+			<return type="void" />
+			<param index="0" name="bus_name" type="String" />
+			<param index="1" name="solo" type="bool" />
+			<description>
+				Sets the solo state of the specified bus.
+			</description>
+		</method>
+		<method name="set_bus_volume">
+			<return type="void" />
+			<param index="0" name="bus_name" type="String" />
+			<param index="1" name="volume_db" type="float" />
+			<description>
+				Sets the volume of the specified bus in decibels.
+			</description>
+		</method>
+		<method name="sync_bus_state">
+			<return type="void" />
+			<param index="0" name="bus_name" type="String" />
+			<param index="1" name="audio_server_bus_index" type="int" />
+			<description>
+				Synchronizes the state of the named bus with Godot's AudioServer bus at the specified index.
+				Copies volume, mute, and solo states from the AudioServer.
+			</description>
+		</method>
+		<method name="sync_from_audio_server">
+			<return type="void" />
+			<description>
+				Synchronizes the entire bus layout with Godot's AudioServer.
+				This creates/updates buses to match the AudioServer layout and copies all state.
+				Called automatically when the bus layout changes in Godot.
+			</description>
+		</method>
+	</methods>
+</class>

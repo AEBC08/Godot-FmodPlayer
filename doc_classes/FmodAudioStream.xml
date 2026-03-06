@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="FmodAudioStream" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		A resource representing an audio stream for FMOD playback.
+	</brief_description>
+	<description>
+		FmodAudioStream is a Resource that holds audio data for playback through the FMOD audio engine. It supports loading audio from files (including [code]res://[/code] paths) and provides configurable creation modes for streaming or sample-based playback.
+		The stream can be played using [FmodAudioStreamPlayer] or used directly with FMOD's channel system. The underlying [FmodSound] object is created lazily when first requested via [method get_sound].
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="clear">
+			<return type="void" />
+			<description>
+				Clears the audio data and releases the internal [FmodSound] resource. This frees up memory and resets the stream to an empty state. The stream will need to be reloaded before it can be played again.
+			</description>
+		</method>
+		<method name="get_length" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the length of the audio in seconds. Returns [code]0.0[/code] if the sound has not been created or if no data is loaded.
+			</description>
+		</method>
+		<method name="get_sound">
+			<return type="FmodSound" />
+			<description>
+				Returns the [FmodSound] object for this stream, creating it if necessary (lazy creation). The sound is created using the current [member mode_flags] settings. If the mode flags have changed since the last call, the sound will be recreated with the new settings.
+				Returns an empty reference if no audio data is loaded or if the FMOD system is not available.
+			</description>
+		</method>
+		<method name="is_data_loaded" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if audio data has been loaded into this stream, [code]false[/code] otherwise.
+			</description>
+		</method>
+		<method name="load_from_file" qualifiers="static">
+			<return type="FmodAudioStream" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="flags" type="int" default="1" />
+			<description>
+				Loads an audio stream from a file path. The path can be a Godot resource path (e.g., [code]"res://audio/music.mp3"[/code]) or an absolute file path.
+				The [param flags] parameter specifies the creation mode flags (bitmask of [enum CreateMode]). Defaults to [constant MODE_STREAM] for streaming playback from disk.
+				Returns an empty reference if the file cannot be opened or read.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="audio_data" type="PackedByteArray" setter="set_audio_data" getter="get_audio_data" default="PackedByteArray()">
+			The raw audio data loaded from file. This is typically set by the audio importer or by [method load_from_file]. The data is stored in memory and used to create the FMOD sound object when [method get_sound] is called.
+		</member>
+		<member name="mode_flags" type="int" setter="set_mode_flags" getter="get_mode_flags" default="1">
+			Creation mode flags that determine how the audio is loaded and played. This is a bitmask of [enum CreateMode] values. When these flags are changed, the internal [FmodSound] is released and will be recreated with the new flags on the next call to [method get_sound].
+			Default value is [constant MODE_STREAM] (1).
+		</member>
+	</members>
+	<constants>
+		<constant name="MODE_DEFAULT" value="0" enum="CreateMode">
+			Default creation mode. No special flags are set.
+		</constant>
+		<constant name="MODE_STREAM" value="1" enum="CreateMode">
+			Stream the audio from memory. The audio data is read progressively rather than being fully decoded at once. This reduces memory usage for large files but may have higher CPU overhead during playback.
+		</constant>
+		<constant name="MODE_SAMPLE" value="2" enum="CreateMode">
+			Load the entire audio file as a sample into memory. This allows for faster playback and lower CPU usage, but consumes more memory. Best suited for short sound effects.
+		</constant>
+		<constant name="MODE_LOOP" value="4" enum="CreateMode">
+			Enable normal loop playback. When the audio reaches the end, it will loop back to the beginning.
+		</constant>
+		<constant name="MODE_LOOP_BIDI" value="8" enum="CreateMode">
+			Enable bidirectional (ping-pong) loop playback. When the audio reaches the end, it will play backwards to the beginning, then forwards again, creating a seamless back-and-forth loop.
+		</constant>
+	</constants>
+</class>

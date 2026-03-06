@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="FmodSystem" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Wrapper class for the FMOD::System object, providing audio system management and control.
+	</brief_description>
+	<description>
+		FmodSystem wraps the FMOD Core API's FMOD::System object and provides comprehensive audio system management capabilities. This class handles system initialization, audio device management, sound creation, playback control, and recording functionality.
+		The FMOD System is the core of the FMOD audio engine. It manages the mixer, channels, sounds, DSP effects, and output devices. You can create multiple System instances for advanced use cases, or use the global singleton via [FmodServer] for typical applications.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="close">
+			<return type="void" />
+			<description>
+				Closes the connection to the output device and returns the system to an uninitialized state without releasing the object. The system can be reinitialized by calling [method init] again.
+			</description>
+		</method>
+		<method name="create_channel_group">
+			<return type="FmodChannelGroup" />
+			<param index="0" name="name" type="String" />
+			<description>
+				Creates a new [FmodChannelGroup] with the specified name. Channel groups allow you to organize channels for collective control of volume, pitch, and effects.
+			</description>
+		</method>
+		<method name="create_dsp">
+			<return type="FmodDSP" />
+			<param index="0" name="name" type="String" />
+			<description>
+				Creates a custom DSP (Digital Signal Processor) effect with the specified name. The created DSP can be inserted into the signal chain to process audio in real-time.
+			</description>
+		</method>
+		<method name="create_dsp_by_type">
+			<return type="FmodDSP" />
+			<param index="0" name="type" type="int" />
+			<description>
+				Creates a DSP effect of the specified built-in type. Use [method get_dsp_info_by_type] to query available DSP types and their information.
+			</description>
+		</method>
+		<method name="create_sound_from_file">
+			<return type="FmodSound" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="mode" type="int" default="0" />
+			<description>
+				Creates a [FmodSound] from a file path. If the path starts with [code]res://[/code], it will use [method create_sound_from_res] internally.
+				The mode parameter specifies creation options using [enum FmodMode] flags, such as looping behavior ([constant FMOD_MODE_LOOP_NORMAL]), 3D positioning ([constant FMOD_MODE_3D]), or streaming ([constant FMOD_MODE_CREATESTREAM]).
+			</description>
+		</method>
+		<method name="create_sound_from_memory">
+			<return type="FmodSound" />
+			<param index="0" name="data" type="PackedByteArray" />
+			<param index="1" name="mode" type="int" default="0" />
+			<description>
+				Creates a [FmodSound] from audio data loaded in memory. The data array must remain valid while the sound is in use. This is useful for loading sounds from encrypted files or network streams.
+				The mode parameter specifies creation options using [enum FmodMode] flags.
+			</description>
+		</method>
+		<method name="create_sound_from_res">
+			<return type="FmodSound" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="mode" type="int" default="0" />
+			<description>
+				Creates a [FmodSound] from a Godot resource path (starting with [code]res://[/code]). The file is loaded through Godot's file system and then passed to FMOD.
+				The mode parameter specifies creation options using [enum FmodMode] flags.
+			</description>
+		</method>
+		<method name="create_stream_from_file">
+			<return type="FmodSound" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="mode" type="int" default="0" />
+			<description>
+				Creates a streaming [FmodSound] from a file. Streams decode audio data on-the-fly, which is memory-efficient for large files like background music.
+				The mode parameter specifies creation options using [enum FmodMode] flags.
+			</description>
+		</method>
+		<method name="create_system" qualifiers="static">
+			<return type="FmodSystem" />
+			<param index="0" name="max_channels" type="int" default="0" />
+			<param index="1" name="flags" type="int" enum="FmodSystem.FmodInitFlags" default="32" />
+			<description>
+				Creates and initializes a new FmodSystem instance with the specified maximum number of channels and initialization flags.
+				The max_channels parameter limits the total number of simultaneously playing channels (range: 0-4096).
+				The flags parameter specifies initialization options using [enum FmodInitFlags] bitmask.
+			</description>
+		</method>
+		<method name="get_channel">
+			<return type="FmodChannel" />
+			<param index="0" name="id" type="int" />
+			<description>
+				Retrieves a [FmodChannel] handle by its ID. Channels are assigned IDs sequentially as they are allocated.
+			</description>
+		</method>
+		<method name="get_channels_playing" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns a dictionary with information about currently playing channels.
+				The returned dictionary contains:
+				- [code]channels[/code]: Total number of channels currently playing (including virtual voices).
+				- [code]real_channels[/code]: Number of channels that are actually audible (not virtual).
+			</description>
+		</method>
+		<method name="get_cpu_usage" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns CPU usage statistics for different parts of the FMOD Core API.
+				The returned dictionary contains:
+				- [code]dsp[/code]: CPU time spent on DSP processing.
+				- [code]stream[/code]: CPU time spent on stream decoding.
+				- [code]geometry[/code]: CPU time spent on 3D geometry processing.
+				- [code]update[/code]: CPU time spent on system updates.
+				- [code]convolution1[/code]: CPU time spent on convolution reverb processing.
+				- [code]convolution2[/code]: CPU time spent on additional convolution processing.
+			</description>
+		</method>
+		<method name="get_default_mix_matrix" qualifiers="const">
+			<return type="PackedFloat32Array" />
+			<param index="0" name="source_speaker_mode" type="int" enum="FmodSystem.FmodSpeakerMode" />
+			<param index="1" name="target_speaker_mode" type="int" enum="FmodSystem.FmodSpeakerMode" />
+			<param index="2" name="array_length" type="int" />
+			<param index="3" name="hop" type="int" />
+			<description>
+				Retrieves the default mixing matrix used to convert audio from one speaker mode to another.
+				This matrix maps source channels to destination channels for upmixing or downmixing.
+				The hop parameter specifies the stride between matrix rows.
+			</description>
+		</method>
+		<method name="get_driver" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the index of the currently selected output driver for the active output type.
+			</description>
+		</method>
+		<method name="get_driver_info" qualifiers="const">
+			<return type="Dictionary" />
+			<param index="0" name="id" type="int" />
+			<description>
+				Returns identification information for a sound device specified by its index.
+				The returned dictionary contains:
+				- [code]name[/code]: The name of the device.
+				- [code]guid[/code]: The unique identifier of the device.
+				- [code]system_rate[/code]: The default sample rate of the device.
+				- [code]speaker_mode[/code]: The default speaker mode ([enum FmodSpeakerMode]).
+				- [code]speaker_mode_channels[/code]: Number of channels in the default speaker mode.
+			</description>
+		</method>
+		<method name="get_dsp_info_by_type" qualifiers="const">
+			<return type="Dictionary" />
+			<param index="0" name="type" type="int" />
+			<description>
+				Retrieves information about a built-in DSP type.
+				The returned dictionary contains:
+				- [code]name[/code]: Name of the DSP.
+				- [code]version[/code]: Plugin version number.
+				- [code]plugin_sdk_version[/code]: FMOD Plugin SDK version.
+				- [code]num_input_buffers[/code]: Number of input buffers.
+				- [code]num_output_buffers[/code]: Number of output buffers.
+				- [code]has_create[/code]: Whether the DSP has a create callback.
+				- [code]has_release[/code]: Whether the DSP has a release callback.
+				- [code]has_reset[/code]: Whether the DSP has a reset callback.
+				- [code]has_process[/code]: Whether the DSP has a process callback.
+				- [code]has_setposition[/code]: Whether the DSP has a setposition callback.
+				- [code]has_read[/code]: Whether the DSP has a read callback.
+				- [code]has_should_i_process[/code]: Whether the DSP has a shouldiprocess callback.
+			</description>
+		</method>
+		<method name="get_file_usage" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns file I/O statistics.
+				The returned dictionary contains:
+				- [code]sample_bytes_read[/code]: Bytes read for sample data.
+				- [code]stream_bytes_read[/code]: Bytes read for streaming data.
+				- [code]other_bytes_read[/code]: Bytes read for other purposes.
+			</description>
+		</method>
+		<method name="get_master_channel_group">
+			<return type="FmodChannelGroup" />
+			<description>
+				Returns the master channel group to which all sounds ultimately route. Use this to control global volume, add master effects, or monitor overall output.
+			</description>
+		</method>
+		<method name="get_network_proxy" qualifiers="const">
+			<return type="String" />
+			<description>
+				Returns the URL of the proxy server used for internet streaming connections.
+			</description>
+		</method>
+		<method name="get_network_timeout" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the timeout in milliseconds for network streams.
+			</description>
+		</method>
+		<method name="get_num_drivers" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the number of available output drivers for the currently selected output type.
+			</description>
+		</method>
+		<method name="get_output" qualifiers="const">
+			<return type="int" enum="FmodSystem.FmodOutputType" />
+			<description>
+				Returns the currently selected output interface type used to run the mixer.
+			</description>
+		</method>
+		<method name="get_output_handle" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the output type-specific native handle. For Windows, this is typically a WASAPI or DirectSound device handle.
+			</description>
+		</method>
+		<method name="get_record_driver_info" qualifiers="const">
+			<return type="Dictionary" />
+			<param index="0" name="id" type="int" />
+			<description>
+				Returns identification information for a recording device specified by its index.
+				The returned dictionary contains:
+				- [code]name[/code]: The name of the recording device.
+				- [code]guid[/code]: The unique identifier of the device.
+				- [code]system_rate[/code]: The default sample rate.
+				- [code]speaker_mode[/code]: The speaker mode ([enum FmodSpeakerMode]).
+				- [code]speaker_mode_channels[/code]: Number of channels.
+				- [code]state[/code]: Driver state flags.
+			</description>
+		</method>
+		<method name="get_record_num_drivers" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns information about available recording devices.
+				The returned dictionary contains:
+				- [code]num_drivers[/code]: Total number of recording devices available.
+				- [code]num_connected[/code]: Number of currently connected recording devices.
+			</description>
+		</method>
+		<method name="get_record_position" qualifiers="const">
+			<return type="int" />
+			<param index="0" name="id" type="int" />
+			<description>
+				Returns the current recording position in PCM samples for the specified recording device.
+			</description>
+		</method>
+		<method name="get_speaker_mode_channels" qualifiers="const">
+			<return type="int" />
+			<param index="0" name="mode" type="int" enum="FmodSystem.FmodSpeakerMode" />
+			<description>
+				Returns the number of channels for the specified speaker mode.
+			</description>
+		</method>
+		<method name="get_version" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns the FMOD version information.
+				The returned dictionary contains:
+				- [code]version[/code]: The FMOD version string in format "product.major.minor".
+				- [code]build_number[/code]: The FMOD build number string.
+			</description>
+		</method>
+		<method name="init">
+			<return type="void" />
+			<param index="0" name="max_channels" type="int" default="0" />
+			<param index="1" name="flags" type="int" enum="FmodSystem.FmodInitFlags" default="32" />
+			<description>
+				Initializes the FMOD System with the specified maximum number of channels and initialization flags.
+				The max_channels parameter limits the total number of simultaneously playing channels (range: 0-4096).
+				The flags parameter is a bitmask of [enum FmodInitFlags] values.
+			</description>
+		</method>
+		<method name="is_recording" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="id" type="int" />
+			<description>
+				Returns [code]true[/code] if the specified recording device is currently recording.
+			</description>
+		</method>
+		<method name="mixer_resume">
+			<return type="void" />
+			<description>
+				Resumes the mixer thread and re-acquires access to the audio hardware. Use after [method mixer_suspend] to restore audio processing.
+			</description>
+		</method>
+		<method name="mixer_suspend">
+			<return type="void" />
+			<description>
+				Suspends the mixer thread, relinquishing use of the audio hardware while maintaining internal state. Useful for handling audio focus changes on mobile platforms.
+			</description>
+		</method>
+		<method name="play_dsp">
+			<return type="FmodChannel" />
+			<param index="0" name="dsp" type="FmodDSP" />
+			<param index="1" name="channel_group" type="FmodChannelGroup" />
+			<param index="2" name="paused" type="bool" default="false" />
+			<description>
+				Plays a DSP and its input signals on a channel, routed through the specified channel group.
+				If paused is [code]true[/code], the channel starts in a paused state and won't produce sound until [method FmodChannel.set_paused] is called with [code]false[/code].
+			</description>
+		</method>
+		<method name="play_sound">
+			<return type="FmodChannel" />
+			<param index="0" name="sound" type="FmodSound" />
+			<param index="1" name="channel_group" type="FmodChannelGroup" />
+			<param index="2" name="paused" type="bool" default="false" />
+			<description>
+				Plays a sound on a channel, routed through the specified channel group.
+				If paused is [code]true[/code], the channel starts in a paused state and won't produce sound until [method FmodChannel.set_paused] is called with [code]false[/code].
+				Returns a [FmodChannel] handle that can be used to control playback.
+			</description>
+		</method>
+		<method name="record_start">
+			<return type="void" />
+			<param index="0" name="id" type="int" />
+			<param index="1" name="sound" type="FmodSound" />
+			<param index="2" name="loop" type="bool" />
+			<description>
+				Starts recording from the specified device into the provided sound object.
+				If loop is [code]true[/code], recording will wrap around to the beginning of the sound buffer when it reaches the end.
+			</description>
+		</method>
+		<method name="record_stop">
+			<return type="void" />
+			<param index="0" name="id" type="int" />
+			<description>
+				Stops recording from the specified device.
+			</description>
+		</method>
+		<method name="release">
+			<return type="void" />
+			<description>
+				Closes the system connection and releases all associated resources. After calling this method, the system object is no longer valid and should not be used.
+			</description>
+		</method>
+		<method name="set_driver">
+			<return type="void" />
+			<param index="0" name="driver" type="int" />
+			<description>
+				Sets the output driver for the currently selected output type. Use [method get_driver_info] to enumerate available drivers.
+			</description>
+		</method>
+		<method name="set_network_proxy">
+			<return type="void" />
+			<param index="0" name="proxy" type="String" />
+			<description>
+				Sets a proxy server URL for all subsequent internet streaming connections. Pass an empty string to disable proxy.
+			</description>
+		</method>
+		<method name="set_network_timeout">
+			<return type="void" />
+			<param index="0" name="timeout" type="int" />
+			<description>
+				Sets the timeout in milliseconds for network streams. This affects how long FMOD waits for data before considering a stream stalled.
+			</description>
+		</method>
+		<method name="set_output">
+			<return type="void" />
+			<param index="0" name="output_type" type="int" enum="FmodSystem.FmodOutputType" />
+			<description>
+				Sets the output interface type used to run the mixer. Must be called before [method init].
+				Common options include [constant FMOD_OUTPUT_TYPE_AUTODETECT], [constant FMOD_OUTPUT_TYPE_WASAPI] (Windows), and [constant FMOD_OUTPUT_TYPE_NOSOUND] (silent mode).
+			</description>
+		</method>
+		<method name="system_is_null" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if the internal FMOD System object is null (not created).
+			</description>
+		</method>
+		<method name="system_is_valid" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if the internal FMOD System object is valid and ready for use.
+			</description>
+		</method>
+		<method name="update">
+			<return type="void" />
+			<description>
+				Updates the FMOD System. This should be called regularly (typically every frame) to process streams, 3D positioning, and non-realtime output modes.
+				When using [constant FMOD_INIT_FLAG_STREAM_FROM_UPDATE] or [constant FMOD_INIT_FLAG_MIX_FROM_UPDATE], this method is even more critical as it drives the audio processing.
+			</description>
+		</method>
+	</methods>
+	<constants>
+		<constant name="FMOD_INIT_FLAG_NORMAL" value="0" enum="FmodInitFlags">
+			Normal initialization, no special flags.
+		</constant>
+		<constant name="FMOD_INIT_FLAG_STREAM_FROM_UPDATE" value="1" enum="FmodInitFlags">
+			No stream thread is created internally. Streams are driven from [method update]. Useful for non-realtime outputs.
+		</constant>
+		<constant name="FMOD_INIT_FLAG_MIX_FROM_UPDATE" value="2" enum="FmodInitFlags">
+			No mixer thread is created internally. Mixing is driven from [method update]. Only applicable for polling-based output modes.
+		</constant>
+		<constant name="FMOD_INIT_FLAG_3D_RIGHTHANDED" value="4" enum="FmodInitFlags">
+			3D calculations use right-handed coordinates instead of the default left-handed coordinates.
+		</constant>
+		<constant name="FMOD_INIT_FLAG_CLIP_OUTPUT" value="8" enum="FmodInitFlags">
+			Enables hard clipping of output values greater than 1.0 or less than -1.0.
+		</constant>
+		<constant name="FMOD_INIT_FLAG_CHANNEL_LOWPASS" value="256" enum="FmodInitFlags">
+			Enables lowpass gain and 3D occlusion features on channels, and automatic use of the Geometry API.
+		</constant>
+		<constant name="FMOD_INIT_FLAG_CHANNEL_DISTANCEFILTER" value="512" enum="FmodInitFlags">
+			All 3D-based voices have software lowpass and highpass filters added to the DSP chain as an automatic distance-based bandpass filter. Use [code]set_advanced_settings[/code] to adjust center frequencies.
+		</constant>
+		<constant name="FMOD_INIT_FLAG_PROFILE_ENABLE" value="65536" enum="FmodInitFlags">
+			Enables TCP/IP profiling host, allowing FMOD Studio or FMOD Profiler to connect and view memory, CPU, and DSP graphs in real-time.
+		</constant>
+		<constant name="FMOD_INIT_FLAG_VOL0_BECOMES_VIRTUAL" value="131072" enum="FmodInitFlags">
+			Sounds with volume 0 become virtual voices and are not processed except for position updates.
+		</constant>
+		<constant name="FMOD_INIT_FLAG_GEOMETRY_USECLOSEST" value="262144" enum="FmodInitFlags">
+			When using the geometry engine, only process the closest polygon instead of accumulating all polygons intersecting the sound-to-listener line.
+		</constant>
+		<constant name="FMOD_INIT_FLAG_PREFER_DOLBY_DOWNMIX" value="524288" enum="FmodInitFlags">
+			When using 5.1 speaker mode with stereo output devices, use Dolby Pro Logic II downmix algorithm instead of the default stereo downmix.
+		</constant>
+		<constant name="FMOD_INIT_FLAG_THREAD_UNSAFE" value="1048576" enum="FmodInitFlags">
+			Disables thread safety for API calls. Only use if FMOD is called from a single thread and Studio API is not used!
+		</constant>
+		<constant name="FMOD_INIT_FLAG_PROFILE_METER_ALL" enum="FmodInitFlags" value="2097152">
+			Enables level metering on all DSPs. This is slower but provides level information for all units in the DSP graph.
+		</constant>
+		<constant name="FMOD_INIT_FLAG_MEMORY_TRACKING" value="4194304" enum="FmodInitFlags">
+			Enables memory allocation tracking. Currently only useful when using the Studio API. Increases memory usage and reduces performance.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_AUTODETECT" value="0" enum="FmodOutputType">
+			Automatically select the most appropriate output mode for the platform.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_UNKNOWN" value="1" enum="FmodOutputType">
+			Unknown output type, returned when the system cannot determine the output mode.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_NOSOUND" value="2" enum="FmodOutputType">
+			No sound output. All calls succeed but no audio is produced. Useful for servers or offline processing.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_WAVWRITER" value="3" enum="FmodOutputType">
+			Write output to a WAV file instead of playing through speakers.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_NOSOUND_NRT" value="4" enum="FmodOutputType">
+			Non-realtime no-sound mode. Calls to [method update] produce audio output without real-time constraints.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_WAVWRITER_NRT" value="5" enum="FmodOutputType">
+			Non-realtime WAV writer mode. Writes audio to a WAV file without real-time constraints, allowing faster-than-realtime encoding.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_WASAPI" value="6" enum="FmodOutputType">
+			Windows Audio Session API. Default output mode on Windows Vista and later.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_ASIO" value="7" enum="FmodOutputType">
+			Audio Stream Input/Output. Low-latency professional audio interface for Windows.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_PULSEAUDIO" value="8" enum="FmodOutputType">
+			PulseAudio output. Default on modern Linux distributions.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_ALSA" value="9" enum="FmodOutputType">
+			Advanced Linux Sound Architecture. Legacy Linux audio output.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_COREAUDIO" value="10" enum="FmodOutputType">
+			Core Audio. Default output mode on macOS and iOS.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_AUDIOTRACK" value="11" enum="FmodOutputType">
+			Android AudioTrack output. Legacy Android audio output.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_OPENSL" value="12" enum="FmodOutputType">
+			OpenSL ES output. Android native audio API.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_AUDIOOUT" value="13" enum="FmodOutputType">
+			PlayStation AudioOut output.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_AUDIO3D" value="14" enum="FmodOutputType">
+			PlayStation Audio3D output.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_WEBAUDIO" value="15" enum="FmodOutputType">
+			Web Audio API output for HTML5/WebAssembly builds.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_NNAUDIO" value="16" enum="FmodOutputType">
+			Nintendo Switch nn::audio output.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_WINSONIC" value="17" enum="FmodOutputType">
+			Windows Sonic output with spatial audio support.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_AAUDIO" value="18" enum="FmodOutputType">
+			Android AAudio output. Modern low-latency Android audio API.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_AUDIOWORKLET" value="19" enum="FmodOutputType">
+			Web Audio Worklet output for improved HTML5 audio performance.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_PHASE" value="20" enum="FmodOutputType">
+			Xbox Phase output.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_OHAUDIO" value="21" enum="FmodOutputType">
+			OpenHarmony OHAudio output.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_MAX" value="22" enum="FmodOutputType">
+			Maximum output type value, used for bounds checking.
+		</constant>
+		<constant name="FMOD_OUTPUT_TYPE_FORCEINT" value="65536" enum="FmodOutputType">
+			Forces the enum to be 32-bit size.
+		</constant>
+		<constant name="FMOD_SPEAKER_MODE_DEFAULT" value="0" enum="FmodSpeakerMode">
+			Default speaker mode for the selected output device.
+		</constant>
+		<constant name="FMOD_SPEAKER_MODE_RAW" value="1" enum="FmodSpeakerMode">
+			Raw speaker mode. Speaker mapping is disabled, channels are output as-is.
+		</constant>
+		<constant name="FMOD_SPEAKER_MODE_MONO" value="2" enum="FmodSpeakerMode">
+			Mono output (1 channel).
+		</constant>
+		<constant name="FMOD_SPEAKER_MODE_STEREO" value="3" enum="FmodSpeakerMode">
+			Stereo output (2 channels: left, right).
+		</constant>
+		<constant name="FMOD_SPEAKER_MODE_QUAD" value="4" enum="FmodSpeakerMode">
+			Quadraphonic output (4 channels: front left, front right, surround left, surround right).
+		</constant>
+		<constant name="FMOD_SPEAKER_MODE_SURROUND" value="5" enum="FmodSpeakerMode">
+			Surround output (5 channels: front left, front right, center, surround left, surround right).
+		</constant>
+		<constant name="FMOD_SPEAKER_MODE_5POINT1" value="6" enum="FmodSpeakerMode">
+			5.1 surround output (6 channels: front left, front right, center, LFE, surround left, surround right).
+		</constant>
+		<constant name="FMOD_SPEAKER_MODE_7POINT1" value="7" enum="FmodSpeakerMode">
+			7.1 surround output (8 channels: front left, front right, center, LFE, surround left, surround right, back left, back right).
+		</constant>
+		<constant name="FMOD_SPEAKER_MODE_7POINT1POINT4" value="8" enum="FmodSpeakerMode">
+			7.1.4 surround output (12 channels: 7.1 plus 4 overhead channels for Dolby Atmos).
+		</constant>
+		<constant name="FMOD_SPEAKER_MODE_MAX" value="9" enum="FmodSpeakerMode">
+			Maximum speaker mode value, used for bounds checking.
+		</constant>
+		<constant name="FMOD_SPEAKER_MODE_FORCEINT" value="65536" enum="FmodSpeakerMode">
+			Forces the enum to be 32-bit size.
+		</constant>
+		<constant name="FMOD_MODE_DEFAULT" value="0" enum="FmodMode">
+			Default sound creation mode.
+		</constant>
+		<constant name="FMOD_MODE_LOOP_OFF" value="1" enum="FmodMode">
+			Sound does not loop. Playback stops at the end.
+		</constant>
+		<constant name="FMOD_MODE_LOOP_NORMAL" value="2" enum="FmodMode">
+			Sound loops normally, jumping from end back to start.
+		</constant>
+		<constant name="FMOD_MODE_LOOP_BIDI" value="4" enum="FmodMode">
+			Sound loops bidirectionally, playing forward then backward (ping-pong).
+		</constant>
+		<constant name="FMOD_MODE_2D" value="8" enum="FmodMode">
+			2D sound that ignores 3D positioning and attenuation.
+		</constant>
+		<constant name="FMOD_MODE_3D" value="16" enum="FmodMode">
+			3D sound that is affected by 3D positioning and attenuation settings.
+		</constant>
+		<constant name="FMOD_MODE_CREATESTREAM" value="128" enum="FmodMode">
+			Creates a stream for the sound. Audio is decoded on-the-fly, saving memory for large files.
+		</constant>
+		<constant name="FMOD_MODE_CREATESAMPLE" value="256" enum="FmodMode">
+			Loads the entire sound into memory as a sample. Enables fast seeking and repeated playback.
+		</constant>
+		<constant name="FMOD_MODE_CREATECOMPRESSEDSAMPLE" value="512" enum="FmodMode">
+			Creates a compressed sample that stays compressed in memory, decoding in real-time during playback. Saves memory but uses more CPU.
+		</constant>
+		<constant name="FMOD_MODE_OPENUSER" value="1024" enum="FmodMode">
+			Opens a user-created sound with custom read callbacks.
+		</constant>
+		<constant name="FMOD_MODE_OPENMEMORY" value="2048" enum="FmodMode">
+			Opens a sound from memory. The memory buffer is copied by FMOD.
+		</constant>
+		<constant name="FMOD_MODE_OPENMEMORY_POINT" value="268435456" enum="FmodMode">
+			Opens a sound from memory using the provided pointer directly without copying. The application must keep the memory valid during playback.
+		</constant>
+		<constant name="FMOD_MODE_OPENRAW" value="4096" enum="FmodMode">
+			Opens a raw audio file with no format parsing. Requires manual specification of format parameters.
+		</constant>
+		<constant name="FMOD_MODE_OPENONLY" value="8192" enum="FmodMode">
+			Opens the file for metadata reading only. No audio data is loaded and the sound cannot be played.
+		</constant>
+		<constant name="FMOD_MODE_ACCURATETIME" value="16384" enum="FmodMode">
+			Calculates accurate length and position information for VBR formats like MP3. Increases opening time.
+		</constant>
+		<constant name="FMOD_MODE_MPEGSEARCH" value="32768" enum="FmodMode">
+			For MP2/MP3 files: searches for sync bytes to find the first frame. Increases opening time but improves compatibility with some files.
+		</constant>
+		<constant name="FMOD_MODE_NONBLOCKING" value="65536" enum="FmodMode">
+			Opens the sound asynchronously without blocking. Check [method FmodSound.get_open_state] to determine when the sound is ready.
+		</constant>
+		<constant name="FMOD_MODE_UNIQUE" value="131072" enum="FmodMode">
+			Creates a unique sound instance that is not shared with other sounds referencing the same file.
+		</constant>
+		<constant name="FMOD_MODE_3D_HEADRELATIVE" value="262144" enum="FmodMode">
+			3D sound position is relative to the listener's head orientation.
+		</constant>
+		<constant name="FMOD_MODE_3D_WORLDRELATIVE" value="524288" enum="FmodMode">
+			3D sound position is in world coordinates (default for 3D sounds).
+		</constant>
+		<constant name="FMOD_MODE_3D_INVERSEROLLOFF" value="1048576" enum="FmodMode">
+			3D sound uses inverse distance rolloff model (volume decreases with 1/distance).
+		</constant>
+		<constant name="FMOD_MODE_3D_LINEARROLLOFF" value="2097152" enum="FmodMode">
+			3D sound uses linear distance rolloff model.
+		</constant>
+		<constant name="FMOD_MODE_3D_LINEARSQUAREROLLOFF" value="4194304" enum="FmodMode">
+			3D sound uses linear squared distance rolloff model.
+		</constant>
+		<constant name="FMOD_MODE_3D_INVERSETAPEREDROLLOFF" value="8388608" enum="FmodMode">
+			3D sound uses inverse tapered rolloff model with smooth transition at max distance.
+		</constant>
+		<constant name="FMOD_MODE_3D_CUSTOMROLLOFF" value="67108864" enum="FmodMode">
+			3D sound uses a custom rolloff curve defined by [method FmodChannel.set_3d_custom_rolloff].
+		</constant>
+		<constant name="FMOD_MODE_3D_IGNOREGEOMETRY" value="1073741824" enum="FmodMode">
+			3D sound ignores geometry-based occlusion and environmental effects.
+		</constant>
+		<constant name="FMOD_MODE_IGNORETAGS" value="33554432" enum="FmodMode">
+			Ignores metadata tags in the sound file, speeding up loading.
+		</constant>
+		<constant name="FMOD_MODE_LOWMEM" value="134217728" enum="FmodMode">
+			Uses less memory when loading sounds, at the cost of some features and compatibility.
+		</constant>
+		<constant name="FMOD_MODE_VIRTUAL_PLAYFROMSTART" value="-2147483648" enum="FmodMode">
+			Virtual channels resume from the start of the sound when they become real, rather than from where they went virtual.
+		</constant>
+		<constant name="FMOD_TIME_UNIT_MS" value="1" enum="FmodTimeUnit">
+			Time in milliseconds.
+		</constant>
+		<constant name="FMOD_TIME_UNIT_PCM" value="2" enum="FmodTimeUnit">
+			Time in PCM (Pulse Code Modulation) samples.
+		</constant>
+		<constant name="FMOD_TIME_UNIT_PCMBYTES" value="4" enum="FmodTimeUnit">
+			Time in bytes of PCM data.
+		</constant>
+		<constant name="FMOD_TIME_UNIT_RAWBYTES" value="8" enum="FmodTimeUnit">
+			Time in raw file bytes (compressed data).
+		</constant>
+		<constant name="FMOD_TIME_UNIT_PCMFRACTION" value="16" enum="FmodTimeUnit">
+			Time as a fractional PCM sample position.
+		</constant>
+		<constant name="FMOD_TIME_UNIT_MODORDER" value="256" enum="FmodTimeUnit">
+			For module formats (MOD/XM/IT/S3M): pattern order position.
+		</constant>
+		<constant name="FMOD_TIME_UNIT_MODROW" value="512" enum="FmodTimeUnit">
+			For module formats (MOD/XM/IT/S3M): row within the current pattern.
+		</constant>
+		<constant name="FMOD_TIME_UNIT_MODPATTERN" value="1024" enum="FmodTimeUnit">
+			For module formats (MOD/XM/IT/S3M): pattern index.
+		</constant>
+	</constants>
+</class>

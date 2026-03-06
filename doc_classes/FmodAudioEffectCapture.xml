@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="FmodAudioEffectCapture" inherits="FmodAudioEffect" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Captures audio output to an internal ring buffer for audio visualization, recording, or analysis.
+	</brief_description>
+	<description>
+		FmodAudioEffectCapture captures the audio signal passing through an audio bus and stores it in an internal ring buffer. This is useful for real-time audio visualization, custom audio processing, or recording audio output.
+		The captured audio is stored in a thread-safe ring buffer as interleaved stereo data (L, R, L, R...). You can query the available frames and retrieve them as needed.
+		To use this effect, apply it to an audio bus using [method apply_to], then poll [method get_frames_available] periodically and retrieve the audio data using [method get_buffer].
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="can_get_buffer" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="frames" type="int" />
+			<description>
+				Returns [code]true[/code] if at least the specified number of frames are available in the buffer and can be retrieved using [method get_buffer].
+			</description>
+		</method>
+		<method name="clear_buffer">
+			<return type="void" />
+			<description>
+				Clears the internal ring buffer, discarding all captured audio data. This is useful when you want to start fresh, for example, when beginning a new visualization or recording session.
+			</description>
+		</method>
+		<method name="get_buffer">
+			<return type="PackedVector2Array" />
+			<param index="0" name="frames" type="int" />
+			<description>
+				Retrieves the specified number of frames from the internal ring buffer. The returned array contains interleaved stereo audio data where each [Vector2] represents one sample: [code]x[/code] is the left channel and [code]y[/code] is the right channel.
+				Returns an empty array if no data is available. Use [method can_get_buffer] or [method get_frames_available] to check availability before calling this method.
+			</description>
+		</method>
+		<method name="get_discarded_frames" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the number of audio frames that have been discarded due to buffer overflow. If the audio bus produces data faster than it is consumed, older frames may be dropped. A high number of discarded frames indicates that you should increase the [member buffer_length] or consume data more frequently.
+			</description>
+		</method>
+		<method name="get_frames_available" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the number of audio frames currently available in the ring buffer that can be retrieved using [method get_buffer]. This value changes as new audio is captured and as data is retrieved.
+			</description>
+		</method>
+		<method name="get_pushed_frames" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the total number of audio frames that have been pushed to the buffer from the audio bus since the effect was applied. This includes both frames currently in the buffer and frames that have been discarded.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="buffer_length" type="float" setter="set_buffer_length" getter="get_buffer_length" default="1.0">
+			The length of the internal ring buffer in seconds. A larger buffer can hold more audio data and is less likely to drop frames, but uses more memory. The default value of 1.0 second is suitable for most visualization and recording use cases. Increase this value if you are experiencing frame discards.
+		</member>
+	</members>
+</class>

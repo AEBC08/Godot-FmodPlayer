@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="FmodAudioEffectStereoEnhance" inherits="FmodAudioEffect" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Stereo enhancement effect for widening or narrowing the stereo field.
+	</brief_description>
+	<description>
+		FmodAudioEffectStereoEnhance is a stereo widening/enhancement effect that can expand or contract the perceived stereo width of audio signals. It uses multiple techniques including pan pullout, time-based separation, and surround processing to manipulate the stereo image.
+		The effect can create wider, more immersive stereo fields for music and sound effects, or narrow the stereo image for mono compatibility. Use it to add spaciousness to narrow recordings, create special stereo effects, or ensure mono compatibility when needed.
+		The pan pullout spreads low frequencies to the sides while keeping mid frequencies centered, time pullout introduces micro-delays between channels for width, and surround adds depth to the stereo field.
+	</description>
+	<tutorials>
+	</tutorials>
+	<members>
+		<member name="pan_pullout" type="float" setter="set_pan_pullout" getter="get_pan_pullout" default="1.0">
+			The amount of pan-based stereo widening applied. Range: 0.0 to 4.0. Default: 1.0. Higher values spread the stereo image wider by moving different frequency components to different positions in the stereo field. This creates a sense of width while maintaining center image stability. A value of 0.0 disables this effect.
+		</member>
+		<member name="surround" type="float" setter="set_surround" getter="get_surround" default="0.0">
+			The amount of surround processing applied to the stereo field. Range: -100.0 to 100.0. Default: 0.0. Positive values enhance the ambient/spatial components of the signal, creating a more enveloping sound. Negative values can make the stereo image more focused and direct. This parameter manipulates the difference (L-R) signal to alter spaciousness.
+		</member>
+		<member name="time_pullout_ms" type="float" setter="set_time_pullout" getter="get_time_pullout" default="0.0">
+			The time-based stereo separation in milliseconds. Range: 0.0 to 50.0 ms. Default: 0.0. This introduces a small delay between the left and right channels to create stereo width. The effect mimics natural acoustic delays and can make sources sound wider. Higher values create more width but may cause comb filtering artifacts if too extreme. Use subtle values (1-10 ms) for natural enhancement.
+		</member>
+	</members>
+</class>

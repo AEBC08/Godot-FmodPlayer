@@ -316,25 +316,30 @@ namespace godot {
 						case FmodSound::FMOD_SOUND_FORMAT_PCM8:
 							sample_val = (float)(*ptr) / 127.5f - 1.0f;
 							break;
+
 						case FmodSound::FMOD_SOUND_FORMAT_PCM16: {
 							int16_t val = (int16_t)(ptr[0] | (ptr[1] << 8));
 							sample_val = (float)val / 32767.0f;
 							break;
 						}
+
 						case FmodSound::FMOD_SOUND_FORMAT_PCM24: {
 							int32_t val = (int32_t)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16));
 							if (val & 0x800000) val |= 0xFF000000;
 							sample_val = (float)val / 8388607.0f;
 							break;
 						}
+
 						case FmodSound::FMOD_SOUND_FORMAT_PCM32: {
 							int32_t val = (int32_t)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24));
 							sample_val = (float)val / 2147483647.0f;
 							break;
 						}
+
 						case FmodSound::FMOD_SOUND_FORMAT_PCMFLOAT:
 							sample_val = *(const float*)ptr;
 							break;
+
 						default:
 							if (bits == 8) {
 								sample_val = (float)(*ptr) / 127.5f - 1.0f;

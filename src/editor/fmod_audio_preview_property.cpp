@@ -69,18 +69,18 @@ namespace godot {
 		_current_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_RIGHT);
 		_current_label->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 		_current_label->set_modulate(Color(1, 1, 1, 0.5));
-		_current_label->set_text("00:00");
+		_current_label->set_text("0.00s");
 		hbox->add_child(_current_label);
 
 		// 分隔符
 		Label* separator = memnew(Label);
-		separator->set_text(" / ");
+		separator->set_text("/");
 		separator->set_modulate(Color(1, 1, 1, 0.5));
 		hbox->add_child(separator);
 
 		// 总时长标签
 		_duration_label = memnew(Label);
-		_duration_label->set_text("00:00");
+		_duration_label->set_text("0.00s");
 		_duration_label->set_modulate(Color(1, 1, 1, 0.5));
 		hbox->add_child(_duration_label);
 	}
@@ -143,9 +143,7 @@ namespace godot {
 	}
 
 	void FmodAudioPreviewProperty::_update_time_labels() {
-		int minutes = int(playback_position) / 60;
-		int seconds = int(playback_position) % 60;
-		_current_label->set_text(String::num_int64(minutes).pad_zeros(2) + ":" + String::num_int64(seconds).pad_zeros(2));
+		_current_label->set_text(String::num(playback_position, 2));
 	}
 
 	void FmodAudioPreviewProperty::_update_preview() {
@@ -163,7 +161,7 @@ namespace godot {
 		if (stream.is_null()) {
 			stream_duration = 0.0f;
 			if (_duration_label) {
-				_duration_label->set_text("00:00");
+				_duration_label->set_text("0.00s");
 			}
 			if (_preview) {
 				_preview->queue_redraw();
@@ -179,13 +177,11 @@ namespace godot {
 		// 获取音频长度
 		if (stream->is_data_loaded()) {
 			stream_duration = stream->get_length();
-			int minutes = int(stream_duration) / 60;
-			int seconds = int(stream_duration) % 60;
-			_duration_label->set_text(String::num_int64(minutes).pad_zeros(2) + ":" + String::num_int64(seconds).pad_zeros(2));
+			_duration_label->set_text(String::num(stream_duration, 2) + "s");
 		}
 		else {
 			stream_duration = 0.0f;
-			_duration_label->set_text("00:00");
+			_duration_label->set_text("0.00s");
 		}
 
 		_update_time_labels();

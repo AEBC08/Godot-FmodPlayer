@@ -7,6 +7,7 @@ reloadable = true
 [libraries]
 
 windows.debug.x86_64 = "fmod_player.windows.template_debug.x86_64.dll"
+windows.release.x86_64 = "fmod_player.windows.template_release.x86_64.dll"
 android.debug.arm64 = "libfmod_player.android.template_debug.arm64.so"
 
 [icons]

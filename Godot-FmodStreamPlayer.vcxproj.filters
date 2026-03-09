@@ -51,6 +51,12 @@
     <Filter Include="Source Files\editor">
       <UniqueIdentifier>{20c9d372-f92a-4997-8e31-8d1184ecfbcc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\geometry">
+      <UniqueIdentifier>{f362e116-3cd8-4fc5-9d52-0681259289ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\geometry">
+      <UniqueIdentifier>{c6d971ec-342f-4593-89fb-5495e2c8b712}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\fmod_server.h">
@@ -167,6 +173,9 @@
     <ClInclude Include="src\playback\fmod_sound_group.h">
       <Filter>Header Files\playback</Filter>
     </ClInclude>
+    <ClInclude Include="src\geometry\geometry.h">
+      <Filter>Header Files\geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\fmod_server.cpp">
@@ -279,6 +288,9 @@
     </ClCompile>
     <ClCompile Include="src\playback\fmod_sound_group.cpp">
       <Filter>Source Files\playback</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry\geometry.cpp">
+      <Filter>Source Files\geometry</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -158,6 +158,10 @@ namespace godot {
 		return audio_bus_layout;
 	}
 
+	void FmodServer::generate_bus_layout() {
+		audio_bus_layout->sync_from_audio_server();
+	}
+
 	void FmodServer::_build_bus_layout() {
 		if (audio_bus_layout.is_valid()) {
 			audio_bus_layout->sync_from_audio_server();

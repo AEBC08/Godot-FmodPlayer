@@ -9,7 +9,8 @@ env.Append(CPPPATH=["src/", "src/thirdparty/fmod/inc"])
 env.Tool("compilation_db")
 env.CompilationDatabase()
 sources = (Glob("src/core/*.cpp") + Glob("src/audio/*.cpp") + Glob("src/playback/*.cpp") + 
-           Glob("src/mixer/*.cpp") + Glob("src/dsp/*.cpp") + Glob("src/nodes/*.cpp") + Glob("src/editor/*.cpp"))
+           Glob("src/mixer/*.cpp") + Glob("src/dsp/*.cpp") + Glob("src/nodes/*.cpp") + 
+           Glob("src/editor/*.cpp")) + Glob("src/geometry/*.cpp")
 
 if env["target"] in ["editor", "template_debug"]:
     doc_data = env.GodotCPPDocData("src/gen/doc_data.gen.cpp", source=Glob("doc_classes/*.xml"))

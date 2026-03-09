@@ -553,7 +553,7 @@ namespace godot {
 		_update_solo_mute();
 	}
 
-	void FmodAudioBusLayout::sync_bus_state(const String& bus_name, int audio_server_bus_index) {
+	void FmodAudioBusLayout::sync_bus_state(const String& bus_name, int audio_server_bus_index) const {
 		AudioServer* audio_server = AudioServer::get_singleton();
 		if (!audio_server) return;
 

@@ -30,6 +30,7 @@
 #include "dsp/fmod_dsp_connection.h"
 #include "mixer/fmod_audio_bus.h"
 #include "mixer/fmod_audio_bus_layout.h"
+#include "geometry/geometry.h"
 #include "nodes/fmod_audio_sample_emitter.h"
 #include "nodes/fmod_audio_stream_player.h"
 #include "playback/fmod_channel.h"
@@ -141,6 +142,9 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	// 音频流类
 	GDREGISTER_CLASS(FmodAudioStream);
 	GDREGISTER_CLASS(FmodAudioStreamFLAC);
+
+	// 几何体
+	GDREGISTER_CLASS(FmodGeometry);
 
 	// 音频播放器类
 	GDREGISTER_CLASS(FmodAudioStreamPlayer);

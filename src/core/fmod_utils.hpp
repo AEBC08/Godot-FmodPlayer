@@ -107,6 +107,65 @@ namespace FmodUtils {
         return theme->get_color(name, theme_type);
     }
 
+    // 将 FMOD 方向向量转换为 Godot 的旋转矩阵
+    static godot::Basis fmod_vectors_to_godot_basis(const FMOD_VECTOR& forward, const FMOD_VECTOR& up) {
+        // FMOD (左手系 Y-up) -> Godot (右手系 Y-up) 转换
+        godot::Vector3 f(-forward.x, forward.y, forward.z);   // X 取反
+        godot::Vector3 u(-up.x, up.y, up.z);                  // X 取反
+        
+        godot::Vector3 r = u.cross(f).normalized();
+        f.normalize();
+        u.normalize();
+        
+        return godot::Basis(r, u, f);
+    }
+
+    static godot::Vector3 fmod_vectors_to_godot_euler(const FMOD_VECTOR& forward, const FMOD_VECTOR& up) {
+        // FMOD (左手系 Y-up) -> Godot (右手系 Y-up) 转换
+        // 关键：翻转 X 轴来改变手性
+        
+        godot::Vector3 f(-forward.x, forward.y, forward.z);   // X 取反
+        godot::Vector3 u(-up.x, up.y, up.z);                  // X 取反
+        
+        // 计算右向量（右手系叉乘：up × forward）
+        godot::Vector3 r = u.cross(f).normalized();
+        f.normalize();
+        u.normalize();
+        
+        // 构建 Godot Basis（列向量：右、上、前）
+        godot::Basis basis(r, u, f);
+        
+        // 返回欧拉角（YXZ 顺序）
+        return basis.get_euler();
+    }
+
+    // 将 FMOD 方向向量转换为 Godot 的四元数
+    static godot::Quaternion fmod_vectors_to_godot_quat(const FMOD_VECTOR& forward, const FMOD_VECTOR& up) {
+        return godot::Quaternion(fmod_vectors_to_godot_basis(forward, up));
+    }
+
+    // 将 Godot 欧拉角转换为 FMOD 方向向量
+    static void godot_euler_to_fmod_vectors(const godot::Vector3& euler, FMOD_VECTOR* out_forward, FMOD_VECTOR* out_up) {
+        // Godot (右手系 Y-up) -> FMOD (左手系 Y-up) 转换
+        godot::Basis basis = godot::Basis::from_euler(euler);
+        
+        // 提取轴向量（Godot 右手系）
+        godot::Vector3 u = basis.get_column(1);  // 上
+        godot::Vector3 f = basis.get_column(2);  // 前
+        
+        // X 取反转换为左手系
+        if (out_forward) {
+            out_forward->x = -f.x;
+            out_forward->y = f.y;
+            out_forward->z = f.z;
+        }
+        if (out_up) {
+            out_up->x = -u.x;
+            out_up->y = u.y;
+            out_up->z = u.z;
+        }
+    }
+
 	template <typename T>
 	static godot::Ref<T> load(const godot::String& p_path) {
 		godot::ResourceLoader* loader = godot::ResourceLoader::get_singleton();

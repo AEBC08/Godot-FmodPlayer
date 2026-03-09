@@ -48,7 +48,7 @@ namespace godot {
 
 		// 与 Godot AudioServer 同步
 		void sync_from_audio_server();
-		void sync_bus_state(const String& bus_name, int audio_server_bus_index);
+		void sync_bus_state(const String& bus_name, int audio_server_bus_index) const;
 	};
 }
 

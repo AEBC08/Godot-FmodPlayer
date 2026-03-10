@@ -46,6 +46,22 @@ namespace godot {
 		BIND_ENUM_CONSTANT(FMOD_OUTPUT_TYPE_MAX);
 		BIND_ENUM_CONSTANT(FMOD_OUTPUT_TYPE_FORCEINT);
 
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_NONE);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_FRONT_LEFT);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_FRONT_RIGHT);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_FRONT_CENTER);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_LOW_FREQUENCY);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_SURROUND_LEFT);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_SURROUND_RIGHT);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_BACK_LEFT);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_BACK_RIGHT);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_TOP_FRONT_LEFT);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_TOP_FRONT_RIGHT);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_TOP_BACK_LEFT);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_TOP_BACK_RIGHT);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_MAX);
+		BIND_ENUM_CONSTANT(FMOD_SPEAKER_FORCEINT);
+
 		BIND_ENUM_CONSTANT(FMOD_SPEAKER_MODE_DEFAULT);
 		BIND_ENUM_CONSTANT(FMOD_SPEAKER_MODE_RAW);
 		BIND_ENUM_CONSTANT(FMOD_SPEAKER_MODE_MONO);
@@ -115,6 +131,119 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("set_driver", "driver"), &FmodSystem::set_driver);
 		ClassDB::bind_method(D_METHOD("get_driver"), &FmodSystem::get_driver);
 
+		ClassDB::bind_method(D_METHOD("set_software_channels", "num_software_channels"), &FmodSystem::set_software_channels);
+		ClassDB::bind_method(D_METHOD("get_software_channels"), &FmodSystem::get_software_channels);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_software_channels"), "set_software_channels", "get_software_channels");
+
+		ClassDB::bind_method(D_METHOD("set_software_format", "sample_rate", "speaker_mode", "num_raw_speakers"), &FmodSystem::set_software_format);
+		ClassDB::bind_method(D_METHOD("get_software_format"), &FmodSystem::get_software_format);
+		ClassDB::bind_method(D_METHOD("set_dsp_buffer_size", "buffer_length", "num_buffers"), &FmodSystem::set_dsp_buffer_size);
+		ClassDB::bind_method(D_METHOD("get_dsp_buffer_size"), &FmodSystem::get_dsp_buffer_size);
+		ClassDB::bind_method(D_METHOD("set_stream_buffer_size", "file_buffer_size", "file_buffer_size_type"), &FmodSystem::set_stream_buffer_size, DEFVAL(FMOD_TIME_UNIT_RAWBYTES), DEFVAL(16384));
+		ClassDB::bind_method(D_METHOD("get_stream_buffer_size"), &FmodSystem::get_stream_buffer_size);
+		ClassDB::bind_method(D_METHOD("set_speaker_position", "speaker", "x", "y", "active"), &FmodSystem::set_speaker_position);
+		ClassDB::bind_method(D_METHOD("get_speaker_position", "speaker"), &FmodSystem::get_speaker_position);
+
+		ClassDB::bind_method(D_METHOD("set_doppler_scale", "doppler_scale"), &FmodSystem::set_doppler_scale);
+		ClassDB::bind_method(D_METHOD("get_doppler_scale"), &FmodSystem::get_doppler_scale);
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "doppler_scale"), "set_doppler_scale", "get_doppler_scale");
+
+		ClassDB::bind_method(D_METHOD("set_distance_factor", "distance_factor"), &FmodSystem::set_distance_factor);
+		ClassDB::bind_method(D_METHOD("get_distance_factor"), &FmodSystem::get_distance_factor);
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "distance_factor"), "set_distance_factor", "get_distance_factor");
+
+		ClassDB::bind_method(D_METHOD("set_rolloff_scale", "rolloff_scale"), &FmodSystem::set_rolloff_scale);
+		ClassDB::bind_method(D_METHOD("get_rolloff_scale"), &FmodSystem::get_rolloff_scale);
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "rolloff_scale"), "set_rolloff_scale", "get_rolloff_scale");
+
+		ClassDB::bind_method(D_METHOD("set_3d_num_listeners", "num_listeners"), &FmodSystem::set_3d_num_listeners);
+		ClassDB::bind_method(D_METHOD("get_3d_num_listeners"), &FmodSystem::get_3d_num_listeners);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "3d_num_listeners"), "set_3d_num_listeners", "get_3d_num_listeners");
+
+		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_DEFAULT);
+		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_NOINTERP);
+		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_LINEAR);
+		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_CUBIC);
+		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_SPLINE);
+
+		ClassDB::bind_method(D_METHOD("set_max_mpeg_codecs", "max_codecs"), &FmodSystem::set_max_mpeg_codecs);
+		ClassDB::bind_method(D_METHOD("get_max_mpeg_codecs"), &FmodSystem::get_max_mpeg_codecs);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_mpeg_codecs"), "set_max_mpeg_codecs", "get_max_mpeg_codecs");
+
+		ClassDB::bind_method(D_METHOD("set_max_adpcm_codecs", "max_codecs"), &FmodSystem::set_max_adpcm_codecs);
+		ClassDB::bind_method(D_METHOD("get_max_adpcm_codecs"), &FmodSystem::get_max_adpcm_codecs);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_adpcm_codecs"), "set_max_adpcm_codecs", "get_max_adpcm_codecs");
+
+		ClassDB::bind_method(D_METHOD("set_max_xma_codecs", "max_codecs"), &FmodSystem::set_max_xma_codecs);
+		ClassDB::bind_method(D_METHOD("get_max_xma_codecs"), &FmodSystem::get_max_xma_codecs);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_xma_codecs"), "set_max_xma_codecs", "get_max_xma_codecs");
+
+		ClassDB::bind_method(D_METHOD("set_max_vorbis_codecs", "max_codecs"), &FmodSystem::set_max_vorbis_codecs);
+		ClassDB::bind_method(D_METHOD("get_max_vorbis_codecs"), &FmodSystem::get_max_vorbis_codecs);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_vorbis_codecs"), "set_max_vorbis_codecs", "get_max_vorbis_codecs");
+
+		ClassDB::bind_method(D_METHOD("set_max_at9_codecs", "max_codecs"), &FmodSystem::set_max_at9_codecs);
+		ClassDB::bind_method(D_METHOD("get_max_at9_codecs"), &FmodSystem::get_max_at9_codecs);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_at9_codecs"), "set_max_at9_codecs", "get_max_at9_codecs");
+
+		ClassDB::bind_method(D_METHOD("set_max_fadpcm_codecs", "max_codecs"), &FmodSystem::set_max_fadpcm_codecs);
+		ClassDB::bind_method(D_METHOD("get_max_fadpcm_codecs"), &FmodSystem::get_max_fadpcm_codecs);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_fadpcm_codecs"), "set_max_fadpcm_codecs", "get_max_fadpcm_codecs");
+
+		ClassDB::bind_method(D_METHOD("set_max_opus_codecs", "max_codecs"), &FmodSystem::set_max_opus_codecs);
+		ClassDB::bind_method(D_METHOD("get_max_opus_codecs"), &FmodSystem::get_max_opus_codecs);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_opus_codecs"), "set_max_opus_codecs", "get_max_opus_codecs");
+
+		ClassDB::bind_method(D_METHOD("set_asio_num_channels", "num_channels"), &FmodSystem::set_asio_num_channels);
+		ClassDB::bind_method(D_METHOD("get_asio_num_channels"), &FmodSystem::get_asio_num_channels);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "asio_num_channels"), "set_asio_num_channels", "get_asio_num_channels");
+
+		ClassDB::bind_method(D_METHOD("set_vol0_virtual_vol", "vol"), &FmodSystem::set_vol0_virtual_vol);
+		ClassDB::bind_method(D_METHOD("get_vol0_virtual_vol"), &FmodSystem::get_vol0_virtual_vol);
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "vol0_virtual_vol"), "set_vol0_virtual_vol", "get_vol0_virtual_vol");
+
+		ClassDB::bind_method(D_METHOD("set_default_decode_buffer_size", "size"), &FmodSystem::set_default_decode_buffer_size);
+		ClassDB::bind_method(D_METHOD("get_default_decode_buffer_size"), &FmodSystem::get_default_decode_buffer_size);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "default_decode_buffer_size"), "set_default_decode_buffer_size", "get_default_decode_buffer_size");
+
+		ClassDB::bind_method(D_METHOD("set_profile_port", "port"), &FmodSystem::set_profile_port);
+		ClassDB::bind_method(D_METHOD("get_profile_port"), &FmodSystem::get_profile_port);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "profile_port"), "set_profile_port", "get_profile_port");
+
+		ClassDB::bind_method(D_METHOD("set_geometry_max_fade_time", "time"), &FmodSystem::set_geometry_max_fade_time);
+		ClassDB::bind_method(D_METHOD("get_geometry_max_fade_time"), &FmodSystem::get_geometry_max_fade_time);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "geometry_max_fade_time"), "set_geometry_max_fade_time", "get_geometry_max_fade_time");
+
+		ClassDB::bind_method(D_METHOD("set_distance_filter_center_freq", "freq"), &FmodSystem::set_distance_filter_center_freq);
+		ClassDB::bind_method(D_METHOD("get_distance_filter_center_freq"), &FmodSystem::get_distance_filter_center_freq);
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "distance_filter_center_freq"), "set_distance_filter_center_freq", "get_distance_filter_center_freq");
+
+		ClassDB::bind_method(D_METHOD("set_reverb_3d_instance", "instance"), &FmodSystem::set_reverb_3d_instance);
+		ClassDB::bind_method(D_METHOD("get_reverb_3d_instance"), &FmodSystem::get_reverb_3d_instance);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "reverb_3d_instance"), "set_reverb_3d_instance", "get_reverb_3d_instance");
+
+		ClassDB::bind_method(D_METHOD("set_dsp_buffer_pool_size", "size"), &FmodSystem::set_dsp_buffer_pool_size);
+		ClassDB::bind_method(D_METHOD("get_dsp_buffer_pool_size"), &FmodSystem::get_dsp_buffer_pool_size);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "dsp_buffer_pool_size"), "set_dsp_buffer_pool_size", "get_dsp_buffer_pool_size");
+
+		ClassDB::bind_method(D_METHOD("set_resampler_method", "method"), &FmodSystem::set_resampler_method);
+		ClassDB::bind_method(D_METHOD("get_resampler_method"), &FmodSystem::get_resampler_method);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "resampler_method", PROPERTY_HINT_ENUM, "Default,No Interp,Linear,Cubic,Spline"), "set_resampler_method", "get_resampler_method");
+
+		ClassDB::bind_method(D_METHOD("set_random_seed", "seed"), &FmodSystem::set_random_seed);
+		ClassDB::bind_method(D_METHOD("get_random_seed"), &FmodSystem::get_random_seed);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "random_seed"), "set_random_seed", "get_random_seed");
+
+		ClassDB::bind_method(D_METHOD("set_max_convolution_threads", "max_threads"), &FmodSystem::set_max_convolution_threads);
+		ClassDB::bind_method(D_METHOD("get_max_convolution_threads"), &FmodSystem::get_max_convolution_threads);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_convolution_threads"), "set_max_convolution_threads", "get_max_convolution_threads");
+
+		ClassDB::bind_method(D_METHOD("set_max_spatial_objects", "max_objects"), &FmodSystem::set_max_spatial_objects);
+		ClassDB::bind_method(D_METHOD("get_max_spatial_objects"), &FmodSystem::get_max_spatial_objects);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_spatial_objects"), "set_max_spatial_objects", "get_max_spatial_objects");
+
+		ClassDB::bind_method(D_METHOD("apply_advanced_settings"), &FmodSystem::apply_advanced_settings);
+
 		ClassDB::bind_method(D_METHOD("set_network_proxy", "proxy"), &FmodSystem::set_network_proxy);
 		ClassDB::bind_method(D_METHOD("get_network_proxy"), &FmodSystem::get_network_proxy);
 		ClassDB::bind_method(D_METHOD("set_network_timeout", "timeout"), &FmodSystem::set_network_timeout);
@@ -157,6 +286,11 @@ namespace godot {
 		if (system) {
 			release();
 		}
+	}
+
+	void FmodSystem::_apply_3d_settings() {
+		ERR_FAIL_COND(!system);
+		FMOD_ERR_CHECK(system->set3DSettings(doppler_scale, distance_factor, rolloff_scale));
 	}
 
 	bool FmodSystem::system_is_valid() const {
@@ -264,6 +398,298 @@ namespace godot {
 		int driver = -1;
 		FMOD_ERR_CHECK_V(system->getDriver(&driver), -1);
 		return (int64_t)driver;
+	}
+
+	void FmodSystem::set_software_channels(const int num_software_channels) {
+		ERR_FAIL_COND(!system);
+		FMOD_ERR_CHECK(system->setSoftwareChannels(num_software_channels));
+	}
+
+	int FmodSystem::get_software_channels() const {
+		if (!system) return 0;
+		int numsoftwarechannels = 0;
+		FMOD_ERR_CHECK_V(system->getSoftwareChannels(&numsoftwarechannels), 0);
+		return numsoftwarechannels;
+	}
+
+	void FmodSystem::set_software_format(
+		const int sample_rate,
+		FmodSpeakerMode speaker_mode,
+		const int num_raw_speakers
+	) {
+		ERR_FAIL_COND(!system);
+		FMOD_SPEAKERMODE fmod_speaker_mode = static_cast<FMOD_SPEAKERMODE>(speaker_mode);
+		FMOD_ERR_CHECK(system->setSoftwareFormat(sample_rate, fmod_speaker_mode, num_raw_speakers));
+	}
+
+	Dictionary FmodSystem::get_software_format() const {
+		ERR_FAIL_COND_V(!system, Dictionary());
+		int samplerate = 0, numrawspeakers = 0;
+		FMOD_SPEAKERMODE fmod_speaker_mode = FMOD_SPEAKERMODE_DEFAULT;
+		FMOD_ERR_CHECK_V(system->getSoftwareFormat(&samplerate, &fmod_speaker_mode, &numrawspeakers), Dictionary());
+		Dictionary result;
+		result["sample_rate"] = samplerate;
+		result["speaker_mode"] = (int)fmod_speaker_mode;
+		result["num_raw_speakers"] = numrawspeakers;
+		return result;
+	}
+
+	void FmodSystem::set_dsp_buffer_size(const unsigned int buffer_length, const int num_buffers) {
+		ERR_FAIL_COND(!system);
+		FMOD_ERR_CHECK(system->setDSPBufferSize(buffer_length, num_buffers));
+	}
+
+	Dictionary FmodSystem::get_dsp_buffer_size() const {
+		ERR_FAIL_COND_V(!system, Dictionary());
+		unsigned int bufferlength;
+		int numbuffers;
+		FMOD_ERR_CHECK_V(system->getDSPBufferSize(&bufferlength, &numbuffers), Dictionary());
+		Dictionary result;
+		result["buffer_length"] = (uint32_t)bufferlength;
+		result["num_buffers"] = numbuffers;
+		return result;
+	}
+
+	void FmodSystem::set_stream_buffer_size(const unsigned int file_buffer_size, FmodTimeUnit file_buffer_size_type) {
+		ERR_FAIL_COND_MSG(
+			!system || file_buffer_size_type != FMOD_TIME_UNIT_MS || file_buffer_size_type != FMOD_TIME_UNIT_PCM ||
+			file_buffer_size != FMOD_TIME_UNIT_PCMBYTES || FMOD_TIME_UNIT_RAWBYTES
+			, "system is null or file_buffer_size_type is invalid"
+		);
+		FMOD_TIMEUNIT fmod_file_buffer_size_type = static_cast<FMOD_TIMEUNIT>(file_buffer_size_type);
+		FMOD_ERR_CHECK(system->setStreamBufferSize(file_buffer_size, fmod_file_buffer_size_type));
+	}
+
+	Dictionary FmodSystem::get_stream_buffer_size() const {
+		ERR_FAIL_COND_V(!system, Dictionary());
+		unsigned int filebuffersize = 0;
+		FMOD_TIMEUNIT filebuffersizetype = FMOD_TIMEUNIT_RAWBYTES;
+		FMOD_ERR_CHECK_V(system->getStreamBufferSize(&filebuffersize, &filebuffersizetype), Dictionary());
+		Dictionary result;
+		result["file_buffer_size"] = (uint64_t)filebuffersize;
+		result["file_buffer_size_type"] = (uint64_t)filebuffersizetype;
+		return result;
+	}
+	
+	void FmodSystem::set_speaker_position(FmodSpeaker speaker, const float x, const float y, const bool active) {
+		ERR_FAIL_COND(!system);
+		FMOD_SPEAKER fmod_speaker = static_cast<FMOD_SPEAKER>(speaker);
+		float clamped_x = CLAMP(x, -1.0f, 1.0f);
+		float clamped_y = CLAMP(y, -1.0f, 1.0f);
+		FMOD_ERR_CHECK(system->setSpeakerPosition(fmod_speaker, clamped_x, clamped_y, active));
+	}
+
+	Dictionary FmodSystem::get_speaker_position(FmodSpeaker speaker) const {
+		ERR_FAIL_COND_V(!system, Dictionary());
+		FMOD_SPEAKER fmod_speaker = static_cast<FMOD_SPEAKER>(speaker);
+		float x = 0.0f, y = 0.0f;
+		bool active;
+		FMOD_ERR_CHECK_V(system->getSpeakerPosition(fmod_speaker, &x, &y, &active), Dictionary());
+		Dictionary result;
+		result["x"] = x;
+		result["y"] = y;
+		result["active"] = active;
+		return result;
+	}
+
+	void FmodSystem::set_doppler_scale(const float _doppler_scale) {
+		ERR_FAIL_COND(!system);
+		doppler_scale = _doppler_scale;
+		_apply_3d_settings();
+	}
+
+	float FmodSystem::get_doppler_scale() const {
+		return doppler_scale;
+	}
+
+	void FmodSystem::set_distance_factor(const float _distance_factor) {
+		ERR_FAIL_COND(!system);
+		distance_factor = _distance_factor;
+		_apply_3d_settings();
+	}
+
+	float FmodSystem::get_distance_factor() const {
+		return distance_factor;
+	}
+
+	void FmodSystem::set_rolloff_scale(const float _rolloff_scale) {
+		ERR_FAIL_COND(!system);
+		rolloff_scale = _rolloff_scale;
+		_apply_3d_settings();
+	}
+
+	float FmodSystem::get_rolloff_scale() const {
+		return rolloff_scale;
+	}
+
+	void FmodSystem::set_3d_num_listeners(const int num_listeners) {
+		ERR_FAIL_COND(!system);
+		FMOD_ERR_CHECK(system->set3DNumListeners(num_listeners));
+	}
+
+	int FmodSystem::get_3d_num_listeners() const {
+		if (!system) return 1;
+		int numlisteners = 1;
+		FMOD_ERR_CHECK_V(system->get3DNumListeners(&numlisteners), 1);
+		return numlisteners;
+	}
+
+	void FmodSystem::set_max_mpeg_codecs(const int max_codecs) {
+		settings.maxMPEGCodecs = max_codecs;
+	}
+
+	int FmodSystem::get_max_mpeg_codecs() const {
+		return settings.maxMPEGCodecs;
+	}
+
+	void FmodSystem::set_max_adpcm_codecs(const int max_codecs) {
+		settings.maxADPCMCodecs = max_codecs;
+	}
+
+	int FmodSystem::get_max_adpcm_codecs() const {
+		return settings.maxADPCMCodecs;
+	}
+
+	void FmodSystem::set_max_xma_codecs(const int max_codecs) {
+		settings.maxXMACodecs = max_codecs;
+	}
+
+	int FmodSystem::get_max_xma_codecs() const {
+		return settings.maxXMACodecs;
+	}
+
+	void FmodSystem::set_max_vorbis_codecs(const int max_codecs) {
+		settings.maxVorbisCodecs = max_codecs;
+	}
+
+	int FmodSystem::get_max_vorbis_codecs() const {
+		return settings.maxVorbisCodecs;
+	}
+
+	void FmodSystem::set_max_at9_codecs(const int max_codecs) {
+		settings.maxAT9Codecs = max_codecs;
+	}
+
+	int FmodSystem::get_max_at9_codecs() const {
+		return settings.maxAT9Codecs;
+	}
+
+	void FmodSystem::set_max_fadpcm_codecs(const int max_codecs) {
+		settings.maxFADPCMCodecs = max_codecs;
+	}
+
+	int FmodSystem::get_max_fadpcm_codecs() const {
+		return settings.maxFADPCMCodecs;
+	}
+
+	void FmodSystem::set_max_opus_codecs(const int max_codecs) {
+		settings.maxOpusCodecs = max_codecs;
+	}
+
+	int FmodSystem::get_max_opus_codecs() const {
+		return settings.maxOpusCodecs;
+	}
+
+	void FmodSystem::set_asio_num_channels(const int num_channels) {
+		settings.ASIONumChannels = num_channels;
+	}
+
+	int FmodSystem::get_asio_num_channels() const {
+		return settings.ASIONumChannels;
+	}
+
+	void FmodSystem::set_vol0_virtual_vol(const float vol) {
+		settings.vol0virtualvol = vol;
+	}
+
+	float FmodSystem::get_vol0_virtual_vol() const {
+		return settings.vol0virtualvol;
+	}
+
+	void FmodSystem::set_default_decode_buffer_size(const unsigned int size) {
+		settings.defaultDecodeBufferSize = size;
+	}
+
+	unsigned int FmodSystem::get_default_decode_buffer_size() const {
+		return settings.defaultDecodeBufferSize;
+	}
+
+	void FmodSystem::set_profile_port(const unsigned short port) {
+		settings.profilePort = port;
+	}
+
+	unsigned short FmodSystem::get_profile_port() const {
+		return settings.profilePort;
+	}
+
+	void FmodSystem::set_geometry_max_fade_time(const unsigned int time) {
+		settings.geometryMaxFadeTime = time;
+	}
+
+	unsigned int FmodSystem::get_geometry_max_fade_time() const {
+		return settings.geometryMaxFadeTime;
+	}
+
+	void FmodSystem::set_distance_filter_center_freq(const float freq) {
+		settings.distanceFilterCenterFreq = freq;
+	}
+
+	float FmodSystem::get_distance_filter_center_freq() const {
+		return settings.distanceFilterCenterFreq;
+	}
+
+	void FmodSystem::set_reverb_3d_instance(const int instance) {
+		settings.reverb3Dinstance = instance;
+	}
+
+	int FmodSystem::get_reverb_3d_instance() const {
+		return settings.reverb3Dinstance;
+	}
+
+	void FmodSystem::set_dsp_buffer_pool_size(const int size) {
+		settings.DSPBufferPoolSize = size;
+	}
+
+	int FmodSystem::get_dsp_buffer_pool_size() const {
+		return settings.DSPBufferPoolSize;
+	}
+
+	void FmodSystem::set_resampler_method(FmodResamplerMethod method) {
+		settings.resamplerMethod = static_cast<FMOD_DSP_RESAMPLER>(method);
+	}
+
+	FmodSystem::FmodResamplerMethod FmodSystem::get_resampler_method() const {
+		return static_cast<FmodResamplerMethod>(settings.resamplerMethod);
+	}
+
+	void FmodSystem::set_random_seed(const unsigned int seed) {
+		settings.randomSeed = seed;
+	}
+
+	unsigned int FmodSystem::get_random_seed() const {
+		return settings.randomSeed;
+	}
+
+	void FmodSystem::set_max_convolution_threads(const int max_threads) {
+		settings.maxConvolutionThreads = max_threads;
+	}
+
+	int FmodSystem::get_max_convolution_threads() const {
+		return settings.maxConvolutionThreads;
+	}
+
+	void FmodSystem::set_max_spatial_objects(const int max_objects) {
+		settings.maxSpatialObjects = max_objects;
+	}
+
+	int FmodSystem::get_max_spatial_objects() const {
+		return settings.maxSpatialObjects;
+	}
+
+	void FmodSystem::apply_advanced_settings() {
+		ERR_FAIL_COND(!system);
+		settings.cbSize = sizeof(FMOD_ADVANCEDSETTINGS);
+		FMOD_ERR_CHECK(system->setAdvancedSettings(&settings));
 	}
 
 	void FmodSystem::set_network_proxy(const String& p_proxy) {
@@ -378,7 +804,7 @@ namespace godot {
 
 		// 分配内存
 		float* matrix = (float*)memalloc(array_length * sizeof(float));
-		
+
 		ERR_FAIL_COND_V(!matrix, PackedFloat32Array());
 		for (int i = 0; i < array_length; i++) {
 
@@ -404,11 +830,11 @@ namespace godot {
 		PackedFloat32Array mix_matrix;
 
 		// 只复制实际需要的数据
-		mix_matrix.resize(needed_size);				
+		mix_matrix.resize(needed_size);
 
 		// 应用矩阵
 		for (int i = 0; i < needed_size; i++) {
-			mix_matrix[i] = matrix[i * hop];		
+			mix_matrix[i] = matrix[i * hop];
 		}
 
 		memfree(matrix);
@@ -438,7 +864,7 @@ namespace godot {
 		FMOD_ERR_CHECK_V(system->createSound(
 			path_cstr,
 			mode,
-			nullptr,							
+			nullptr,
 			&sound_ptr
 		), Ref<FmodSound>());
 
@@ -621,11 +1047,11 @@ namespace godot {
 		FMOD_ERR_CHECK_V(system->getDSPInfoByType(fmod_type, &desc), Dictionary());
 
 		Dictionary info;
-		info["name"] = String::utf8(desc->name);			
-		info["version"] = desc->version;                    
-		info["plugin_sdk_version"] = desc->pluginsdkversion;  
-		info["num_input_buffers"] = desc->numinputbuffers;    
-		info["num_output_buffers"] = desc->numoutputbuffers;  
+		info["name"] = String::utf8(desc->name);
+		info["version"] = desc->version;
+		info["plugin_sdk_version"] = desc->pluginsdkversion;
+		info["num_input_buffers"] = desc->numinputbuffers;
+		info["num_output_buffers"] = desc->numoutputbuffers;
 		info["has_create"] = (desc->create != nullptr);
 		info["has_release"] = (desc->release != nullptr);
 		info["has_reset"] = (desc->reset != nullptr);

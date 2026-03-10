@@ -18,6 +18,14 @@ namespace godot {
 		GDCLASS(FmodSystem, Object)
 
 	private:
+		FMOD_ADVANCEDSETTINGS settings = {};
+
+		// 3D 声音设置
+		float doppler_scale = 1.0f;
+		float distance_factor = 1.0f;
+		float rolloff_scale = 1.0f;
+
+		void _apply_3d_settings();
 
 	protected:
 		static void _bind_methods();
@@ -73,8 +81,26 @@ namespace godot {
 			FMOD_OUTPUT_TYPE_FORCEINT = 65536
 		};
 
-		enum FmodSpeakerMode
-		{
+		enum FmodSpeaker {
+			FMOD_SPEAKER_NONE = -1,
+			FMOD_SPEAKER_FRONT_LEFT,
+			FMOD_SPEAKER_FRONT_RIGHT,
+			FMOD_SPEAKER_FRONT_CENTER,
+			FMOD_SPEAKER_LOW_FREQUENCY,
+			FMOD_SPEAKER_SURROUND_LEFT,
+			FMOD_SPEAKER_SURROUND_RIGHT,
+			FMOD_SPEAKER_BACK_LEFT,
+			FMOD_SPEAKER_BACK_RIGHT,
+			FMOD_SPEAKER_TOP_FRONT_LEFT,
+			FMOD_SPEAKER_TOP_FRONT_RIGHT,
+			FMOD_SPEAKER_TOP_BACK_LEFT,
+			FMOD_SPEAKER_TOP_BACK_RIGHT,
+
+			FMOD_SPEAKER_MAX,
+			FMOD_SPEAKER_FORCEINT = 65536
+		};
+
+		enum FmodSpeakerMode {
 			FMOD_SPEAKER_MODE_DEFAULT,
 			FMOD_SPEAKER_MODE_RAW,
 			FMOD_SPEAKER_MODE_MONO,
@@ -132,6 +158,17 @@ namespace godot {
 			FMOD_TIME_UNIT_MODPATTERN = 0x00000400
 		};
 
+		// 重采样方法
+		enum FmodResamplerMethod {
+			FMOD_RESAMPLER_DEFAULT,
+			FMOD_RESAMPLER_NOINTERP,
+			FMOD_RESAMPLER_LINEAR,
+			FMOD_RESAMPLER_CUBIC,
+			FMOD_RESAMPLER_SPLINE,
+			FMOD_RESAMPLER_MAX,
+			FMOD_RESAMPLER_FORCEINT = 65536
+		};
+
 		FMOD::System* system = nullptr;
 
 		bool system_is_valid() const;															// 检查 FMOD System 是否有效
@@ -153,6 +190,104 @@ namespace godot {
 		Dictionary get_driver_info(const int id) const;											// 获取由其索引指定的声音设备的识别信息，且针对所选输出模式
 		void set_driver(const int driver);														// 设置所选输出类型的输出驱动
 		int64_t get_driver() const;																// 获取所选输出类型的输出驱动
+
+		// 设置
+		void set_software_channels(const int num_software_channels);							// 设置软件混合 Channel 的最大数量
+		int get_software_channels() const;														// 获取软件混合 Channel 的最大数量
+
+		void set_software_format(
+			const int sample_rate,
+			FmodSpeakerMode speaker_mode,
+			const int num_raw_speakers
+		);																						// 设置软件混音器的输出格式
+		Dictionary get_software_format() const;													// 获取软件混音器的输出格式
+		void set_dsp_buffer_size(const unsigned int buffer_length, const int num_buffers);		// 设置 FMOD 软件混音引擎设置缓冲区大小
+		Dictionary get_dsp_buffer_size() const;													// 获取 FMOD 软件混音引擎缓冲区大小设置
+		void set_stream_buffer_size(
+			const unsigned int file_buffer_size = 16384,
+			FmodTimeUnit file_buffer_size_type = FMOD_TIME_UNIT_RAWBYTES
+		);																						// 设置新开启流的默认文件缓冲区大小
+		Dictionary get_stream_buffer_size() const;												// 获取新开启流的默认文件缓冲区大小
+		void set_speaker_position(
+			FmodSpeaker speaker,
+			const float x,
+			const float y,
+			const bool active
+		);																						// 设置当前扬声器模式中指定扬声器的位置
+		Dictionary get_speaker_position(FmodSpeaker speaker) const;								// 获取当前扬声器模式中指定扬声器的位置
+
+		// 3D 声音设置
+		void set_doppler_scale(const float doppler_scale);										// 设置多普勒位移缩放因子
+		float get_doppler_scale() const;														// 获取多普勒位移缩放因子
+
+		void set_distance_factor(const float distance_factor);									// 设置距离因子
+		float get_distance_factor() const;														// 获取距离因子
+
+		void set_rolloff_scale(const float rolloff_scale);										// 设置距离衰减的缩放因子
+		float get_rolloff_scale() const;														// 获取距离衰减的缩放因子
+
+		void set_3d_num_listeners(const int num_listeners);										// 设置 3D 声音场景中 3D "听众" 的数量
+		int get_3d_num_listeners() const;														// 获取 3D 声音场景中 3D "听众" 的数量
+
+		// 高级设置
+		void set_max_mpeg_codecs(const int max_codecs);											// 设置最大 MPEG 音效
+		int get_max_mpeg_codecs() const;														// 获取最大 MPEG 音效
+
+		void set_max_adpcm_codecs(const int max_codecs);										// 设置最大 IMA-ADPCM 音效
+		int get_max_adpcm_codecs() const;														// 获取最大 IMA-ADPCM 音效
+
+		void set_max_xma_codecs(const int max_codecs);											// 设置最大 XMA 音效
+		int get_max_xma_codecs() const;															// 获取最大 XMA 音效
+
+		void set_max_vorbis_codecs(const int max_codecs);										// 设置最大 Vorbis 音效
+		int get_max_vorbis_codecs() const;														// 获取最大 Vorbis 音效
+
+		void set_max_at9_codecs(const int max_codecs);											// 设置最大 AT9 音效
+		int get_max_at9_codecs() const;															// 获取最大 AT9 音效
+
+		void set_max_fadpcm_codecs(const int max_codecs);										// 设置最大 FADPCM 音效
+		int get_max_fadpcm_codecs() const;														// 获取最大 FADPCM 音效
+
+		void set_max_opus_codecs(const int max_codecs);											// 设置最大 Opus 音效
+		int get_max_opus_codecs() const;														// 获取最大 Opus 音效
+
+		void set_asio_num_channels(const int num_channels);										// 设置输入时的元素数和输出时的元素数
+		int get_asio_num_channels() const;														// 获取输入时的元素数和输出时的元素数
+
+		void set_vol0_virtual_vol(const float vol);												// 设置虚拟音频
+		float get_vol0_virtual_vol() const;														// 获取虚拟音频
+
+		void set_default_decode_buffer_size(const unsigned int size);							// 用于 Streams 时，设置双缓冲区的默认大小
+		unsigned int get_default_decode_buffer_size() const;									// 用于 Streams 时，获取双缓冲区的默认大小
+
+		void set_profile_port(const unsigned short port);										// 设置 FMOD Profiler 监听连接端口
+		unsigned short get_profile_port() const;												// 获取 FMOD Profiler 监听连接端口
+
+		void set_geometry_max_fade_time(const unsigned int time);								// 设置 Channel 在遮挡变化时淡入新音量的最长时间
+		unsigned int get_geometry_max_fade_time() const;										// 获取 Channel 在遮挡变化时淡入新音量的最长时间
+
+		void set_distance_filter_center_freq(const float freq);									// 设置距离滤波器的默认中心频率
+		float get_distance_filter_center_freq() const;											// 获取距离滤波器的默认中心频率
+
+		void set_reverb_3d_instance(const int instance);										// 用于 Reverb3D 时，设置使用哪个全局混响实例
+		int get_reverb_3d_instance() const;														// 用于 Reverb3D 时，获取使用哪个全局混响实例
+
+		void set_dsp_buffer_pool_size(const int size);											// 设置 DSP 缓冲池中间混合缓冲区的数量
+		int get_dsp_buffer_pool_size() const;													// 获取 DSP 缓冲池中间混合缓冲区的数量
+
+		void set_resampler_method(FmodResamplerMethod method);									// 设置使用重采样的方法
+		FmodResamplerMethod get_resampler_method() const;										// 获取使用重采样的方法
+
+		void set_random_seed(const unsigned int seed);											// 设置种子用于初始化内部随机数生成器
+		unsigned int get_random_seed() const;													// 获取种子用于初始化内部随机数生成器
+
+		void set_max_convolution_threads(const int max_threads);								// 设置 ConvolutionReverbDSP 效果所使用的最大 CPU 线程数
+		int get_max_convolution_threads() const;												// 获取 ConvolutionReverbDSP 效果所使用的最大 CPU 线程数
+
+		void set_max_spatial_objects(const int max_objects);									// 设置每个 FMODSystem 可预留的最大空间对象数
+		int get_max_spatial_objects() const;													// 获取每个 FMODSystem 可预留的最大空间对象数
+
+		void apply_advanced_settings();															// 应用高级设置到 FMOD 系统
 
 		// 网络配置
 		void set_network_proxy(const String& p_proxy);											// 设置一个代理服务器，用于所有后续的互联网连接
@@ -204,8 +339,10 @@ namespace godot {
 
 VARIANT_ENUM_CAST(FmodSystem::FmodInitFlags);
 VARIANT_ENUM_CAST(FmodSystem::FmodOutputType);
+VARIANT_ENUM_CAST(FmodSystem::FmodSpeaker);
 VARIANT_ENUM_CAST(FmodSystem::FmodSpeakerMode);
 VARIANT_ENUM_CAST(FmodSystem::FmodMode);
 VARIANT_ENUM_CAST(FmodSystem::FmodTimeUnit);
+VARIANT_ENUM_CAST(FmodSystem::FmodResamplerMethod);
 
 #endif // !FMOD_SYSTEM_H

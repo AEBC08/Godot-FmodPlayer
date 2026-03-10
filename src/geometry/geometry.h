@@ -44,7 +44,7 @@ namespace godot {
 		Vector3 get_position() const;									// 获取多边形三维位置
 
 		void set_rotation(const Vector3 rotation);						// 设置多边形三维方向
-		Vector3 get_rotation(const Vector3 rotation) const;				// 获取多边形三维方向
+		Vector3 get_rotation() const;				// 获取多边形三维方向
 		
 		void set_scale(const Vector3 scale);							// 设置多边形三维比例
 		Vector3 get_scale() const;										// 获取多边形三维比例

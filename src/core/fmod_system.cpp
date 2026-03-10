@@ -242,7 +242,9 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_max_spatial_objects"), &FmodSystem::get_max_spatial_objects);
 		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_spatial_objects"), "set_max_spatial_objects", "get_max_spatial_objects");
 
-		ClassDB::bind_method(D_METHOD("apply_advanced_settings"), &FmodSystem::apply_advanced_settings);
+		ClassDB::bind_method(D_METHOD("set_3d_rolloff_callback_enabled", "enable"), &FmodSystem::set_3d_rolloff_callback_enabled);
+		ClassDB::bind_method(D_METHOD("is_3d_rolloff_callback_enabled"), &FmodSystem::is_3d_rolloff_callback_enabled);
+		GDVIRTUAL_BIND(_calculate_3d_rolloff, "distance");
 
 		ClassDB::bind_method(D_METHOD("set_network_proxy", "proxy"), &FmodSystem::set_network_proxy);
 		ClassDB::bind_method(D_METHOD("get_network_proxy"), &FmodSystem::get_network_proxy);
@@ -286,6 +288,12 @@ namespace godot {
 		if (system) {
 			release();
 		}
+	}
+
+	void FmodSystem::_apply_advanced_settings() {
+		ERR_FAIL_COND(!system);
+		settings.cbSize = sizeof(FMOD_ADVANCEDSETTINGS);
+		FMOD_ERR_CHECK(system->setAdvancedSettings(&settings));
 	}
 
 	void FmodSystem::_apply_3d_settings() {
@@ -536,6 +544,7 @@ namespace godot {
 
 	void FmodSystem::set_max_mpeg_codecs(const int max_codecs) {
 		settings.maxMPEGCodecs = max_codecs;
+		_apply_advanced_settings();
 	}
 
 	int FmodSystem::get_max_mpeg_codecs() const {
@@ -544,6 +553,7 @@ namespace godot {
 
 	void FmodSystem::set_max_adpcm_codecs(const int max_codecs) {
 		settings.maxADPCMCodecs = max_codecs;
+		_apply_advanced_settings();
 	}
 
 	int FmodSystem::get_max_adpcm_codecs() const {
@@ -552,6 +562,7 @@ namespace godot {
 
 	void FmodSystem::set_max_xma_codecs(const int max_codecs) {
 		settings.maxXMACodecs = max_codecs;
+		_apply_advanced_settings();
 	}
 
 	int FmodSystem::get_max_xma_codecs() const {
@@ -560,6 +571,7 @@ namespace godot {
 
 	void FmodSystem::set_max_vorbis_codecs(const int max_codecs) {
 		settings.maxVorbisCodecs = max_codecs;
+		_apply_advanced_settings();
 	}
 
 	int FmodSystem::get_max_vorbis_codecs() const {
@@ -568,6 +580,7 @@ namespace godot {
 
 	void FmodSystem::set_max_at9_codecs(const int max_codecs) {
 		settings.maxAT9Codecs = max_codecs;
+		_apply_advanced_settings();
 	}
 
 	int FmodSystem::get_max_at9_codecs() const {
@@ -576,6 +589,7 @@ namespace godot {
 
 	void FmodSystem::set_max_fadpcm_codecs(const int max_codecs) {
 		settings.maxFADPCMCodecs = max_codecs;
+		_apply_advanced_settings();
 	}
 
 	int FmodSystem::get_max_fadpcm_codecs() const {
@@ -584,6 +598,7 @@ namespace godot {
 
 	void FmodSystem::set_max_opus_codecs(const int max_codecs) {
 		settings.maxOpusCodecs = max_codecs;
+		_apply_advanced_settings();
 	}
 
 	int FmodSystem::get_max_opus_codecs() const {
@@ -592,6 +607,7 @@ namespace godot {
 
 	void FmodSystem::set_asio_num_channels(const int num_channels) {
 		settings.ASIONumChannels = num_channels;
+		_apply_advanced_settings();
 	}
 
 	int FmodSystem::get_asio_num_channels() const {
@@ -600,6 +616,7 @@ namespace godot {
 
 	void FmodSystem::set_vol0_virtual_vol(const float vol) {
 		settings.vol0virtualvol = vol;
+		_apply_advanced_settings();
 	}
 
 	float FmodSystem::get_vol0_virtual_vol() const {
@@ -608,6 +625,7 @@ namespace godot {
 
 	void FmodSystem::set_default_decode_buffer_size(const unsigned int size) {
 		settings.defaultDecodeBufferSize = size;
+		_apply_advanced_settings();
 	}
 
 	unsigned int FmodSystem::get_default_decode_buffer_size() const {
@@ -616,6 +634,7 @@ namespace godot {
 
 	void FmodSystem::set_profile_port(const unsigned short port) {
 		settings.profilePort = port;
+		_apply_advanced_settings();
 	}
 
 	unsigned short FmodSystem::get_profile_port() const {
@@ -624,6 +643,7 @@ namespace godot {
 
 	void FmodSystem::set_geometry_max_fade_time(const unsigned int time) {
 		settings.geometryMaxFadeTime = time;
+		_apply_advanced_settings();
 	}
 
 	unsigned int FmodSystem::get_geometry_max_fade_time() const {
@@ -632,6 +652,7 @@ namespace godot {
 
 	void FmodSystem::set_distance_filter_center_freq(const float freq) {
 		settings.distanceFilterCenterFreq = freq;
+		_apply_advanced_settings();
 	}
 
 	float FmodSystem::get_distance_filter_center_freq() const {
@@ -640,6 +661,7 @@ namespace godot {
 
 	void FmodSystem::set_reverb_3d_instance(const int instance) {
 		settings.reverb3Dinstance = instance;
+		_apply_advanced_settings();
 	}
 
 	int FmodSystem::get_reverb_3d_instance() const {
@@ -648,6 +670,7 @@ namespace godot {
 
 	void FmodSystem::set_dsp_buffer_pool_size(const int size) {
 		settings.DSPBufferPoolSize = size;
+		_apply_advanced_settings();
 	}
 
 	int FmodSystem::get_dsp_buffer_pool_size() const {
@@ -656,6 +679,7 @@ namespace godot {
 
 	void FmodSystem::set_resampler_method(FmodResamplerMethod method) {
 		settings.resamplerMethod = static_cast<FMOD_DSP_RESAMPLER>(method);
+		_apply_advanced_settings();
 	}
 
 	FmodSystem::FmodResamplerMethod FmodSystem::get_resampler_method() const {
@@ -664,6 +688,7 @@ namespace godot {
 
 	void FmodSystem::set_random_seed(const unsigned int seed) {
 		settings.randomSeed = seed;
+		_apply_advanced_settings();
 	}
 
 	unsigned int FmodSystem::get_random_seed() const {
@@ -672,6 +697,7 @@ namespace godot {
 
 	void FmodSystem::set_max_convolution_threads(const int max_threads) {
 		settings.maxConvolutionThreads = max_threads;
+		_apply_advanced_settings();
 	}
 
 	int FmodSystem::get_max_convolution_threads() const {
@@ -680,16 +706,11 @@ namespace godot {
 
 	void FmodSystem::set_max_spatial_objects(const int max_objects) {
 		settings.maxSpatialObjects = max_objects;
+		_apply_advanced_settings();
 	}
 
 	int FmodSystem::get_max_spatial_objects() const {
 		return settings.maxSpatialObjects;
-	}
-
-	void FmodSystem::apply_advanced_settings() {
-		ERR_FAIL_COND(!system);
-		settings.cbSize = sizeof(FMOD_ADVANCEDSETTINGS);
-		FMOD_ERR_CHECK(system->setAdvancedSettings(&settings));
 	}
 
 	void FmodSystem::set_network_proxy(const String& p_proxy) {
@@ -905,8 +926,8 @@ namespace godot {
 		PackedByteArray data = file->get_buffer(file->get_length());
 		ERR_FAIL_COND_V(data.is_empty(), nullptr);
 
-		// 以内存模式创建 FMOD Sound
-		return create_sound_from_memory(data, mode);
+		// 以内存模式创建 FMOD Sound（添加 OPENMEMORY 标志）
+		return create_sound_from_memory(data, mode | FMOD_MODE_OPENMEMORY);
 	}
 
 	Ref<FmodSound> FmodSystem::create_stream_from_file(const String p_path, unsigned int mode) {
@@ -1135,4 +1156,48 @@ namespace godot {
 		FMOD_ERR_CHECK_V(system->isRecording(id, &recording), false);
 		return recording;
 	}
+
+	// 静态成员变量定义
+	FmodSystem* FmodSystem::current_callback_system = nullptr;
+
+	void FmodSystem::set_3d_rolloff_callback_enabled(const bool enable) {
+		ERR_FAIL_COND(!system);
+		_3d_rolloff_callback_enabled = enable;
+		if (enable) {
+			// 设置当前实例为回调目标
+			current_callback_system = this;
+			FMOD_ERR_CHECK(system->set3DRolloffCallback(GodotFMOD3DRolloffCallback));
+		} else {
+			// 如果当前实例是回调目标，则移除回调
+			if (current_callback_system == this) {
+				current_callback_system = nullptr;
+				FMOD_ERR_CHECK(system->set3DRolloffCallback(nullptr));
+			}
+		}
+	}
+
+	bool FmodSystem::is_3d_rolloff_callback_enabled() const {
+		return _3d_rolloff_callback_enabled;
+	}
+
+	// 成员函数：处理 3D 衰减回调，调用 GDScript 虚函数
+	float FmodSystem::_handle_3d_rolloff_callback(float distance) {
+		float result = 1.0f;
+		if (_gdvirtual__calculate_3d_rolloff_call(distance, result)) {
+			return result;
+		}
+		// GDScript 没有实现，返回默认线性衰减
+		return 1.0f;
+	}
+}
+
+// C 回调函数实现
+float F_CALL GodotFMOD3DRolloffCallback(FMOD_CHANNELCONTROL* channel_control, float distance) {
+	// 如果当前没有启用的回调系统，返回默认的线性衰减
+	if (!godot::FmodSystem::current_callback_system) {
+		return 1.0f;
+	}
+
+	// 调用成员函数处理回调
+	return godot::FmodSystem::current_callback_system->_handle_3d_rolloff_callback(distance);
 }

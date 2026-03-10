@@ -7,6 +7,7 @@
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/core/gdvirtual.gen.inc>
 
 namespace godot {
 	class FmodSound;
@@ -20,11 +21,13 @@ namespace godot {
 	private:
 		FMOD_ADVANCEDSETTINGS settings = {};
 
-		// 3D 声音设置
+		// 3D Settings
 		float doppler_scale = 1.0f;
 		float distance_factor = 1.0f;
 		float rolloff_scale = 1.0f;
+		bool _3d_rolloff_callback_enabled = false;
 
+		void _apply_advanced_settings();
 		void _apply_3d_settings();
 
 	protected:
@@ -33,6 +36,9 @@ namespace godot {
 	public:
 		FmodSystem();
 		~FmodSystem();
+
+		// Static pointer for C callback to access current instance
+		static FmodSystem* current_callback_system;
 
 		// 初始化系统对象时使用的配置标志
 		enum FmodInitFlags {
@@ -287,7 +293,14 @@ namespace godot {
 		void set_max_spatial_objects(const int max_objects);									// 设置每个 FMODSystem 可预留的最大空间对象数
 		int get_max_spatial_objects() const;													// 获取每个 FMODSystem 可预留的最大空间对象数
 
-		void apply_advanced_settings();															// 应用高级设置到 FMOD 系统
+		// 3D Sound Callback
+		void set_3d_rolloff_callback_enabled(const bool enable);
+		bool is_3d_rolloff_callback_enabled() const;
+
+		// Internal: handle 3D rolloff callback
+		float _handle_3d_rolloff_callback(float distance);
+
+		GDVIRTUAL1R(float, _calculate_3d_rolloff, float);										// Virtual function: GDScript can override to customize distance rolloff
 
 		// 网络配置
 		void set_network_proxy(const String& p_proxy);											// 设置一个代理服务器，用于所有后续的互联网连接
@@ -344,5 +357,13 @@ VARIANT_ENUM_CAST(FmodSystem::FmodSpeakerMode);
 VARIANT_ENUM_CAST(FmodSystem::FmodMode);
 VARIANT_ENUM_CAST(FmodSystem::FmodTimeUnit);
 VARIANT_ENUM_CAST(FmodSystem::FmodResamplerMethod);
+
+extern "C" {
+	// Godot FMOD 3D 衰减回调实现 - 调用当前启用了回调的 FmodSystem 实例的虚拟函数
+	float F_CALL GodotFMOD3DRolloffCallback(
+		FMOD_CHANNELCONTROL* channel_control,
+		float distance
+	);
+}
 
 #endif // !FMOD_SYSTEM_H

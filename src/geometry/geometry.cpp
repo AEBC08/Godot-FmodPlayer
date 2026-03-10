@@ -110,11 +110,11 @@ namespace godot {
 		FMOD_ERR_CHECK(geometry->setRotation(&forward, &up));
 	}
 
-	Vector3 FmodGeometry::get_rotation(const Vector3 rotation) const {
+	Vector3 FmodGeometry::get_rotation() const {
 		if (!geometry) return Vector3();
 		FMOD_VECTOR forward = {}, up = {};
 		FMOD_ERR_CHECK_V(geometry->getRotation(&forward, &up), Vector3());
-		return FmodUtils::fmod_vectors_to_godot_euler(forward, up);;
+		return FmodUtils::fmod_vectors_to_godot_euler(forward, up);
 	}
 
 	void FmodGeometry::set_scale(const Vector3 scale) {

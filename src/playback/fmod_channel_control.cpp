@@ -33,6 +33,43 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_mute"), &FmodChannelControl::get_mute);
 		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "mute"), "set_mute", "get_mute");
 
+		ClassDB::bind_method(D_METHOD("set_3d_attributes", "pos", "vel"), &FmodChannelControl::set_3d_attributes);
+		ClassDB::bind_method(D_METHOD("get_3d_attributes"), &FmodChannelControl::get_3d_attributes);
+		ClassDB::bind_method(D_METHOD("set_3d_cone_orientation", "orientation"), &FmodChannelControl::set_3d_cone_orientation);
+		ClassDB::bind_method(D_METHOD("get_3d_cone_orientation"), &FmodChannelControl::get_3d_cone_orientation);
+		ClassDB::bind_method(D_METHOD("set_3d_cone_settings", "inside_cone_angle", "outside_cone_angle", "outside_volume_db"), &FmodChannelControl::set_3d_cone_settings);
+		ClassDB::bind_method(D_METHOD("get_3d_cone_settings"), &FmodChannelControl::get_3d_cone_settings);
+
+		ClassDB::bind_method(D_METHOD("set_3d_custom_rolloff", "3d_custom_rolloff"), &FmodChannelControl::set_3d_custom_rolloff);
+		ClassDB::bind_method(D_METHOD("get_3d_custom_rolloff"), &FmodChannelControl::get_3d_custom_rolloff);
+		ADD_PROPERTY(PropertyInfo(Variant::PACKED_VECTOR3_ARRAY, "3d_custom_rolloff"), "set_3d_custom_rolloff", "get_3d_custom_rolloff");
+
+		ClassDB::bind_method(D_METHOD("set_3d_distance_filter", "custom", "custom_level", "center_freq"), &FmodChannelControl::set_3d_distance_filter);
+		ClassDB::bind_method(D_METHOD("get_3d_distance_filter"), &FmodChannelControl::get_3d_distance_filter);
+
+		ClassDB::bind_method(D_METHOD("set_3d_doppler_level", "level"), &FmodChannelControl::set_3d_doppler_level);
+		ClassDB::bind_method(D_METHOD("get_3d_doppler_level"), &FmodChannelControl::get_3d_doppler_level);
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_doppler_level", PROPERTY_HINT_RANGE, "0.00,5.00,0.01"), "set_3d_doppler_level", "get_3d_doppler_level");
+
+		ClassDB::bind_method(D_METHOD("set_3d_level", "level"), &FmodChannelControl::set_3d_level);
+		ClassDB::bind_method(D_METHOD("get_3d_level"), &FmodChannelControl::get_3d_level);
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_level", PROPERTY_HINT_RANGE, "0.0,1.0,0.1"), "set_3d_level", "get_3d_level");
+		
+		ClassDB::bind_method(D_METHOD("set_3d_min_distance", "min_distance"), &FmodChannelControl::set_3d_min_distance);
+		ClassDB::bind_method(D_METHOD("get_3d_min_distance"), &FmodChannelControl::get_3d_min_distance);
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_min_distance", PROPERTY_HINT_RANGE, "1,100000,1"), "set_3d_min_distance", "get_3d_min_distance");
+		
+		ClassDB::bind_method(D_METHOD("set_3d_max_distance", "max_distance"), &FmodChannelControl::set_3d_max_distance);
+		ClassDB::bind_method(D_METHOD("get_3d_max_distance"), &FmodChannelControl::get_3d_max_distance);
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_max_distance", PROPERTY_HINT_RANGE, "1,100000,1"), "set_3d_max_distance", "get_3d_max_distance");
+		
+		ClassDB::bind_method(D_METHOD("set_3d_occlusion", "min_distance", "max_distance"), &FmodChannelControl::set_3d_occlusion);
+		ClassDB::bind_method(D_METHOD("get_3d_occlusion"), &FmodChannelControl::get_3d_occlusion);
+
+		ClassDB::bind_method(D_METHOD("set_3d_spread", "angle"), &FmodChannelControl::set_3d_spread);
+		ClassDB::bind_method(D_METHOD("get_3d_spread"), &FmodChannelControl::get_3d_spread);
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_spread", PROPERTY_HINT_RANGE, "0,360,0.1"), "set_3d_spread", "get_3d_spread");
+
 		ClassDB::bind_method(D_METHOD("set_pan", "pan"), &FmodChannelControl::set_pan);
 
 		ClassDB::bind_method(D_METHOD("set_reverb_properties", "instance", "wet"), &FmodChannelControl::set_reverb_properties);
@@ -47,7 +84,7 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_dsp", "index"), &FmodChannelControl::get_dsp);
 		ClassDB::bind_method(D_METHOD("set_dsp_index", "dsp", "index"), &FmodChannelControl::set_dsp_index);
 		ClassDB::bind_method(D_METHOD("get_dsp_index", "dsp"), &FmodChannelControl::get_dsp_index);
-		
+
 		ClassDB::bind_method(D_METHOD("get_dsp_clock"), &FmodChannelControl::get_dsp_clock);
 		ClassDB::bind_method(D_METHOD("set_delay", "start", "end", "stop_channels"), &FmodChannelControl::set_delay, DEFVAL(true));
 		ClassDB::bind_method(D_METHOD("get_delay"), &FmodChannelControl::get_delay);
@@ -184,6 +221,194 @@ namespace godot {
 		bool mute = false;
 		FMOD_ERR_CHECK(channel_control->getMute(&mute));
 		return mute;
+	}
+
+	void FmodChannelControl::set_3d_attributes(
+		const Vector3 pos,
+		const Vector3 vel
+	) {
+		ERR_FAIL_COND(!channel_control);
+		FMOD_VECTOR fmod_pos = { pos.x, pos.y, pos.z };
+		FMOD_VECTOR fmod_vel = { pos.x, pos.y, pos.z };
+		FMOD_ERR_CHECK(channel_control->set3DAttributes(&fmod_pos, &fmod_vel));
+	}
+
+	Dictionary FmodChannelControl::get_3d_attributes() const {
+		ERR_FAIL_COND_V(!channel_control, Dictionary());
+		FMOD_VECTOR fmod_pos = {};
+		FMOD_VECTOR fmod_vel = {};
+		FMOD_ERR_CHECK_V(channel_control->get3DAttributes(&fmod_pos, &fmod_vel), Dictionary());
+		Dictionary result;
+		result["pos"] = Vector3(fmod_pos.x, fmod_pos.y, fmod_pos.z);
+		result["vel"] = Vector3(fmod_vel.x, fmod_vel.y, fmod_vel.z);
+		return result;
+	}
+
+	void FmodChannelControl::set_3d_cone_orientation(const Vector3 orientation) {
+		ERR_FAIL_COND(!channel_control);
+		FMOD_VECTOR fmod_orientation = { orientation.x, orientation.y, orientation.z };
+		FMOD_ERR_CHECK(channel_control->set3DConeOrientation(&fmod_orientation));
+	}
+
+	Vector3 FmodChannelControl::get_3d_cone_orientation() const {
+		ERR_FAIL_COND_V(!channel_control, Vector3());
+		FMOD_VECTOR fmod_orientation = {};
+		FMOD_ERR_CHECK_V(channel_control->get3DConeOrientation(&fmod_orientation), Vector3());
+		return Vector3(fmod_orientation.x, fmod_orientation.y, fmod_orientation.z);
+	}
+
+	void FmodChannelControl::set_3d_cone_settings(
+		const float inside_cone_angle,
+		const float outside_cone_angle,
+		const float outside_volume_db
+	) {
+		ERR_FAIL_COND(!channel_control);
+		FMOD_ERR_CHECK(channel_control->set3DConeSettings(inside_cone_angle, outside_cone_angle, FmodUtils::db_to_linear(outside_volume_db)));
+	}
+
+	Dictionary FmodChannelControl::get_3d_cone_settings() const {
+		ERR_FAIL_COND_V(!channel_control, Dictionary());
+		float inside_cone_angle = 360.0f, outside_cone_angle = 360.f, outside_volume = 1.0f;
+		FMOD_ERR_CHECK_V(channel_control->get3DConeSettings(&inside_cone_angle, &outside_cone_angle, &outside_volume), Dictionary());
+		Dictionary result;
+		result["inside_cone_angle"] = inside_cone_angle;
+		result["outside_cone_angle"] = outside_cone_angle;
+		result["outside_volume_db"] = FmodUtils::linear_to_db(outside_volume);
+		return result;
+	}
+
+	void FmodChannelControl::set_3d_custom_rolloff(const PackedVector3Array points) {
+		ERR_FAIL_COND(!channel_control);
+
+		const int num_points = points.size();
+		if (num_points == 0) {
+			// 传入空数组表示清除自定义 rolloff
+			FMOD_ERR_CHECK(channel_control->set3DCustomRolloff(nullptr, 0));
+			return;
+		}
+
+		// 使用 std::vector 管理内存，自动释放
+		std::vector<FMOD_VECTOR> fmod_points;
+		fmod_points.reserve(num_points);
+
+		for (int i = 0; i < num_points; i++) {
+			const Vector3& p = points[i];
+			fmod_points.push_back({ p.x, p.y, p.z });
+		}
+
+		// 传递数组首地址（连续内存）
+		FMOD_ERR_CHECK(channel_control->set3DCustomRolloff(fmod_points.data(), num_points));
+	}
+
+	PackedVector3Array FmodChannelControl::get_3d_custom_rolloff() const {
+		if (!channel_control) return PackedVector3Array();
+		FMOD_VECTOR* fmod_points = nullptr;
+		int numpoints = 0;
+		FMOD_ERR_CHECK_V(channel_control->get3DCustomRolloff(&fmod_points, &numpoints), PackedVector3Array());
+		PackedVector3Array points;
+		for (int index = 0; index < numpoints; index++) {
+			Vector3 point = Vector3(fmod_points[index].x, fmod_points[index].y, fmod_points[index].z);
+			points.append(point);
+		}
+		return points;
+	}
+
+	void FmodChannelControl::set_3d_distance_filter(const bool custom, const float custom_level, const float center_freq) {
+		ERR_FAIL_COND(!channel_control);
+		FMOD_ERR_CHECK(channel_control->set3DDistanceFilter(custom, custom_level, center_freq));
+	}
+
+	Dictionary FmodChannelControl::get_3d_distance_filter() const {
+		ERR_FAIL_COND_V(!channel_control, Dictionary());
+		bool custom = false;
+		float custom_level = 1.0f, center_freq = 1500.0f;
+		FMOD_ERR_CHECK_V(channel_control->get3DDistanceFilter(&custom, &custom_level, &center_freq), Dictionary());
+		Dictionary result;
+		result["custom"] = custom;
+		result["custom_level"] = custom_level;
+		result["center_freq"] = center_freq;
+		return result;
+	}
+
+	void FmodChannelControl::set_3d_doppler_level(const float level) {
+		ERR_FAIL_COND(!channel_control);
+		FMOD_ERR_CHECK(channel_control->set3DDopplerLevel(level));
+	}
+
+	float FmodChannelControl::get_3d_doppler_level() const {
+		if (!channel_control) return 1.0f;
+		float level = 1.0f;
+		FMOD_ERR_CHECK_V(channel_control->get3DDopplerLevel(&level), 1.0f);
+		return level;
+	}
+
+	void FmodChannelControl::set_3d_level(const float level) {
+		ERR_FAIL_COND(!channel_control);
+		FMOD_ERR_CHECK(channel_control->set3DLevel(level));
+	}
+
+	float FmodChannelControl::get_3d_level() const {
+		if (!channel_control) return 1.0f;
+		float level = 1.0f;
+		FMOD_ERR_CHECK_V(channel_control->get3DLevel(&level), 1.0f);
+		return level;
+	}
+
+	void FmodChannelControl::set_3d_min_distance(const float min) {
+		ERR_FAIL_COND(!channel_control);
+		float min_distance = 1.0f, max_distance = 100000.0f;
+		FMOD_ERR_CHECK(channel_control->get3DMinMaxDistance(&min_distance, &max_distance));
+		min_distance = min;
+		FMOD_ERR_CHECK(channel_control->set3DMinMaxDistance(min_distance, max_distance));
+	}
+
+	float FmodChannelControl::get_3d_min_distance() const {
+		if (!channel_control) return 1.0f;
+		float min_distance = 1.0f, max_distance = 100000.0f;
+		FMOD_ERR_CHECK_V(channel_control->get3DMinMaxDistance(&min_distance, &max_distance), 1.0f);
+		return min_distance;
+	}
+
+	void FmodChannelControl::set_3d_max_distance(const float max) {
+		ERR_FAIL_COND(!channel_control);
+		float min_distance = 1.0f, max_distance = 100000.0f;
+		FMOD_ERR_CHECK(channel_control->get3DMinMaxDistance(&min_distance, &max_distance));
+		max_distance = max;
+		FMOD_ERR_CHECK(channel_control->set3DMinMaxDistance(min_distance, max_distance));
+	}
+
+	float FmodChannelControl::get_3d_max_distance() const {
+		if (!channel_control) return 100000.0f;
+		float min_distance = 1.0f, max_distance = 100000.0f;
+		FMOD_ERR_CHECK_V(channel_control->get3DMinMaxDistance(&min_distance, &max_distance), 100000.0f);
+		return max_distance;
+	}
+
+	void FmodChannelControl::set_3d_occlusion(const float direct_occlusion, const float reverb_occlusion) {
+		ERR_FAIL_COND(!channel_control);
+		FMOD_ERR_CHECK(channel_control->set3DOcclusion(direct_occlusion, reverb_occlusion));
+	}
+
+	Dictionary FmodChannelControl::get_3d_occlusion() const {
+		if (!channel_control) return Dictionary();
+		float min_distance = 0.0f, max_distance = 0.0f;
+		FMOD_ERR_CHECK_V(channel_control->get3DOcclusion(&min_distance, &max_distance), Dictionary());
+		Dictionary result;
+		result["min_distance"] = min_distance;
+		result["max_distance"] = max_distance;
+		return result;
+	}
+
+	void FmodChannelControl::set_3d_spread(const float angle) {
+		ERR_FAIL_COND(!channel_control);
+		FMOD_ERR_CHECK(channel_control->set3DSpread(angle));
+	}
+
+	float FmodChannelControl::get_3d_spread() const {
+		if (!channel_control) return 0.0f;
+		float angle = 0.0f;
+		FMOD_ERR_CHECK_V(channel_control->get3DSpread(&angle), 0.0f);
+		return angle;
 	}
 
 	void FmodChannelControl::set_pan(const float pan) {

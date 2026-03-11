@@ -4,6 +4,7 @@
 #include "dsp/fmod_dsp.h"
 #include "core/fmod_system.h"
 #include <godot_cpp/classes/ref_counted.hpp>
+#include <vector>
 
 namespace godot {
     class FmodChannelControl : public RefCounted {
@@ -20,7 +21,7 @@ namespace godot {
         virtual ~FmodChannelControl();
 
 		bool channel_control_is_valid() const;						// 检查底层 FMOD::ChannelControl 对象是否有效
-		bool channel_control_is_null() const;						// 检查底层 FMOD::ChannelControl 对象是否无效s
+		bool channel_control_is_null() const;						// 检查底层 FMOD::ChannelControl 对象是否无效
 
         // 播放
         bool is_playing() const;									// 检查播放状态
@@ -47,6 +48,50 @@ namespace godot {
 		void set_mute(const bool mute);								// 设置静音状态
 		bool get_mute() const;										// 检索静音状态
 
+		// 空间化
+		void set_3d_attributes(
+			const Vector3 pos,
+			const Vector3 vel
+		);															// 设置用于应用平移、衰减和多普勒的三维位置和速度
+		Dictionary get_3d_attributes() const;						// 获取用于应用平移、衰减和多普勒的三维位置和速度
+		void set_3d_cone_orientation(const Vector3 orientation);	// 设置三维锥体形状的方向，用于模拟遮挡
+		Vector3 get_3d_cone_orientation() const;					// 获取三维锥体形状的方向，用于模拟遮挡
+		void set_3d_cone_settings(
+			const float inside_cone_angle,
+			const float outside_cone_angle,
+			const float outside_volume_db
+		);															// 设置基于方向的三维锥形模拟遮挡的角度和衰减水平
+		Dictionary get_3d_cone_settings() const;					// 获取基于方向的三维锥形模拟遮挡的角度和衰减水平
+		void set_3d_custom_rolloff(const PackedVector3Array points);// 设置一个自定义的三维距离衰减滚出形状
+		PackedVector3Array get_3d_custom_rolloff() const;			// 获取一个自定义的三维距离衰减滚出形状
+		void set_3d_distance_filter(
+			const bool custom,
+			const float custom_level,
+			const float center_freq
+		);															// 设置三维距离滤波器覆盖值
+		Dictionary get_3d_distance_filter() const;					// 获取三维距离滤波器覆盖值
+
+		void set_3d_doppler_level(const float level);				// 设置多普勒的缩放量 (仅支持 Channel)
+		float get_3d_doppler_level() const;							// 获取多普勒的缩放量 (仅支持 Channel)
+
+		void set_3d_level(const float level);						// 设置 3D 平移和 2D 平移之间的混合
+		float get_3d_level() const;									// 获取 3D 平移和 2D 平移之间的混合
+
+		void set_3d_min_distance(const float min);					// 设置三维滚落衰减的最小距离
+		float get_3d_min_distance() const;							// 获取三维滚落衰减的最小距离
+
+		void set_3d_max_distance(const float max);					// 设置三维滚落衰减的最大距离
+		float get_3d_max_distance() const;							// 获取三维滚落衰减的最大距离
+
+		void set_3d_occlusion(
+			const float direct_occlusion,
+			const float reverb_occlusion
+		);															// 设置直接和混响路径的三维衰减因子
+		Dictionary get_3d_occlusion() const;						// 获取直接和混响路径的三维衰减因子
+		
+		void set_3d_spread(const float angle);						// 设置 3D 声音在扬声器空间中的扩散
+		float get_3d_spread() const;								// 获取 3D 声音在扬声器空间中的扩散
+
 		// 声像与水平调整
 		void set_pan(const float pan);								// 调节左右声像水平
 
@@ -59,7 +104,7 @@ namespace godot {
 		void set_low_pass_gain(const float gain);					// 在内置低通/距离滤波应用时，设置干信号的增益
 		float get_low_pass_gain() const;							// 当内置低通/距离滤波应用时，获取干信号的增益
 
-		// DSP链配置
+		// DSP 链配置
 		void add_dsp(const int index, Ref<FmodDSP> dsp);			// 在指定的索引中添加一个 DSP 单元
 		void remove_dsp(Ref<FmodDSP> dsp);							// 从 DSP 链中移除指定的 DSP 单元
 		int get_num_dsps() const;									// 获取 DSP 链中 DSP 单元的数量

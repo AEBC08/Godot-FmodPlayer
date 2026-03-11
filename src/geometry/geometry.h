@@ -20,6 +20,11 @@ namespace godot {
 		FmodGeometry();
 		~FmodGeometry();
 
+		bool geometry_is_valid() const;									// 检查多边形是否有效
+		bool geometry_is_null() const;									// 检查多边形是否无效
+
+		void setup(FMOD::Geometry* p_geometry);	
+
 		// 多边形
 		void set_polygon_attributes(
 			const int index,

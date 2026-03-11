@@ -2,6 +2,7 @@
 #include "audio/fmod_sound.h"
 #include "playback/fmod_channel.h"
 #include "playback/fmod_channel_group.h"
+#include "geometry/geometry.h"
 #include "dsp/fmod_dsp.h"
 
 namespace godot {
@@ -278,6 +279,18 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("record_start", "id", "sound", "loop"), &FmodSystem::record_start);
 		ClassDB::bind_method(D_METHOD("record_stop", "id"), &FmodSystem::record_stop);
 		ClassDB::bind_method(D_METHOD("is_recording", "id"), &FmodSystem::is_recording);
+
+		ClassDB::bind_method(D_METHOD("create_geometry", "max_polygons", "max_vertices"), &FmodSystem::create_geometry, DEFVAL(9999), DEFVAL(9999));
+
+		ClassDB::bind_method(D_METHOD("set_3d_max_world_size", "max_world_size"), &FmodSystem::set_3d_max_world_size);
+		ClassDB::bind_method(D_METHOD("get_3d_max_world_size"), &FmodSystem::get_3d_max_world_size);
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_max_world_size", PROPERTY_HINT_RANGE, "0,999999,1"), "set_3d_max_world_size", "get_3d_max_world_size");
+		
+		ClassDB::bind_method(D_METHOD("load_geometry", "data"), &FmodSystem::load_geometry);
+		ClassDB::bind_method(D_METHOD("get_geometry_occlusion", "listener", "source"), &FmodSystem::get_geometry_occlusion);
+
+		ClassDB::bind_method(D_METHOD("lock_dsp"), &FmodSystem::lock_dsp);
+		ClassDB::bind_method(D_METHOD("unlock_dsp"), &FmodSystem::unlock_dsp);
 	}
 
 	FmodSystem::FmodSystem() {
@@ -1155,6 +1168,60 @@ namespace godot {
 		bool recording = false;
 		FMOD_ERR_CHECK_V(system->isRecording(id, &recording), false);
 		return recording;
+	}
+
+	Ref<FmodGeometry> FmodSystem::create_geometry(const int max_polygons, const int max_vertices) const {
+		ERR_FAIL_COND_V(!system, Ref<FmodGeometry>());
+		FMOD::Geometry* geometry_ptr = nullptr;
+		FMOD_ERR_CHECK_V(system->createGeometry(max_polygons, max_vertices, &geometry_ptr), Ref<FmodGeometry>());
+		Ref<FmodGeometry> geometry;
+		geometry.instantiate();
+		geometry->setup(geometry_ptr);
+		return geometry;
+	}
+
+	void FmodSystem::set_3d_max_world_size(const float max_world_size) {
+		ERR_FAIL_COND(!system);
+		FMOD_ERR_CHECK(system->setGeometrySettings(max_world_size));
+	}
+
+	float FmodSystem::get_3d_max_world_size() const {
+		if (!system) return 1000.0f;
+		float max_world_size = 1000.0f;
+		FMOD_ERR_CHECK_V(system->getGeometrySettings(&max_world_size), 1000.0f);
+		return max_world_size;
+	}
+
+	Ref<FmodGeometry> FmodSystem::load_geometry(const PackedByteArray& data) const {
+		ERR_FAIL_COND_V(!system, Ref<FmodGeometry>());
+		FMOD::Geometry* geometry_ptr = nullptr;
+		FMOD_ERR_CHECK_V(system->loadGeometry(data.ptr(), data.size(), &geometry_ptr), Ref<FmodGeometry>());
+		Ref<FmodGeometry> geometry;
+		geometry.instantiate();
+		geometry->setup(geometry_ptr);
+		return geometry;
+	}
+
+	Dictionary FmodSystem::get_geometry_occlusion(const Vector3 listener, const Vector3 source) const {
+		ERR_FAIL_COND_V(!system, Dictionary());
+		const FMOD_VECTOR fmod_listener = { listener.x, listener.y, listener.z };
+		const FMOD_VECTOR fmod_source = { source.x, source.y, source.z };
+		float direct = 0.0f, reverb = 0.0f;
+		FMOD_ERR_CHECK_V(system->getGeometryOcclusion(&fmod_listener, &fmod_source, &direct, &reverb), Dictionary());
+		Dictionary result;
+		result["direct"] = direct;
+		result["reverb"] = reverb;
+		return result;
+	}
+
+	void FmodSystem::lock_dsp() {
+		ERR_FAIL_COND(!system);
+		FMOD_ERR_CHECK(system->lockDSP());
+	}
+
+	void FmodSystem::unlock_dsp() {
+		ERR_FAIL_COND(!system);
+		FMOD_ERR_CHECK(system->unlockDSP());
 	}
 
 	// 静态成员变量定义

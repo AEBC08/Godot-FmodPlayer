@@ -2,6 +2,9 @@
 
 namespace godot {
 	void FmodGeometry::_bind_methods() {
+		ClassDB::bind_method(D_METHOD("geometry_is_valid"), &FmodGeometry::geometry_is_valid);
+		ClassDB::bind_method(D_METHOD("geometry_is_null"), &FmodGeometry::geometry_is_null);
+		
 		ClassDB::bind_method(D_METHOD("set_polygon_attributes", "index", "direct_occlusion", "reverb_occlusion", "double_sided"), &FmodGeometry::set_polygon_attributes);
 		ClassDB::bind_method(D_METHOD("get_polygon_attributes", "index"), &FmodGeometry::get_polygon_attributes);
 		ClassDB::bind_method(D_METHOD("get_polygon_num_vertices", "index"), &FmodGeometry::get_polygon_num_vertices);
@@ -37,7 +40,28 @@ namespace godot {
 	}
 
 	FmodGeometry::~FmodGeometry() {
+		if (geometry) {
+			geometry->setUserData(nullptr);
+		}
+	}
 
+	bool FmodGeometry::geometry_is_valid() const {
+		return geometry != nullptr;
+	}
+
+	bool FmodGeometry::geometry_is_null() const {
+		return geometry == nullptr;
+	}
+
+	void FmodGeometry::setup(FMOD::Geometry* p_geometry) {
+		ERR_FAIL_COND_MSG(!p_geometry, "DSP pointer is null");
+
+		if (geometry) {
+			geometry->setUserData(nullptr);
+		}
+
+		geometry = p_geometry;
+		geometry->setUserData(this);
 	}
 
 	void FmodGeometry::set_polygon_attributes(

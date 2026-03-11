@@ -13,6 +13,7 @@ namespace godot {
 	class FmodSound;
 	class FmodChannel;
 	class FmodChannelGroup;
+	class FmodGeometry;
 	class FmodDSP;
 
 	class FmodSystem : public Object {
@@ -299,7 +300,7 @@ namespace godot {
 
 		// Internal: handle 3D rolloff callback
 		float _handle_3d_rolloff_callback(float distance);
-
+										
 		GDVIRTUAL1R(float, _calculate_3d_rolloff, float);										// Virtual function: GDScript can override to customize distance rolloff
 
 		// 网络配置
@@ -347,6 +348,22 @@ namespace godot {
 		void record_start(const int id, Ref<FmodSound> sound, const bool loop);					// 启动录制引擎，录制到预设的声音对象
 		void record_stop(const int id);															// 停止录制引擎向预设的声音对象录制
 		bool is_recording(const int id) const;													// 检索 FMOD 录制 API 的状态，即是否正在录制
+
+		// 几何管理
+		Ref<FmodGeometry> create_geometry(
+			const int max_polygons = 9999,
+			const int max_vertices = 9999
+		) const;																				// 创建几何
+
+		void set_3d_max_world_size(const float max_world_size);									// 设置最大世界大小
+		float get_3d_max_world_size() const;													// 获取最大世界大小
+
+		Ref<FmodGeometry> load_geometry(const PackedByteArray& data) const;						// 从包含预存几何数据的内存块创建几何对象
+		Dictionary get_geometry_occlusion(const Vector3 listener, const Vector3 source) const;	// 计算听者与声源之间的几何遮挡
+
+		// 概述
+		void lock_dsp();																		// 互斥函数，将DSP引擎 (异步运行于另一线程中) 锁定，使其无法执行
+		void unlock_dsp();																		// 互斥函数，用于解锁DSP引擎 (异步运行于另一线程) ，并让它继续执行
 	};
 }
 

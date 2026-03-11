@@ -376,6 +376,493 @@
 				When using [constant FMOD_INIT_FLAG_STREAM_FROM_UPDATE] or [constant FMOD_INIT_FLAG_MIX_FROM_UPDATE], this method is even more critical as it drives the audio processing.
 			</description>
 		</method>
+		<method name="set_software_channels">
+			<return type="void" />
+			<param index="0" name="num_software_channels" type="int" />
+			<description>
+				Sets the maximum number of software channels for the mixer.
+				This determines how many channels can be mixed in software when hardware voices are exhausted.
+				Must be called before [method init].
+			</description>
+		</method>
+		<method name="get_software_channels" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the maximum number of software channels.
+			</description>
+		</method>
+		<method name="set_software_format">
+			<return type="void" />
+			<param index="0" name="sample_rate" type="int" />
+			<param index="1" name="speaker_mode" type="int" enum="FmodSystem.FmodSpeakerMode" />
+			<param index="2" name="num_raw_speakers" type="int" />
+			<description>
+				Sets the output format for the software mixer.
+				- [param sample_rate]: Output sample rate in Hz (typically 44100 or 48000)
+				- [param speaker_mode]: Speaker output configuration (stereo, 5.1, etc.)
+				- [param num_raw_speakers]: Number of speakers for raw speaker mode
+				Must be called before [method init].
+			</description>
+		</method>
+		<method name="get_software_format" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns the current software format settings as a Dictionary with:
+				- [code]sample_rate[/code]: Current sample rate
+				- [code]speaker_mode[/code]: Current speaker mode
+				- [code]num_raw_speakers[/code]: Number of raw speakers
+			</description>
+		</method>
+		<method name="set_dsp_buffer_size">
+			<return type="void" />
+			<param index="0" name="buffer_length" type="int" />
+			<param index="1" name="num_buffers" type="int" />
+			<description>
+				Sets the DSP buffer size for the software mixer.
+				Smaller buffer sizes reduce latency but increase CPU usage and risk of audio dropouts.
+				Must be called before [method init].
+			</description>
+		</method>
+		<method name="get_dsp_buffer_size" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns the current DSP buffer size settings as a Dictionary with:
+				- [code]buffer_length[/code]: Length of each buffer in samples
+				- [code]num_buffers[/code]: Number of buffers in the ring buffer
+			</description>
+		</method>
+		<method name="set_stream_buffer_size">
+			<return type="void" />
+			<param index="0" name="file_buffer_size" type="int" />
+			<param index="1" name="file_buffer_size_type" type="int" enum="FmodSystem.FmodTimeUnit" />
+			<description>
+				Sets the default buffer size for streaming sounds.
+				This affects how much data is read ahead for streamed audio files.
+			</description>
+		</method>
+		<method name="get_stream_buffer_size" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns the current stream buffer size settings as a Dictionary with:
+				- [code]file_buffer_size[/code]: Size of the stream buffer
+				- [code]file_buffer_size_type[/code]: The time unit used for the buffer size
+			</description>
+		</method>
+		<method name="set_speaker_position">
+			<return type="void" />
+			<param index="0" name="speaker" type="int" enum="FmodSystem.FmodSpeaker" />
+			<param index="1" name="x" type="float" />
+			<param index="2" name="y" type="float" />
+			<param index="3" name="active" type="bool" />
+			<description>
+				Sets the position of a speaker in the speaker configuration.
+				This allows custom speaker positioning for non-standard speaker setups.
+				The position is specified in 2D coordinates relative to the listener.
+			</description>
+		</method>
+		<method name="get_speaker_position" qualifiers="const">
+			<return type="Dictionary" />
+			<param index="0" name="speaker" type="int" enum="FmodSystem.FmodSpeaker" />
+			<description>
+				Returns the position of the specified speaker as a Dictionary with:
+				- [code]x[/code]: X coordinate
+				- [code]y[/code]: Y coordinate
+				- [code]active[/code]: Whether the speaker is active
+			</description>
+		</method>
+		<method name="set_doppler_scale">
+			<return type="void" />
+			<param index="0" name="doppler_scale" type="float" />
+			<description>
+				Sets the scaling factor for 3D doppler effect calculations.
+				Higher values exaggerate the doppler effect, lower values reduce it.
+				A value of 1.0 represents the default scaling.
+			</description>
+		</method>
+		<method name="get_doppler_scale" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the current doppler scale factor.
+			</description>
+		</method>
+		<method name="set_distance_factor">
+			<return type="void" />
+			<param index="0" name="distance_factor" type="float" />
+			<description>
+				Sets the distance factor for 3D spatial audio.
+				This converts the units used in 3D positioning (e.g., meters) to FMOD's internal units.
+				Default is 1.0 (1 unit = 1 meter).
+			</description>
+		</method>
+		<method name="get_distance_factor" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the current distance factor for 3D audio.
+			</description>
+		</method>
+		<method name="set_rolloff_scale">
+			<return type="void" />
+			<param index="0" name="rolloff_scale" type="float" />
+			<description>
+				Sets the scaling factor for 3D distance rolloff attenuation.
+				Higher values cause sounds to attenuate more quickly with distance.
+				Default is 1.0.
+			</description>
+		</method>
+		<method name="get_rolloff_scale" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the current rolloff scale factor.
+			</description>
+		</method>
+		<method name="set_3d_num_listeners">
+			<return type="void" />
+			<param index="0" name="num_listeners" type="int" />
+			<description>
+				Sets the number of 3D listeners in the scene.
+				Multiple listeners can be used for split-screen multiplayer or other scenarios.
+				Maximum number of listeners is platform-dependent.
+			</description>
+		</method>
+		<method name="get_3d_num_listeners" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the number of active 3D listeners.
+			</description>
+		</method>
+		<method name="set_3d_rolloff_callback_enabled">
+			<return type="void" />
+			<param index="0" name="enable" type="bool" />
+			<description>
+				Enables or disables the custom 3D rolloff callback.
+				When enabled, the [_calculate_3d_rolloff] virtual method is called for custom distance attenuation calculations.
+			</description>
+		</method>
+		<method name="is_3d_rolloff_callback_enabled" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if the custom 3D rolloff callback is enabled.
+			</description>
+		</method>
+		<method name="set_max_mpeg_codecs">
+			<return type="void" />
+			<param index="0" name="max_codecs" type="int" />
+			<description>
+				Sets the maximum number of MPEG (MP3) codecs to allocate.
+				Each playing MPEG sound requires a codec. Must be called before [method init].
+			</description>
+		</method>
+		<method name="get_max_mpeg_codecs" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the maximum number of allocated MPEG codecs.
+			</description>
+		</method>
+		<method name="set_max_adpcm_codecs">
+			<return type="void" />
+			<param index="0" name="max_codecs" type="int" />
+			<description>
+				Sets the maximum number of IMA-ADPCM codecs to allocate.
+				Must be called before [method init].
+			</description>
+		</method>
+		<method name="get_max_adpcm_codecs" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the maximum number of allocated ADPCM codecs.
+			</description>
+		</method>
+		<method name="set_max_xma_codecs">
+			<return type="void" />
+			<param index="0" name="max_codecs" type="int" />
+			<description>
+				Sets the maximum number of XMA codecs to allocate.
+				Must be called before [method init].
+			</description>
+		</method>
+		<method name="get_max_xma_codecs" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the maximum number of allocated XMA codecs.
+			</description>
+		</method>
+		<method name="set_max_vorbis_codecs">
+			<return type="void" />
+			<param index="0" name="max_codecs" type="int" />
+			<description>
+				Sets the maximum number of Vorbis codecs to allocate.
+				Must be called before [method init].
+			</description>
+		</method>
+		<method name="get_max_vorbis_codecs" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the maximum number of allocated Vorbis codecs.
+			</description>
+		</method>
+		<method name="set_max_at9_codecs">
+			<return type="void" />
+			<param index="0" name="max_codecs" type="int" />
+			<description>
+				Sets the maximum number of ATRAC9 (AT9) codecs to allocate.
+				Must be called before [method init].
+			</description>
+		</method>
+		<method name="get_max_at9_codecs" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the maximum number of allocated AT9 codecs.
+			</description>
+		</method>
+		<method name="set_max_fadpcm_codecs">
+			<return type="void" />
+			<param index="0" name="max_codecs" type="int" />
+			<description>
+				Sets the maximum number of FADPCM codecs to allocate.
+				Must be called before [method init].
+			</description>
+		</method>
+		<method name="get_max_fadpcm_codecs" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the maximum number of allocated FADPCM codecs.
+			</description>
+		</method>
+		<method name="set_max_opus_codecs">
+			<return type="void" />
+			<param index="0" name="max_codecs" type="int" />
+			<description>
+				Sets the maximum number of Opus codecs to allocate.
+				Must be called before [method init].
+			</description>
+		</method>
+		<method name="get_max_opus_codecs" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the maximum number of allocated Opus codecs.
+			</description>
+		</method>
+		<method name="set_asio_num_channels">
+			<return type="void" />
+			<param index="0" name="num_channels" type="int" />
+			<description>
+				Sets the number of ASIO channels for input/output.
+				Only applicable when using ASIO output mode.
+			</description>
+		</method>
+		<method name="get_asio_num_channels" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the number of configured ASIO channels.
+			</description>
+		</method>
+		<method name="set_vol0_virtual_vol">
+			<return type="void" />
+			<param index="0" name="vol" type="float" />
+			<description>
+				Sets the virtual voice threshold volume.
+				Sounds with volume below this threshold become virtual voices.
+			</description>
+		</method>
+		<method name="get_vol0_virtual_vol" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the current virtual voice threshold volume.
+			</description>
+		</method>
+		<method name="set_default_decode_buffer_size">
+			<return type="void" />
+			<param index="0" name="size" type="int" />
+			<description>
+				Sets the default decode buffer size for streams.
+				Larger buffers reduce the risk of buffer underruns but use more memory.
+			</description>
+		</method>
+		<method name="get_default_decode_buffer_size" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the default decode buffer size for streams.
+			</description>
+		</method>
+		<method name="set_profile_port">
+			<return type="void" />
+			<param index="0" name="port" type="int" />
+			<description>
+				Sets the TCP port for FMOD Profiler connections.
+				Use with [constant FMOD_INIT_FLAG_PROFILE_ENABLE] to enable profiling.
+			</description>
+		</method>
+		<method name="get_profile_port" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the configured FMOD Profiler port.
+			</description>
+		</method>
+		<method name="set_geometry_max_fade_time">
+			<return type="void" />
+			<param index="0" name="time" type="int" />
+			<description>
+				Sets the maximum fade time for geometry occlusion changes.
+				When sound is occluded by geometry, the transition is smoothed over this duration (in milliseconds).
+			</description>
+		</method>
+		<method name="get_geometry_max_fade_time" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the maximum geometry occlusion fade time.
+			</description>
+		</method>
+		<method name="set_distance_filter_center_freq">
+			<return type="void" />
+			<param index="0" name="freq" type="float" />
+			<description>
+				Sets the center frequency for the distance filter.
+				Used with [constant FMOD_INIT_FLAG_CHANNEL_DISTANCEFILTER].
+			</description>
+		</method>
+		<method name="get_distance_filter_center_freq" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the distance filter center frequency.
+			</description>
+		</method>
+		<method name="set_reverb_3d_instance">
+			<return type="void" />
+			<param index="0" name="instance" type="int" />
+			<description>
+				Sets the global reverb instance to use for 3D reverb calculations.
+			</description>
+		</method>
+		<method name="get_reverb_3d_instance" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the current 3D reverb instance index.
+			</description>
+		</method>
+		<method name="set_dsp_buffer_pool_size">
+			<return type="void" />
+			<param index="0" name="size" type="int" />
+			<description>
+				Sets the DSP buffer pool size for intermediate mixing buffers.
+				Must be called before [method init].
+			</description>
+		</method>
+		<method name="get_dsp_buffer_pool_size" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the DSP buffer pool size.
+			</description>
+		</method>
+		<method name="set_resampler_method">
+			<return type="void" />
+			<param index="0" name="method" type="int" enum="FmodSystem.FmodResamplerMethod" />
+			<description>
+				Sets the resampling method for pitch changes.
+				Higher quality methods use more CPU. See [enum FmodResamplerMethod].
+			</description>
+		</method>
+		<method name="get_resampler_method" qualifiers="const">
+			<return type="int" enum="FmodSystem.FmodResamplerMethod" />
+			<description>
+				Returns the current resampler method.
+			</description>
+		</method>
+		<method name="set_random_seed">
+			<return type="void" />
+			<param index="0" name="seed" type="int" />
+			<description>
+				Sets the random seed for FMOD's internal random number generator.
+				Affects randomized features like chorus and flange effects.
+			</description>
+		</method>
+		<method name="get_random_seed" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the current random seed.
+			</description>
+		</method>
+		<method name="set_max_convolution_threads">
+			<return type="void" />
+			<param index="0" name="max_threads" type="int" />
+			<description>
+				Sets the maximum number of CPU threads for convolution reverb processing.
+			</description>
+		</method>
+		<method name="get_max_convolution_threads" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the maximum number of convolution threads.
+			</description>
+		</method>
+		<method name="set_max_spatial_objects">
+			<return type="void" />
+			<param index="0" name="max_objects" type="int" />
+			<description>
+				Sets the maximum number of spatial audio objects for object-based audio output.
+				Must be called before [method init].
+			</description>
+		</method>
+		<method name="get_max_spatial_objects" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the maximum number of spatial objects.
+			</description>
+		</method>
+		<method name="create_geometry">
+			<return type="FmodGeometry" />
+			<param index="0" name="max_polygons" type="int" default="9999" />
+			<param index="1" name="max_vertices" type="int" default="9999" />
+			<description>
+				Creates a geometry object for 3D occlusion calculations.
+				Geometry is used to simulate sound occlusion by physical objects in the scene.
+			</description>
+		</method>
+		<method name="set_3d_max_world_size">
+			<return type="void" />
+			<param index="0" name="max_world_size" type="float" />
+			<description>
+				Sets the maximum world size for 3D spatial audio calculations.
+				This affects the precision of spatial calculations.
+			</description>
+		</method>
+		<method name="get_3d_max_world_size" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the maximum world size for 3D spatial audio.
+			</description>
+		</method>
+		<method name="load_geometry">
+			<return type="FmodGeometry" />
+			<param index="0" name="data" type="PackedByteArray" />
+			<description>
+				Loads pre-saved geometry data from a PackedByteArray.
+				Useful for loading complex geometry from disk.
+			</description>
+		</method>
+		<method name="get_geometry_occlusion" qualifiers="const">
+			<return type="Dictionary" />
+			<param index="0" name="listener" type="Vector3" />
+			<param index="1" name="source" type="Vector3" />
+			<description>
+				Calculates occlusion between a listener and a sound source position.
+				Returns a Dictionary with occlusion values for direct and reverb paths.
+			</description>
+		</method>
+		<method name="lock_dsp">
+			<return type="void" />
+			<description>
+				Locks the DSP engine mutex.
+				Use this when making multiple DSP calls that need to be atomic.
+				Always pair with [method unlock_dsp].
+			</description>
+		</method>
+		<method name="unlock_dsp">
+			<return type="void" />
+			<description>
+				Unlocks the DSP engine mutex.
+				Must be called after [method lock_dsp].
+			</description>
+		</method>
 	</methods>
 	<constants>
 		<constant name="FMOD_INIT_FLAG_NORMAL" value="0" enum="FmodInitFlags">
@@ -635,6 +1122,72 @@
 		</constant>
 		<constant name="FMOD_TIME_UNIT_MODPATTERN" value="1024" enum="FmodTimeUnit">
 			For module formats (MOD/XM/IT/S3M): pattern index.
+		</constant>
+		<constant name="FMOD_SPEAKER_NONE" value="-1" enum="FmodSpeaker">
+			No speaker (invalid or disabled).
+		</constant>
+		<constant name="FMOD_SPEAKER_FRONT_LEFT" value="0" enum="FmodSpeaker">
+			Front left speaker.
+		</constant>
+		<constant name="FMOD_SPEAKER_FRONT_RIGHT" value="1" enum="FmodSpeaker">
+			Front right speaker.
+		</constant>
+		<constant name="FMOD_SPEAKER_FRONT_CENTER" value="2" enum="FmodSpeaker">
+			Front center speaker (dialogue).
+		</constant>
+		<constant name="FMOD_SPEAKER_LOW_FREQUENCY" value="3" enum="FmodSpeaker">
+			Low frequency effects/subwoofer (LFE).
+		</constant>
+		<constant name="FMOD_SPEAKER_SURROUND_LEFT" value="4" enum="FmodSpeaker">
+			Surround left speaker.
+		</constant>
+		<constant name="FMOD_SPEAKER_SURROUND_RIGHT" value="5" enum="FmodSpeaker">
+			Surround right speaker.
+		</constant>
+		<constant name="FMOD_SPEAKER_BACK_LEFT" value="6" enum="FmodSpeaker">
+			Back left speaker (7.1).
+		</constant>
+		<constant name="FMOD_SPEAKER_BACK_RIGHT" value="7" enum="FmodSpeaker">
+			Back right speaker (7.1).
+		</constant>
+		<constant name="FMOD_SPEAKER_TOP_FRONT_LEFT" value="8" enum="FmodSpeaker">
+			Top front left speaker (Dolby Atmos).
+		</constant>
+		<constant name="FMOD_SPEAKER_TOP_FRONT_RIGHT" value="9" enum="FmodSpeaker">
+			Top front right speaker (Dolby Atmos).
+		</constant>
+		<constant name="FMOD_SPEAKER_TOP_BACK_LEFT" value="10" enum="FmodSpeaker">
+			Top back left speaker (Dolby Atmos).
+		</constant>
+		<constant name="FMOD_SPEAKER_TOP_BACK_RIGHT" value="11" enum="FmodSpeaker">
+			Top back right speaker (Dolby Atmos).
+		</constant>
+		<constant name="FMOD_SPEAKER_MAX" value="12" enum="FmodSpeaker">
+			Maximum speaker index.
+		</constant>
+		<constant name="FMOD_SPEAKER_FORCEINT" value="65536" enum="FmodSpeaker">
+			Forces the enum to be 32-bit size.
+		</constant>
+		<constant name="FMOD_RESAMPLER_DEFAULT" value="0" enum="FmodResamplerMethod">
+			Default resampler (platform-dependent, usually linear).
+		</constant>
+		<constant name="FMOD_RESAMPLER_NOINTERP" value="1" enum="FmodResamplerMethod">
+			No interpolation (nearest neighbor, lowest quality).
+		</constant>
+		<constant name="FMOD_RESAMPLER_LINEAR" value="2" enum="FmodResamplerMethod">
+			Linear interpolation (fast, good quality).
+		</constant>
+		<constant name="FMOD_RESAMPLER_CUBIC" value="3" enum="FmodResamplerMethod">
+			Cubic interpolation (slower, better quality).
+		</constant>
+		<constant name="FMOD_RESAMPLER_SPLINE" value="4" enum="FmodResamplerMethod">
+			Spline interpolation (slowest, best quality).
+		</constant>
+		<constant name="FMOD_RESAMPLER_MAX" value="5" enum="FmodResamplerMethod">
+			Maximum resampler method value.
+		</constant>
+		<constant name="FMOD_RESAMPLER_FORCEINT" value="65536" enum="FmodResamplerMethod">
+			Forces the enum to be 32-bit size.
 		</constant>
 	</constants>
 </class>

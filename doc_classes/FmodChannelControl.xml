@@ -282,6 +282,205 @@
 				Stops playback of the channel (or all channels in nested ChannelGroups). The channel becomes invalid after stopping and cannot be reused.
 			</description>
 		</method>
+		<method name="set_3d_attributes">
+			<return type="void" />
+			<param index="0" name="pos" type="Vector3" />
+			<param index="1" name="vel" type="Vector3" />
+			<description>
+				Sets the 3D position and velocity for spatial audio.
+				- [param pos]: Position in world space
+				- [param vel]: Velocity for doppler effect calculations
+			</description>
+		</method>
+		<method name="get_3d_attributes" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns the 3D attributes as a Dictionary with:
+				- [code]pos[/code]: Current position (Vector3)
+				- [code]vel[/code]: Current velocity (Vector3)
+			</description>
+		</method>
+		<method name="set_3d_cone_orientation">
+			<return type="void" />
+			<param index="0" name="orientation" type="Vector3" />
+			<description>
+				Sets the orientation of the directional cone for directional audio.
+				The vector should be normalized and point in the direction the sound is facing.
+			</description>
+		</method>
+		<method name="get_3d_cone_orientation" qualifiers="const">
+			<return type="Vector3" />
+			<description>
+				Returns the current cone orientation vector.
+			</description>
+		</method>
+		<method name="set_3d_cone_settings">
+			<return type="void" />
+			<param index="0" name="inside_cone_angle" type="float" />
+			<param index="1" name="outside_cone_angle" type="float" />
+			<param index="2" name="outside_volume_db" type="float" />
+			<description>
+				Sets the cone parameters for directional audio.
+				- [param inside_cone_angle]: Angle in degrees where volume is at maximum (0-360)
+				- [param outside_cone_angle]: Angle in degrees where volume begins to attenuate (0-360)
+				- [param outside_volume_db]: Volume level outside the cone in dB
+			</description>
+		</method>
+		<method name="get_3d_cone_settings" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns the cone settings as a Dictionary with:
+				- [code]inside_cone_angle[/code]: Inside cone angle in degrees
+				- [code]outside_cone_angle[/code]: Outside cone angle in degrees
+				- [code]outside_volume_db[/code]: Outside volume in dB
+			</description>
+		</method>
+		<method name="set_3d_custom_rolloff">
+			<return type="void" />
+			<param index="0" name="points" type="PackedVector3Array" />
+			<description>
+				Sets a custom distance rolloff curve.
+				Each point is a Vector3 where x=distance, y=volume, z=unused.
+			</description>
+		</method>
+		<method name="get_3d_custom_rolloff" qualifiers="const">
+			<return type="PackedVector3Array" />
+			<description>
+				Returns the custom rolloff curve points.
+			</description>
+		</method>
+		<method name="set_3d_distance_filter">
+			<return type="void" />
+			<param index="0" name="custom" type="bool" />
+			<param index="1" name="custom_level" type="float" />
+			<param index="2" name="center_freq" type="float" />
+			<description>
+				Sets the distance filter parameters.
+				- [param custom]: Enable custom filter settings
+				- [param custom_level]: Filter level when custom is enabled
+				- [param center_freq]: Center frequency of the distance filter
+			</description>
+		</method>
+		<method name="get_3d_distance_filter" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns the distance filter settings as a Dictionary with:
+				- [code]custom[/code]: Whether custom filter is enabled
+				- [code]custom_level[/code]: Custom filter level
+				- [code]center_freq[/code]: Center frequency
+			</description>
+		</method>
+		<method name="set_3d_doppler_level">
+			<return type="void" />
+			<param index="0" name="level" type="float" />
+			<description>
+				Sets the doppler effect intensity for this channel.
+				Higher values increase the pitch shift due to velocity.
+			</description>
+		</method>
+		<method name="get_3d_doppler_level" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the current doppler level.
+			</description>
+		</method>
+		<method name="set_3d_level">
+			<return type="void" />
+			<param index="0" name="level" type="float" />
+			<description>
+				Sets the 3D panning level (0.0 to 1.0).
+				0.0 = full 2D panning, 1.0 = full 3D spatialization.
+			</description>
+		</method>
+		<method name="get_3d_level" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the current 3D panning level.
+			</description>
+		</method>
+		<method name="set_3d_min_distance">
+			<return type="void" />
+			<param index="0" name="min_distance" type="float" />
+			<description>
+				Sets the minimum distance for 3D attenuation.
+				Inside this distance, the sound plays at full volume.
+			</description>
+		</method>
+		<method name="get_3d_min_distance" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the minimum 3D distance.
+			</description>
+		</method>
+		<method name="set_3d_max_distance">
+			<return type="void" />
+			<param index="0" name="max_distance" type="float" />
+			<description>
+				Sets the maximum distance for 3D attenuation.
+				Beyond this distance, the sound volume stays at the minimum level.
+			</description>
+		</method>
+		<method name="get_3d_max_distance" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the maximum 3D distance.
+			</description>
+		</method>
+		<method name="set_3d_occlusion">
+			<return type="void" />
+			<param index="0" name="direct_occlusion" type="float" />
+			<param index="1" name="reverb_occlusion" type="float" />
+			<description>
+				Sets the occlusion factors for direct and reverb paths.
+				- [param direct_occlusion]: 0.0 (no occlusion) to 1.0 (fully occluded)
+				- [param reverb_occlusion]: 0.0 (no occlusion) to 1.0 (fully occluded)
+			</description>
+		</method>
+		<method name="get_3d_occlusion" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns the occlusion values as a Dictionary with:
+				- [code]direct_occlusion[/code]: Direct path occlusion (0.0-1.0)
+				- [code]reverb_occlusion[/code]: Reverb path occlusion (0.0-1.0)
+			</description>
+		</method>
+		<method name="set_3d_spread">
+			<return type="void" />
+			<param index="0" name="angle" type="float" />
+			<description>
+				Sets the stereo spread angle for 3D positioned sounds.
+				Higher values make the sound more diffuse in the stereo field.
+			</description>
+		</method>
+		<method name="get_3d_spread" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the current 3D spread angle.
+			</description>
+		</method>
+		<method name="set_mix_levels_input">
+			<return type="void" />
+			<param index="0" name="levels" type="PackedFloat32Array" />
+			<description>
+				Sets the input mix levels for each channel of a multi-channel sound.
+				This allows per-channel volume control.
+			</description>
+		</method>
+		<method name="set_mix_levels_output">
+			<return type="void" />
+			<param index="0" name="front_left" type="float" />
+			<param index="1" name="front_right" type="float" />
+			<param index="2" name="center" type="float" />
+			<param index="3" name="lfe" type="float" />
+			<param index="4" name="surround_left" type="float" />
+			<param index="5" name="surround_right" type="float" />
+			<param index="6" name="back_left" type="float" />
+			<param index="7" name="back_right" type="float" />
+			<description>
+				Sets the output mix levels for each speaker channel.
+				Allows custom routing to specific speaker outputs.
+			</description>
+		</method>
 	</methods>
 	<members>
 		<member name="gain" type="float" setter="set_low_pass_gain" getter="get_low_pass_gain" default="1.0">

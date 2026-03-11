@@ -24,7 +24,7 @@
 </p>
 
 <p align="center">
-  A high-performance audio player plugin supporting multiple formats, flexible loading modes,<br>
+  A audio player plugin supporting multiple formats, flexible loading modes,<br>
   professional DSP effects, and real-time mixing capabilities.
 </p>
 

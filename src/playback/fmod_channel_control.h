@@ -94,6 +94,17 @@ namespace godot {
 
 		// 声像与水平调整
 		void set_pan(const float pan);								// 调节左右声像水平
+		void set_mix_levels_input(const PackedFloat32Array& levels);// 为多声道信号的每个通道设置输入音量电平 (仅支持 Channel)
+		void set_mix_levels_output(
+			const float front_left,
+			const float front_right,
+			const float center,
+			const float lfe,
+			const float surround_left,
+			const float surround_right,
+			const float back_left,
+			const float back_right
+		);															// 为每个扬声器设置输出音量
 
 		// 过滤
 		void set_reverb_properties(

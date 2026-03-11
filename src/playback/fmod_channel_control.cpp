@@ -71,6 +71,8 @@ namespace godot {
 		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_spread", PROPERTY_HINT_RANGE, "0,360,0.1"), "set_3d_spread", "get_3d_spread");
 
 		ClassDB::bind_method(D_METHOD("set_pan", "pan"), &FmodChannelControl::set_pan);
+		ClassDB::bind_method(D_METHOD("set_mix_levels_input", "levels"), &FmodChannelControl::set_mix_levels_input);
+		ClassDB::bind_method(D_METHOD("set_mix_levels_output", "front_left", "front_right", "center", "lfe", "surround_left", "surround_right", "back_left", "back_right"), &FmodChannelControl::set_mix_levels_output);
 
 		ClassDB::bind_method(D_METHOD("set_reverb_properties", "instance", "wet"), &FmodChannelControl::set_reverb_properties);
 		ClassDB::bind_method(D_METHOD("get_reverb_properties", "instance"), &FmodChannelControl::get_reverb_properties);
@@ -414,6 +416,43 @@ namespace godot {
 	void FmodChannelControl::set_pan(const float pan) {
 		ERR_FAIL_COND(!channel_control);
 		FMOD_ERR_CHECK(channel_control->setPan(pan));
+	}
+
+	void FmodChannelControl::set_mix_levels_input(const PackedFloat32Array& levels) {
+		ERR_FAIL_COND(!channel_control);
+
+		const int num_levels = levels.size();
+		std::vector<float> fmod_levels;
+		fmod_levels.reserve(num_levels);
+		for (int i = 0; i < num_levels; i++) {
+			const float level = levels[i];
+			fmod_levels.push_back(level);
+		}
+
+		FMOD_ERR_CHECK(channel_control->setMixLevelsInput(fmod_levels.data(), num_levels));
+	}
+
+	void FmodChannelControl::set_mix_levels_output(
+		const float front_left,
+		const float front_right,
+		const float center,
+		const float lfe,
+		const float surround_left,
+		const float surround_right,
+		const float back_left,
+		const float back_right
+	) {
+		ERR_FAIL_COND(!channel_control);
+		FMOD_ERR_CHECK(channel_control->setMixLevelsOutput(
+			front_left,
+			front_right,
+			center,
+			lfe,
+			surround_left,
+			surround_right,
+			back_left,
+			back_right
+		));
 	}
 
 	void FmodChannelControl::set_reverb_properties(const int instance, const float wet) {

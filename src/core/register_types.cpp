@@ -31,13 +31,13 @@
 #include "geometry/geometry.h"
 #include "mixer/fmod_audio_bus.h"
 #include "mixer/fmod_audio_bus_layout.h"
-#include "spatial/fmod_reverb_3d.h"
 #include "nodes/fmod_audio_sample_emitter.h"
 #include "nodes/fmod_audio_stream_player.h"
 #include "playback/fmod_channel.h"
 #include "playback/fmod_channel_control.h"
 #include "playback/fmod_channel_group.h"
 #include "playback/fmod_sound_group.h"
+#include "spatial/fmod_reverb_3d.h"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/classes/engine.hpp>

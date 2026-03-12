@@ -57,6 +57,12 @@
     <Filter Include="Header Files\geometry">
       <UniqueIdentifier>{c6d971ec-342f-4593-89fb-5495e2c8b712}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\spatial">
+      <UniqueIdentifier>{851ea35e-909b-404a-875c-eb8bf34e7dc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\spatial">
+      <UniqueIdentifier>{5d392228-a08e-422d-9ed4-bcd50be01bab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\fmod_server.h">
@@ -176,6 +182,9 @@
     <ClInclude Include="src\geometry\geometry.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
+    <ClInclude Include="src\spatial\fmod_reverb_3d.h">
+      <Filter>Header Files\spatial</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\fmod_server.cpp">
@@ -291,6 +300,9 @@
     </ClCompile>
     <ClCompile Include="src\geometry\geometry.cpp">
       <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\spatial\fmod_reverb_3d.cpp">
+      <Filter>Source Files\spatial</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

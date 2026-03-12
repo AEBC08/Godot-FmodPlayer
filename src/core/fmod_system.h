@@ -309,10 +309,11 @@ namespace godot {
 		Dictionary get_cpu_usage() const;														// 获取 Core API不同部分所使用的 CPU 资源
 		Dictionary get_file_usage() const;														// 获取文件读取信息
 		PackedFloat32Array get_default_mix_matrix(
-			FmodSpeakerMode source_speaker_mode,
-			FmodSpeakerMode target_speaker_mode,
-			int array_length,
-			int hop) const;																		// 检索用于从一种扬声器模式转换为另一种模式的默认矩阵
+			const FmodSpeakerMode source_speaker_mode,
+			const FmodSpeakerMode target_speaker_mode,
+			const int array_length,
+			const int hop
+		) const;																				// 检索用于从一种扬声器模式转换为另一种模式的默认矩阵
 		int get_speaker_mode_channels(FmodSpeakerMode mode) const;								// 获取给定扬声器模式的通道数
 
 		// 创建与获取

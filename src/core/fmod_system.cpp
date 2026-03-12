@@ -820,15 +820,15 @@ namespace godot {
 	}
 
 	PackedFloat32Array FmodSystem::get_default_mix_matrix(
-		FmodSpeakerMode source_speaker_mode,
-		FmodSpeakerMode target_speaker_mode,
-		int array_length,
-		int hop) const {
+		const FmodSpeakerMode source_speaker_mode,
+		const FmodSpeakerMode target_speaker_mode,
+		const int array_length,
+		const int hop) const {
 		ERR_FAIL_COND_V(!system, PackedFloat32Array());
 
 		FMOD_SPEAKERMODE fmod_source = static_cast<FMOD_SPEAKERMODE>((int)source_speaker_mode);
 		FMOD_SPEAKERMODE fmod_target = static_cast<FMOD_SPEAKERMODE>((int)target_speaker_mode);
-		int source_channels = 0;
+		int source_channels = 0, arr_len = array_length;
 
 		// 获取实际需要的大小
 		int target_channels = 0;
@@ -837,15 +837,15 @@ namespace godot {
 		int needed_size = source_channels * target_channels;
 
 		// 若用户指定array_length，使用需要的尺寸
-		if (array_length <= 0) {
-			array_length = needed_size;
+		if (arr_len <= 0) {
+			arr_len = needed_size;
 		}
 
 		// 分配内存
-		float* matrix = (float*)memalloc(array_length * sizeof(float));
+		float* matrix = (float*)memalloc(arr_len * sizeof(float));
 
 		ERR_FAIL_COND_V(!matrix, PackedFloat32Array());
-		for (int i = 0; i < array_length; i++) {
+		for (int i = 0; i < arr_len; i++) {
 
 			matrix[i] = 0.0f;
 

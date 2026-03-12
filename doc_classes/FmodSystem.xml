@@ -179,6 +179,13 @@
 				Returns the master channel group to which all sounds ultimately route. Use this to control global volume, add master effects, or monitor overall output.
 			</description>
 		</method>
+		<method name="get_master_sound_group">
+			<return type="FmodSoundGroup" />
+			<description>
+				Returns the master sound group that all sounds belong to by default.
+				The master sound group can be used to set global playback limits and control collective behavior for all sounds.
+			</description>
+		</method>
 		<method name="get_network_proxy" qualifiers="const">
 			<return type="String" />
 			<description>
@@ -815,6 +822,23 @@
 			<description>
 				Creates a geometry object for 3D occlusion calculations.
 				Geometry is used to simulate sound occlusion by physical objects in the scene.
+			</description>
+		</method>
+		<method name="create_reverb_3d">
+			<return type="FmodReverb3D" />
+			<description>
+				Creates a 3D reverb zone for spatial audio reverberation effects.
+				Returns a [FmodReverb3D] object that can be positioned in 3D space and configured with reverb parameters.
+				Use this to create environmental audio effects like caves, halls, or rooms.
+			</description>
+		</method>
+		<method name="create_sound_group">
+			<return type="FmodSoundGroup" />
+			<param index="0" name="name" type="String" />
+			<description>
+				Creates a new [FmodSoundGroup] with the specified name.
+				Sound groups allow you to organize sounds into categories with shared playback limits and collective control.
+				Useful for managing weapon sounds, ambient sounds, or dialogue with max audible limits.
 			</description>
 		</method>
 		<method name="set_3d_max_world_size">

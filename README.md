@@ -28,7 +28,7 @@
   professional DSP effects, and real-time mixing capabilities.
 </p>
 
----
+-
 
 ## Features
 
@@ -85,7 +85,7 @@ First-class Godot Editor support:
 - **Audio Preview** - Preview audio files in the inspector
 - **Custom Icons** - Visual distinction for all FMOD-related nodes and resources
 
----
+-
 
 ## Requirements
 
@@ -98,7 +98,7 @@ First-class Godot Editor support:
 
 > **License Notice:** FMOD is a proprietary audio engine. You must obtain your own license from [fmod.com](https://www.fmod.com) for commercial use.
 
----
+-
 
 #### Available Options
 - **Platforms:** `windows`, `android`
@@ -108,7 +108,7 @@ First-class Godot Editor support:
 #### Enable the Plugin
 After building, go to `Project > Project Settings > Plugins` in Godot Editor, find **FMOD Player Plugin** and enable it.
 
----
+-
 
 ## Documentation
 
@@ -116,13 +116,13 @@ After building, go to `Project > Project Settings > Plugins` in Godot Editor, fi
 
 The documentation includes detailed usage guides, API reference, code examples, and platform-specific instructions.
 
----
+-
 
 ## Acknowledgments
 
 - [FMOD](https://www.fmod.com/) by Firelight Technologies Pty Ltd
 
----
+-
 
 <p align="center">
   <sub>FMOD is a trademark of Firelight Technologies Pty Ltd.<br>

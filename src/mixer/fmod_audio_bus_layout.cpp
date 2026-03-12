@@ -94,12 +94,14 @@ namespace godot {
 		ERR_FAIL_COND(bus->get_bus().is_null());
 		AudioServer* audio_server = AudioServer::get_singleton();
 		ERR_FAIL_COND(!audio_server);
-		int32_t effect_count = audio_server->get_bus_effect_count(audio_server_bus_index);
+		const int32_t effect_count = audio_server->get_bus_effect_count(audio_server_bus_index);
 		for (int32_t i = 0; i < effect_count; i++) {
+			if (!audio_server->is_bus_effect_enabled(audio_server_bus_index, i)) continue;
 			Ref<AudioEffect> godot_effect = audio_server->get_bus_effect(audio_server_bus_index, i);
 
 			// Amplify 效果器 - 处理 AudioEffectAmplify
 			Ref<AudioEffectAmplify> godot_amplify = godot_effect;
+
 			if (godot_amplify.is_valid()) {
 				Ref<FmodAudioEffectAmplify> fmod_amplify;
 				fmod_amplify.instantiate();

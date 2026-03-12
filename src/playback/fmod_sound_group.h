@@ -28,6 +28,8 @@ namespace godot {
 		bool sound_group_is_valid() const;							// 检查 SoundGroup 是否有效
 		bool sound_group_is_null() const;							// 检查 SoundGroup 是否无效
 
+		void setup(FMOD::SoundGroup* p_sound_group);
+
 		// 基础功能
 		void set_max_audible(const int max_audible);				// 设置 SoundGroup 同时可听到的最大回放次数
 		int get_max_audible() const;								// 获取 SoundGroup 同时可听到的最大回放次数

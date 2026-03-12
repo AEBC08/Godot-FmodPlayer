@@ -44,6 +44,17 @@ namespace godot {
 		return sound_group == nullptr;
 	}
 
+	void FmodSoundGroup::setup(FMOD::SoundGroup* p_sound_group) {
+		ERR_FAIL_COND_MSG(!p_sound_group, "SoundGroup pointer is null");
+
+		if (sound_group) {
+			sound_group->setUserData(nullptr);
+		}
+
+		sound_group = p_sound_group;
+		sound_group->setUserData(this);
+	}
+
 	void FmodSoundGroup::set_max_audible(const int max_audible) {
 		ERR_FAIL_COND(!sound_group);
 		FMOD_ERR_CHECK(sound_group->setMaxAudible(max_audible));

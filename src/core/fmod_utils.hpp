@@ -2,16 +2,16 @@
 #define UTILS_TOOLKIT_H
 
 #include "fmod_system.h"
-#include <fmod_errors.h>
-#include <godot_cpp/classes/ref_counted.hpp>
-#include <godot_cpp/variant/string.hpp>
-#include <godot_cpp/classes/resource_loader.hpp>
-#include <godot_cpp/variant/utility_functions.hpp>
-#include <godot_cpp/classes/editor_interface.hpp>
-#include <godot_cpp/classes/theme.hpp>
-#include <godot_cpp/classes/texture2d.hpp>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <fmod_errors.h>
+#include <godot_cpp/classes/editor_interface.hpp>
+#include <godot_cpp/classes/ref_counted.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
+#include <godot_cpp/classes/texture2d.hpp>
+#include <godot_cpp/classes/theme.hpp>
+#include <godot_cpp/variant/string.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 
 #define FMOD_ERR_CHECK(result)                                                  \
     do {                                                                        \

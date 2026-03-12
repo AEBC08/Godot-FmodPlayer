@@ -188,6 +188,7 @@ namespace godot {
 	void FmodAudioStreamPlayer::stop() {
 		if (internal_channel.is_valid() && internal_channel->channel_is_valid()) {
 			playing = false;
+			stream_paused = false;
 			internal_channel->stop();
 		}
 	}

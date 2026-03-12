@@ -69,20 +69,6 @@ namespace godot {
 
 		// 初始化总线布局
 		audio_bus_layout.instantiate();
-
-		// 注册自定义监视器
-		Performance* perf = Performance::get_singleton();
-		if (perf) {
-			perf->add_custom_monitor("FmodCPUUsage/DSP", callable_mp(this, &FmodServer::_get_dsp));
-			perf->add_custom_monitor("FmodCPUUsage/Stream", callable_mp(this, &FmodServer::_get_stream));
-			perf->add_custom_monitor("FmodCPUUsage/Geometry", callable_mp(this, &FmodServer::_get_geometry));
-			perf->add_custom_monitor("FmodCPUUsage/Update", callable_mp(this, &FmodServer::_get_update));
-			perf->add_custom_monitor("FmodCPUUsage/Convolution1", callable_mp(this, &FmodServer::_get_convolution1));
-			perf->add_custom_monitor("FmodCPUUsage/Convolution2", callable_mp(this, &FmodServer::_get_convolution2));
-			perf->add_custom_monitor("FmodFileUsage/SampleBytesRead", callable_mp(this, &FmodServer::_get_sample_bytes_read));
-			perf->add_custom_monitor("FmodFileUsage/StreamBytesRead", callable_mp(this, &FmodServer::_get_stream_bytes_read));
-			perf->add_custom_monitor("FmodFileUsage/OtherBytesRead", callable_mp(this, &FmodServer::_get_other_bytes_read));
-		}
 	}
 
 	FmodServer::~FmodServer() {
@@ -126,15 +112,34 @@ namespace godot {
 		SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop());
 		if (tree) {
 			tree->connect("process_frame", callable_mp(get_singleton(), &FmodServer::_update_fmod));
+
+			Performance* perf = Performance::get_singleton();
+			if (perf) {
+				perf->add_custom_monitor("FmodCPUUsage/DSP", callable_mp(this, &FmodServer::_get_dsp));
+				perf->add_custom_monitor("FmodCPUUsage/Stream", callable_mp(this, &FmodServer::_get_stream));
+				perf->add_custom_monitor("FmodCPUUsage/Geometry", callable_mp(this, &FmodServer::_get_geometry));
+				perf->add_custom_monitor("FmodCPUUsage/Update", callable_mp(this, &FmodServer::_get_update));
+				perf->add_custom_monitor("FmodCPUUsage/Convolution1", callable_mp(this, &FmodServer::_get_convolution1));
+				perf->add_custom_monitor("FmodCPUUsage/Convolution2", callable_mp(this, &FmodServer::_get_convolution2));
+				perf->add_custom_monitor("FmodFileUsage/SampleBytesRead", callable_mp(this, &FmodServer::_get_sample_bytes_read));
+				perf->add_custom_monitor("FmodFileUsage/StreamBytesRead", callable_mp(this, &FmodServer::_get_stream_bytes_read));
+				perf->add_custom_monitor("FmodFileUsage/OtherBytesRead", callable_mp(this, &FmodServer::_get_other_bytes_read));
+			}
+			else {
+				UtilityFunctions::push_warning("Failed to get Performance!");
+			}
+
+			AudioServer* audio_server = AudioServer::get_singleton();
+			if (audio_server) {
+				audio_server->connect("bus_layout_changed", callable_mp(this, &FmodServer::_build_bus_layout), CONNECT_DEFERRED);
+				_build_bus_layout();
+			}
+			else {
+				UtilityFunctions::push_warning("Failed to get AudioServer!");
+			}
 		}
 		else {
 			UtilityFunctions::push_error("Failed to get SceneTree!");
-		}
-
-		AudioServer* audio_server = AudioServer::get_singleton();
-		if (audio_server) {
-			audio_server->connect("bus_layout_changed", callable_mp(this, &FmodServer::_build_bus_layout), CONNECT_DEFERRED);
-			_build_bus_layout();
 		}
 	}
 

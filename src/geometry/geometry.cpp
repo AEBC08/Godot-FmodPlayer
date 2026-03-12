@@ -232,7 +232,12 @@ namespace godot {
 
 	void FmodGeometry::release() {
 		ERR_FAIL_COND(!geometry);
-		FMOD_ERR_CHECK(geometry->release());
+		geometry->setUserData(nullptr);
+		FMOD_RESULT result = geometry->release();
+		if (result != FMOD_OK) {
+			UtilityFunctions::push_error("Failed to release Geometry");
+			return;
+		}
 		geometry = nullptr;
 	}
 }

@@ -1,8 +1,5 @@
 #include "register_types.h"
 
-#include "editor/fmod_audio_importer.h"
-#include "editor/fmod_audio_preview_inspector.h"
-#include "editor/fmod_audio_preview_property.h"
 #include "audio/fmod_audio_stream.h"
 #include "audio/fmod_audio_stream_flac.h"
 #include "audio/fmod_sound.h"
@@ -11,13 +8,13 @@
 #include "core/fmod_system.h"
 #include "dsp/fmod_audio_effect.h"
 #include "dsp/fmod_audio_effect_amplify.h"
-#include "dsp/fmod_audio_effect_filter.h"
 #include "dsp/fmod_audio_effect_capture.h"
 #include "dsp/fmod_audio_effect_chorus.h"
 #include "dsp/fmod_audio_effect_compressor.h"
 #include "dsp/fmod_audio_effect_delay.h"
 #include "dsp/fmod_audio_effect_distortion.h"
 #include "dsp/fmod_audio_effect_eq.h"
+#include "dsp/fmod_audio_effect_filter.h"
 #include "dsp/fmod_audio_effect_hard_limiter.h"
 #include "dsp/fmod_audio_effect_panner.h"
 #include "dsp/fmod_audio_effect_phaser.h"
@@ -28,9 +25,13 @@
 #include "dsp/fmod_audio_effect_stereo_enhance.h"
 #include "dsp/fmod_dsp.h"
 #include "dsp/fmod_dsp_connection.h"
+#include "editor/fmod_audio_importer.h"
+#include "editor/fmod_audio_preview_inspector.h"
+#include "editor/fmod_audio_preview_property.h"
+#include "geometry/geometry.h"
 #include "mixer/fmod_audio_bus.h"
 #include "mixer/fmod_audio_bus_layout.h"
-#include "geometry/geometry.h"
+#include "spatial/fmod_reverb_3d.h"
 #include "nodes/fmod_audio_sample_emitter.h"
 #include "nodes/fmod_audio_stream_player.h"
 #include "playback/fmod_channel.h"
@@ -39,8 +40,8 @@
 #include "playback/fmod_sound_group.h"
 
 #include <gdextension_interface.h>
-#include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/classes/engine.hpp>
+#include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
@@ -143,6 +144,9 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(FmodAudioStream);
 	GDREGISTER_CLASS(FmodAudioStreamFLAC);
 
+	// 空间
+	GDREGISTER_CLASS(FmodReverb3D);
+
 	// 几何体
 	GDREGISTER_CLASS(FmodGeometry);
 
@@ -150,6 +154,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(FmodAudioStreamPlayer);
 	GDREGISTER_CLASS(FmodAudioSampleEmitter);
 
+	// FmodServer 注册和添加单例
 	GDREGISTER_CLASS(FmodServer);
 	fmod_server_instance = memnew(FmodServer);
 	Engine::get_singleton()->register_singleton("FmodServer", FmodServer::get_singleton());

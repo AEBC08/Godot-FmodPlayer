@@ -13,8 +13,10 @@ namespace godot {
 	class FmodSound;
 	class FmodChannel;
 	class FmodChannelGroup;
+	class FmodSoundGroup;
 	class FmodGeometry;
 	class FmodDSP;
+	class FmodReverb3D;
 
 	class FmodSystem : public Object {
 		GDCLASS(FmodSystem, Object)
@@ -294,15 +296,6 @@ namespace godot {
 		void set_max_spatial_objects(const int max_objects);									// 设置每个 FMODSystem 可预留的最大空间对象数
 		int get_max_spatial_objects() const;													// 获取每个 FMODSystem 可预留的最大空间对象数
 
-		// 3D Sound Callback
-		void set_3d_rolloff_callback_enabled(const bool enable);
-		bool is_3d_rolloff_callback_enabled() const;
-
-		// Internal: handle 3D rolloff callback
-		float _handle_3d_rolloff_callback(float distance);
-										
-		GDVIRTUAL1R(float, _calculate_3d_rolloff, float);										// Virtual function: GDScript can override to customize distance rolloff
-
 		// 网络配置
 		void set_network_proxy(const String& p_proxy);											// 设置一个代理服务器，用于所有后续的互联网连接
 		String get_network_proxy() const;														// 获取用于互联网流媒体的代理服务器的URL
@@ -327,19 +320,25 @@ namespace godot {
 		Ref<FmodSound> create_sound_from_memory(const PackedByteArray& data, unsigned int mode);// 从内存创建 FmodSound
 		Ref<FmodSound> create_sound_from_res(const String p_path, unsigned int mode);			// 从资源文件创建 FmodSound
 		Ref<FmodSound> create_stream_from_file(const String p_path, unsigned int mode);			// 从文件创建流 FmodSound
-		Ref<FmodDSP> create_dsp(const String& name);											// 创建 DSP
-		Ref<FmodDSP> create_dsp_by_type(unsigned int type);										// 创建一个带有指定类型索引的 DSP
-		Ref<FmodChannelGroup> create_channel_group(const String& p_name);						// 创建 ChannelGroup
+		Ref<FmodDSP> create_dsp(const String& name) const;										// 创建 DSP
+		Ref<FmodDSP> create_dsp_by_type(unsigned int type) const;								// 创建一个带有指定类型索引的 DSP
+		Ref<FmodChannelGroup> create_channel_group(const String& p_name) const;					// 创建 ChannelGroup
+		Ref<FmodSoundGroup> create_sound_group(const String& p_name) const;						// 创建 SoundGroup
+		Ref<FmodReverb3D> create_reverb_3d() const;												// 创建一个 "虚拟混响" 对象。这个物体会对3D位置做出反应，并根据与混响物体中心的距离来变形混响环境
 		Ref<FmodChannel> play_sound(
-			Ref<FmodSound> sound, Ref<FmodChannelGroup> channel_group, bool paused = false);	// 在 Channel 播放一个声音
+			Ref<FmodSound> sound,
+			Ref<FmodChannelGroup> channel_group,
+			const bool paused = false
+		);																						// 在 Channel 播放一个声音
 		Ref<FmodChannel> play_dsp(
 			Ref<FmodDSP> dsp,
 			Ref<FmodChannelGroup> channel_group,
-			bool paused = false
+			const bool paused = false
 		);																						// 播放一个 DSP 及其任何输入在 Channel 的信号
-		Ref<FmodChannel> get_channel(const int64_t id);											// 通过 ID 获取 Channel 的句柄
+		Ref<FmodChannel> get_channel(const int id) const;										// 通过 ID 获取 Channel 的句柄
 		Dictionary get_dsp_info_by_type(unsigned int type) const;								// 获取内置 DSP 描述结构信息
-		Ref<FmodChannelGroup> get_master_channel_group();										// 获取所有声音最终路由到的主通道组
+		Ref<FmodChannelGroup> get_master_channel_group() const;									// 获取所有声音最终路由到的主通道组
+		Ref<FmodSoundGroup> get_master_sound_group() const;										// 获取默认的 SoundGroup，所有声音在创建时放置的位置
 
 		// 录音
 		Dictionary get_record_num_drivers() const;												// 获取该输出模式下可用的录音设备数量
@@ -362,8 +361,17 @@ namespace godot {
 		Dictionary get_geometry_occlusion(const Vector3 listener, const Vector3 source) const;	// 计算听者与声源之间的几何遮挡
 
 		// 概述
-		void lock_dsp();																		// 互斥函数，将DSP引擎 (异步运行于另一线程中) 锁定，使其无法执行
-		void unlock_dsp();																		// 互斥函数，用于解锁DSP引擎 (异步运行于另一线程) ，并让它继续执行
+		void lock_dsp();																		// 互斥函数，将 DSP 引擎 (异步运行于另一线程中) 锁定，使其无法执行
+		void unlock_dsp();																		// 互斥函数，用于解锁 DSP 引擎 (异步运行于另一线程) ，并让它继续执行
+
+		// 3D Sound Callback
+		void set_3d_rolloff_callback_enabled(const bool enable);
+		bool is_3d_rolloff_callback_enabled() const;
+
+		// Internal: handle 3D rolloff callback
+		float _handle_3d_rolloff_callback(float distance);
+
+		GDVIRTUAL1R(float, _calculate_3d_rolloff, float);										// Virtual function: GDScript can override to customize distance rolloff
 	};
 }
 

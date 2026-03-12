@@ -2,8 +2,10 @@
 #include "audio/fmod_sound.h"
 #include "playback/fmod_channel.h"
 #include "playback/fmod_channel_group.h"
+#include "playback/fmod_sound_group.h"
 #include "geometry/geometry.h"
 #include "dsp/fmod_dsp.h"
+#include "spatial/fmod_reverb_3d.h"
 
 namespace godot {
 	void FmodSystem::_bind_methods() {
@@ -267,11 +269,14 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("create_dsp", "name"), &FmodSystem::create_dsp);
 		ClassDB::bind_method(D_METHOD("create_dsp_by_type", "type"), &FmodSystem::create_dsp_by_type);
 		ClassDB::bind_method(D_METHOD("create_channel_group", "name"), &FmodSystem::create_channel_group);
+		ClassDB::bind_method(D_METHOD("create_sound_group", "name"), &FmodSystem::create_sound_group);
+		ClassDB::bind_method(D_METHOD("create_reverb_3d"), &FmodSystem::create_reverb_3d);
 		ClassDB::bind_method(D_METHOD("play_sound", "sound", "channel_group", "paused"), &FmodSystem::play_sound, DEFVAL(false));
 		ClassDB::bind_method(D_METHOD("play_dsp", "dsp", "channel_group", "paused"), &FmodSystem::play_dsp, DEFVAL(false));
 		ClassDB::bind_method(D_METHOD("get_channel", "id"), &FmodSystem::get_channel);
 		ClassDB::bind_method(D_METHOD("get_dsp_info_by_type", "type"), &FmodSystem::get_dsp_info_by_type);
 		ClassDB::bind_method(D_METHOD("get_master_channel_group"), &FmodSystem::get_master_channel_group);
+		ClassDB::bind_method(D_METHOD("get_master_sound_group"), &FmodSystem::get_master_sound_group);
 
 		ClassDB::bind_method(D_METHOD("get_record_num_drivers"), &FmodSystem::get_record_num_drivers);
 		ClassDB::bind_method(D_METHOD("get_record_driver_info", "id"), &FmodSystem::get_record_driver_info);
@@ -964,7 +969,7 @@ namespace godot {
 		return sound;
 	}
 
-	Ref<FmodDSP> FmodSystem::create_dsp(const String& name) {
+	Ref<FmodDSP> FmodSystem::create_dsp(const String& name) const {
 		ERR_FAIL_COND_V(!system, Ref<FmodDSP>());
 
 		// 创建动态 DSP 描述结构 (需保持有效，因为 FMOD 内部会引用)
@@ -989,7 +994,7 @@ namespace godot {
 		return dsp;
 	}
 
-	Ref<FmodDSP> FmodSystem::create_dsp_by_type(unsigned int type) {
+	Ref<FmodDSP> FmodSystem::create_dsp_by_type(unsigned int type) const {
 		FMOD::DSP* dsp_ptr = nullptr;
 		FMOD_ERR_CHECK_V(system->createDSPByType((FMOD_DSP_TYPE)type, &dsp_ptr), Ref<FmodDSP>());
 		Ref<FmodDSP> dsp;
@@ -998,7 +1003,7 @@ namespace godot {
 		return dsp;
 	}
 
-	Ref<FmodChannelGroup> FmodSystem::create_channel_group(const String& p_name) {
+	Ref<FmodChannelGroup> FmodSystem::create_channel_group(const String& p_name) const {
 		ERR_FAIL_COND_V(!system, Ref<FmodChannelGroup>());
 		FMOD::ChannelGroup* channel_group_ptr = nullptr;
 		FMOD_ERR_CHECK_V(
@@ -1011,7 +1016,30 @@ namespace godot {
 		return channel_group;
 	}
 
-	Ref<FmodChannel> FmodSystem::play_sound(Ref<FmodSound> sound, Ref<FmodChannelGroup> channel_group, bool paused) {
+	Ref<FmodSoundGroup> FmodSystem::create_sound_group(const String& p_name) const {
+		ERR_FAIL_COND_V(!system, Ref<FmodSoundGroup>());
+		FMOD::SoundGroup* sound_group_ptr = nullptr;
+		FMOD_ERR_CHECK_V(
+			system->createSoundGroup(p_name.utf8().get_data(), &sound_group_ptr),
+			Ref<FmodSoundGroup>()
+		);
+		Ref<FmodSoundGroup> sound_group;
+		sound_group.instantiate();
+		sound_group->setup(sound_group_ptr);
+		return sound_group;
+	}
+
+	Ref<FmodReverb3D> FmodSystem::create_reverb_3d() const {
+		ERR_FAIL_COND_V(!system, Ref<FmodReverb3D>());
+		FMOD::Reverb3D* reverb_ptr = nullptr;
+		FMOD_ERR_CHECK_V(system->createReverb3D(&reverb_ptr), Ref<FmodReverb3D>());
+		Ref<FmodReverb3D> reverb;
+		reverb.instantiate();
+		reverb->setup(reverb_ptr);
+		return reverb;
+	}
+
+	Ref<FmodChannel> FmodSystem::play_sound(Ref<FmodSound> sound, Ref<FmodChannelGroup> channel_group, const bool paused) {
 		ERR_FAIL_COND_V(
 			!system || sound.is_null() || !sound->sound || channel_group.is_null() || !channel_group->channel_group,
 			Ref<FmodChannel>()
@@ -1036,7 +1064,7 @@ namespace godot {
 		return channel;
 	}
 
-	Ref<FmodChannel> FmodSystem::play_dsp(Ref<FmodDSP> dsp, Ref<FmodChannelGroup> channel_group, bool paused) {
+	Ref<FmodChannel> FmodSystem::play_dsp(Ref<FmodDSP> dsp, Ref<FmodChannelGroup> channel_group, const bool paused) {
 		ERR_FAIL_COND_V(
 			!system || dsp.is_null() || !dsp->dsp || channel_group.is_null() || !channel_group->channel_group,
 			Ref<FmodChannel>()
@@ -1061,11 +1089,11 @@ namespace godot {
 		return channel;
 	}
 
-	Ref<FmodChannel> FmodSystem::get_channel(const int64_t id) {
+	Ref<FmodChannel> FmodSystem::get_channel(const int id) const {
 		ERR_FAIL_COND_V(!system, Ref<FmodChannel>());
 
 		FMOD::Channel* fmod_channel = nullptr;
-		FMOD_ERR_CHECK_V(system->getChannel((int)id, &fmod_channel), Ref<FmodChannel>());
+		FMOD_ERR_CHECK_V(system->getChannel(id, &fmod_channel), Ref<FmodChannel>());
 
 		Ref<FmodChannel> channel;
 		channel.instantiate();
@@ -1096,14 +1124,24 @@ namespace godot {
 		return info;
 	}
 
-	Ref<FmodChannelGroup> FmodSystem::get_master_channel_group() {
-		ERR_FAIL_COND_V(!system, nullptr);
+	Ref<FmodChannelGroup> FmodSystem::get_master_channel_group() const {
+		ERR_FAIL_COND_V(!system, Ref<FmodChannelGroup>());
 		FMOD::ChannelGroup* channel_group_ptr = nullptr;
 		FMOD_ERR_CHECK_V(system->getMasterChannelGroup(&channel_group_ptr), Ref<FmodChannelGroup>());
 		Ref<FmodChannelGroup> channel_group;
 		channel_group.instantiate();
 		channel_group->setup(channel_group_ptr);
 		return channel_group;
+	}
+
+	Ref<FmodSoundGroup> FmodSystem::get_master_sound_group() const {
+		ERR_FAIL_COND_V(!system, Ref<FmodSoundGroup>());
+		FMOD::SoundGroup* sound_group_ptr = nullptr;
+		FMOD_ERR_CHECK_V(system->getMasterSoundGroup(&sound_group_ptr), Ref<FmodSoundGroup>());
+		Ref<FmodSoundGroup> sound_group;
+		sound_group.instantiate();
+		sound_group->setup(sound_group_ptr);
+		return sound_group;
 	}
 
 	Dictionary FmodSystem::get_record_num_drivers() const {

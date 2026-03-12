@@ -28,8 +28,6 @@
   professional DSP effects, and real-time mixing capabilities.
 </p>
 
--
-
 ## Features
 
 ### Multi-Format Audio Support

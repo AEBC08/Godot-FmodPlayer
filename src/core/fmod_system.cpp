@@ -245,9 +245,8 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_max_spatial_objects"), &FmodSystem::get_max_spatial_objects);
 		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_spatial_objects"), "set_max_spatial_objects", "get_max_spatial_objects");
 
-		ClassDB::bind_method(D_METHOD("set_3d_rolloff_callback_enabled", "enable"), &FmodSystem::set_3d_rolloff_callback_enabled);
-		ClassDB::bind_method(D_METHOD("is_3d_rolloff_callback_enabled"), &FmodSystem::is_3d_rolloff_callback_enabled);
-		GDVIRTUAL_BIND(_calculate_3d_rolloff, "distance");
+		ClassDB::bind_method(D_METHOD("set_3d_rolloff_callback", "callback"), &FmodSystem::set_3d_rolloff_callback);
+		ClassDB::bind_method(D_METHOD("get_3d_rolloff_callback"), &FmodSystem::get_3d_rolloff_callback);
 
 		ClassDB::bind_method(D_METHOD("set_network_proxy", "proxy"), &FmodSystem::set_network_proxy);
 		ClassDB::bind_method(D_METHOD("get_network_proxy"), &FmodSystem::get_network_proxy);
@@ -1265,10 +1264,10 @@ namespace godot {
 	// 静态成员变量定义
 	FmodSystem* FmodSystem::current_callback_system = nullptr;
 
-	void FmodSystem::set_3d_rolloff_callback_enabled(const bool enable) {
+	void FmodSystem::set_3d_rolloff_callback(const Callable &p_callback) {
 		ERR_FAIL_COND(!system);
-		_3d_rolloff_callback_enabled = enable;
-		if (enable) {
+		_3d_rolloff_callback = p_callback;
+		if (p_callback.is_valid()) {
 			// 设置当前实例为回调目标
 			current_callback_system = this;
 			FMOD_ERR_CHECK(system->set3DRolloffCallback(GodotFMOD3DRolloffCallback));
@@ -1281,17 +1280,19 @@ namespace godot {
 		}
 	}
 
-	bool FmodSystem::is_3d_rolloff_callback_enabled() const {
-		return _3d_rolloff_callback_enabled;
+	Callable FmodSystem::get_3d_rolloff_callback() const {
+		return _3d_rolloff_callback;
 	}
 
-	// 成员函数：处理 3D 衰减回调，调用 GDScript 虚函数
-	float FmodSystem::_handle_3d_rolloff_callback(float distance) {
-		float result = 1.0f;
-		if (_gdvirtual__calculate_3d_rolloff_call(distance, result)) {
-			return result;
+	// 成员函数：处理 3D 衰减回调，调用 Callable
+	float FmodSystem::_handle_3d_rolloff_callback(float distance) const {
+		if (_3d_rolloff_callback.is_valid()) {
+			const Variant ret = _3d_rolloff_callback.call(distance);
+			if (ret.get_type() == Variant::FLOAT) {
+				return ret;
+			}
 		}
-		// GDScript 没有实现，返回默认线性衰减
+		// Callable 无效或返回类型错误，返回默认线性衰减
 		return 1.0f;
 	}
 }

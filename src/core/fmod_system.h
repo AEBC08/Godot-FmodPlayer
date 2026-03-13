@@ -28,7 +28,7 @@ namespace godot {
 		float doppler_scale = 1.0f;
 		float distance_factor = 1.0f;
 		float rolloff_scale = 1.0f;
-		bool _3d_rolloff_callback_enabled = false;
+		Callable _3d_rolloff_callback;
 
 		void _apply_advanced_settings();
 		void _apply_3d_settings();
@@ -40,7 +40,7 @@ namespace godot {
 		FmodSystem();
 		~FmodSystem();
 
-		// Static pointer for C callback to access current instance
+		// Static pointer for C callback to access the instance that set the callback
 		static FmodSystem* current_callback_system;
 
 		// 初始化系统对象时使用的配置标志
@@ -366,13 +366,11 @@ namespace godot {
 		void unlock_dsp();																		// 互斥函数，用于解锁 DSP 引擎 (异步运行于另一线程) ，并让它继续执行
 
 		// 3D Sound Callback
-		void set_3d_rolloff_callback_enabled(const bool enable);
-		bool is_3d_rolloff_callback_enabled() const;
+		void set_3d_rolloff_callback(const Callable &p_callback);
+		Callable get_3d_rolloff_callback() const;
 
 		// Internal: handle 3D rolloff callback
-		float _handle_3d_rolloff_callback(float distance);
-
-		GDVIRTUAL1R(float, _calculate_3d_rolloff, float);										// Virtual function: GDScript can override to customize distance rolloff
+		float _handle_3d_rolloff_callback(float distance) const;
 	};
 }
 
@@ -385,7 +383,7 @@ VARIANT_ENUM_CAST(FmodSystem::FmodTimeUnit);
 VARIANT_ENUM_CAST(FmodSystem::FmodResamplerMethod);
 
 extern "C" {
-	// Godot FMOD 3D 衰减回调实现 - 调用当前启用了回调的 FmodSystem 实例的虚拟函数
+	// Godot FMOD 3D 衰减回调实现
 	float F_CALL GodotFMOD3DRolloffCallback(
 		FMOD_CHANNELCONTROL* channel_control,
 		float distance

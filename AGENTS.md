@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-Godot-FmodPlayer 是一个 **Godot 4 GDExtension** 插件，通过 FMOD Core API（底层 API，非 Studio API）提供高级音频播放功能。支持多格式音频、灵活加载模式、实时混音和专业级 DSP 效果处理。
+Godot-FmodPlayer 是一个 **Godot 4 GDExtension** 插件，通过 FMOD Core API（底层 API，非 Studio API）提供高级音频播放功能。支持多格式音频、灵活加载模式、实时混音、3D空间音频和专业级 DSP 效果处理。
 
 > **重要提示：** 本项目使用 **FMOD Core API**（底层 API），而非 FMOD Studio API。如需 Studio API 支持，请使用 [fmod-gdextension](https://github.com/utopia-rise/fmod-gdextension)。
 
@@ -10,8 +10,8 @@ Godot-FmodPlayer 是一个 **Godot 4 GDExtension** 插件，通过 FMOD Core API
 
 | 组件 | 技术 |
 |------|------|
-| 编程语言 | C++（最低 C++17，MSVC 使用 C++20） |
-| Godot API | GDExtension（godot-cpp） |
+| 编程语言 | C++（Android 使用 C++17，MSVC 使用 C++20） |
+| Godot API | GDExtension（godot-cpp 4.5 分支） |
 | 音频引擎 | FMOD Core API |
 | 构建系统 | SCons（主要）、MSBuild（Visual Studio 可选） |
 | 支持平台 | Windows (x64)、Android (arm64, arm32, x86, x86_64) |
@@ -28,26 +28,27 @@ Godot-FmodPlayer 是一个 **Godot 4 GDExtension** 插件，通过 FMOD Core API
 │   │   ├── register_types.h/.cpp # GDExtension 注册入口
 │   │   ├── fmod_server.h/.cpp    # 全局单例管理 FMOD 生命周期
 │   │   ├── fmod_system.h/.cpp    # FMOD::System 包装类
-│   │   └── fmod_utils.hpp        # 工具宏和函数（错误检查、音量转换等）
+│   │   └── fmod_utils.hpp        # 工具宏和函数（错误检查、音量转换、坐标转换等）
 │   ├── audio/                    # 音频资源
-│   │   ├── fmod_audio_stream.h/.cpp    # 流式音频资源
+│   │   ├── fmod_audio_stream.h/.cpp      # 流式音频资源
 │   │   ├── fmod_audio_stream_flac.h/.cpp # FLAC 流支持
-│   │   ├── fmod_sound.h/.cpp           # FMOD::Sound 包装类
-│   │   └── fmod_sound_lock.h/.cpp      # 声音数据锁定工具
+│   │   ├── fmod_sound.h/.cpp             # FMOD::Sound 包装类
+│   │   └── fmod_sound_lock.h/.cpp        # 声音数据锁定工具
 │   ├── playback/                 # 播放控制
-│   │   ├── fmod_channel_control.h/.cpp # Channel/ChannelGroup 抽象基类
-│   │   ├── fmod_channel.h/.cpp         # 单通道播放控制
-│   │   └── fmod_channel_group.h/.cpp   # 通道组混音
+│   │   ├── fmod_channel_control.h/.cpp   # Channel/ChannelGroup 抽象基类
+│   │   ├── fmod_channel.h/.cpp           # 单通道播放控制
+│   │   ├── fmod_channel_group.h/.cpp     # 通道组混音
+│   │   └── fmod_sound_group.h/.cpp       # 声音组管理
 │   ├── mixer/                    # 混音系统
-│   │   ├── fmod_audio_bus.h/.cpp       # 音频总线
-│   │   └── fmod_audio_bus_layout.h/.cpp # 总线布局管理
+│   │   ├── fmod_audio_bus.h/.cpp         # 音频总线
+│   │   └── fmod_audio_bus_layout.h/.cpp  # 总线布局管理
 │   ├── dsp/                      # 数字信号处理（效果器）
-│   │   ├── fmod_dsp.h/.cpp             # FMOD::DSP 包装类
-│   │   ├── fmod_dsp_connection.h/.cpp  # DSP 连接路由
-│   │   ├── fmod_audio_effect.h/.cpp    # 效果基类（抽象）
-│   │   └── fmod_audio_effect_*.h/.cpp  # 16+ 种效果实现：
+│   │   ├── fmod_dsp.h/.cpp               # FMOD::DSP 包装类
+│   │   ├── fmod_dsp_connection.h/.cpp    # DSP 连接路由
+│   │   ├── fmod_audio_effect.h/.cpp      # 效果基类（抽象）
+│   │   └── fmod_audio_effect_*.h/.cpp    # 17 种效果实现：
 │   │       ├── amplify（增益）
-│   │       ├── filter（滤波器：低通/高通/带通）
+│   │       ├── filter（滤波器：低通/高通/带通/陷波）
 │   │       ├── eq/equ6/eq10/eq21（均衡器）
 │   │       ├── reverb（混响）
 │   │       ├── delay（延迟）
@@ -69,28 +70,34 @@ Godot-FmodPlayer 是一个 **Godot 4 GDExtension** 插件，通过 FMOD Core API
 │   │   ├── fmod_audio_importer.h/.cpp        # 音频资源导入器
 │   │   ├── fmod_audio_preview_inspector.h/.cpp # 预览检查器
 │   │   └── fmod_audio_preview_property.h/.cpp  # 预览属性
+│   ├── geometry/                 # 3D 几何体（声音遮挡）
+│   │   └── geometry.h/.cpp
+│   ├── spatial/                  # 3D 空间音频
+│   │   └── fmod_reverb_3d.h/.cpp # 3D 混响球
 │   └── thirdparty/fmod/          # FMOD SDK
 │       ├── inc/                  # 头文件（fmod.hpp, fmod_dsp.h 等）
 │       └── lib/                  # 库文件
 │           ├── x64/              # Windows x64 (fmod_vc.lib, fmod.dll)
-│           ├── android/          # Android (arm64-v8a, armeabi-v7a, x86, x86_64)
-│           └── ...
+│           ├── arm64/            # Windows ARM64
+│           ├── x86/              # Windows x86
+│           └── android/          # Android (arm64-v8a, armeabi-v7a, x86, x86_64)
 ├── addons/                       # Godot 插件目录
-│   ├── bin/                      # 构建输出
-│   │   ├── fmod_player.gdextension    # GDExtension 配置文件
-│   │   ├── fmod.dll                   # FMOD 运行时（Windows）
-│   │   ├── fmod_player.windows.*.dll  # Windows 构建产物
-│   │   ├── libfmod_player.android.*.so # Android 构建产物
-│   │   └── icons/                     # 类图标（SVG）
-│   └── fmod_player_plugin/       # 编辑器插件
-│       ├── plugin.cfg
-│       └── fmod_player_plugin.gd
-├── godot-cpp/                    # Git 子模块 - godot-cpp 绑定
-├── docs/                         # 文档
-│   └── architecture_diagram.md   # 架构图（Mermaid）
+│   └── fmod_player/              # 插件主目录
+│       ├── bin/                  # 构建输出
+│       │   ├── fmod_player.gdextension      # GDExtension 配置文件
+│       │   ├── fmod.dll                     # FMOD 运行时（Windows）
+│       │   ├── fmod_player.windows.*.dll    # Windows 构建产物
+│       │   ├── libfmod_player.android.*.so  # Android 构建产物
+│       │   └── icons/                       # 类图标（SVG）
+│       ├── gdextension_bindgen/  # C# 绑定生成文件
+│       ├── plugin.cfg            # 插件配置
+│       └── fmod_player.gd        # 编辑器插件脚本
+├── godot-cpp/                    # Git 子模块 - godot-cpp 绑定（4.5 分支）
+├── doc_classes/                  # 文档 XML 文件（41 个类）
 ├── SConstruct                    # SCons 构建脚本（主要构建方式）
 ├── Godot-FmodStreamPlayer.vcxproj # Visual Studio 项目文件
 ├── Godot-FmodPlayer.slnx         # Visual Studio 解决方案
+├── build_all_platform.bat        # 多平台构建批处理脚本
 └── README.md                     # 项目说明
 ```
 
@@ -106,6 +113,7 @@ Godot-FmodPlayer 是一个 **Godot 4 GDExtension** 插件，通过 FMOD Core API
   - Windows: MSVC v145+（Visual Studio 2022）
   - Android: Android NDK
 - FMOD Core API（已包含在 `src/thirdparty/fmod/`）
+- godot-cpp 子模块（`git submodule update --init --recursive`）
 
 ### SCons 构建（推荐）
 
@@ -114,19 +122,34 @@ Godot-FmodPlayer 是一个 **Godot 4 GDExtension** 插件，通过 FMOD Core API
 scons platform=windows target=template_debug arch=x86_64
 ```
 
+**Windows (x64) 发布版：**
+```bash
+scons platform=windows target=template_release arch=x86_64
+```
+
 **Android (arm64) 调试版：**
 ```bash
 scons platform=android target=template_debug arch=arm64
 ```
 
+**Android (arm64) 发布版：**
+```bash
+scons platform=android target=template_release arch=arm64
+```
+
+**多平台批量构建：**
+```bash
+build_all_platform.bat
+```
+
 **可用选项：**
-- **Platforms:** `windows`, `android`
+- **Platforms:** `windows`, `android`, `macos`, `ios`
 - **Targets:** `template_debug`, `template_release`, `editor`
 - **Architectures:** `x86_64`, `arm64`, `arm32`, `x86_32`
 
 **输出位置：**
-- Windows: `addons/bin/fmod_player.windows.{target}.{arch}.dll`
-- Android: `addons/bin/libfmod_player.android.{target}.{arch}.so`
+- Windows: `addons/fmod_player/bin/fmod_player.windows.{target}.{arch}.dll`
+- Android: `addons/fmod_player/bin/libfmod_player.android.{target}.{arch}.so`
 
 ### Visual Studio 构建（可选）
 
@@ -141,20 +164,22 @@ scons platform=android target=template_debug arch=arm64
 
 ### GDExtension 配置
 
-配置文件：`addons/bin/fmod_player.gdextension`
+配置文件：`addons/fmod_player/bin/fmod_player.gdextension`
 
 ```ini
 [configuration]
-entry_symbol = "example_library_init"
+entry_symbol = "fmod_player_init"
 compatibility_minimum = "4.1"
 reloadable = true
 
 [libraries]
 windows.debug.x86_64 = "fmod_player.windows.template_debug.x86_64.dll"
+windows.release.x86_64 = "fmod_player.windows.template_release.x86_64.dll"
 android.debug.arm64 = "libfmod_player.android.template_debug.arm64.so"
 
 [dependencies]
 windows.debug.x86_64 = { "fmod.dll" : "" }
+windows.release.x86_64 = { "fmod.dll" : "" }
 ```
 
 ---
@@ -167,9 +192,9 @@ windows.debug.x86_64 = { "fmod.dll" : "" }
 |------|------|------|
 | 类名 | PascalCase | `FmodServer`, `FmodAudioStreamPlayer` |
 | 方法/函数 | snake_case | `get_sound()`, `set_volume_db()` |
-| 私有成员 | 无严格约定，混合使用 | `_bind_methods()`, `internal_channel` |
+| 私有成员 | 混合使用 | `internal_channel`, `sound_group` |
 | 宏 | 全大写下划线 | `FMOD_ERR_CHECK`, `FMOD_ERR_CHECK_V` |
-| 枚举 | PascalCase | `FmodDSPType`, `FmodInitFlags` |
+| 枚举 | PascalCase | `FmodDSPType`, `CreateMode`, `Behavior` |
 | 常量 | 全大写下划线 | `MIN_DB`, `MIN_LINEAR` |
 
 ### 代码风格
@@ -194,6 +219,7 @@ namespace godot {
 
     private:
         // 私有成员
+        FMOD::InternalType* internal_ptr = nullptr;
 
     protected:
         static void _bind_methods();  // GDExtension 方法绑定
@@ -203,6 +229,9 @@ namespace godot {
         ~ClassName();
 
         // 公共方法
+        bool is_valid() const;
+        bool is_null() const;
+        void setup(FMOD::InternalType* p_ptr);
     };
 }
 
@@ -279,10 +308,13 @@ Godot 基础类
 │   │   ├── FmodChannel         # 单通道播放
 │   │   └── FmodChannelGroup    # 通道组混音
 │   ├── FmodSound               # FMOD 声音句柄
+│   ├── FmodSoundGroup          # 声音组管理
 │   ├── FmodDSP                 # DSP 效果器
 │   ├── FmodDSPConnection       # DSP 连接
 │   ├── FmodAudioBus            # 音频总线
-│   └── FmodSoundLock           # 声音数据锁定
+│   ├── FmodSoundLock           # 声音数据锁定
+│   ├── FmodGeometry            # 3D 几何体（声音遮挡）
+│   └── FmodReverb3D            # 3D 混响球
 ├── Resource
 │   ├── FmodAudioStream         # 流式音频资源
 │   ├── FmodAudioStreamFLAC     # FLAC 流
@@ -290,12 +322,29 @@ Godot 基础类
 │   │   ├── FmodAudioEffectAmplify
 │   │   ├── FmodAudioEffectFilter
 │   │   ├── FmodAudioEffectEQ
-│   │   └── ...（其他 13+ 种效果）
+│   │   ├── FmodAudioEffectEQ6
+│   │   ├── FmodAudioEffectEQ10
+│   │   ├── FmodAudioEffectEQ21
+│   │   ├── FmodAudioEffectChorus
+│   │   ├── FmodAudioEffectDelay
+│   │   ├── FmodAudioEffectDistortion
+│   │   ├── FmodAudioEffectCompressor
+│   │   ├── FmodAudioEffectHardLimiter
+│   │   ├── FmodAudioEffectPanner
+│   │   ├── FmodAudioEffectPhaser
+│   │   ├── FmodAudioEffectPitchShift
+│   │   ├── FmodAudioEffectReverb
+│   │   ├── FmodAudioEffectStereoEnhance
+│   │   ├── FmodAudioEffectSpectrumAnalyzer
+│   │   ├── FmodAudioEffectCapture
+│   │   └── FmodAudioEffectRecord
 │   └── FmodAudioBusLayout      # 总线布局
 └── Node
     ├── FmodAudioStreamPlayer   # 流播放器节点
     └── FmodAudioSampleEmitter  # 采样发射器节点
 ```
+
+**总计：** 41 个类注册到 Godot 系统
 
 ---
 
@@ -305,8 +354,11 @@ Godot 基础类
 Godot Engine
     ↓ 加载 GDExtension
 register_types.cpp
+    ↓ MODULE_INITIALIZATION_LEVEL_EDITOR
+注册编辑器类（AudioImporterFmod, FmodAudioPreviewInspector, FmodAudioPreviewProperty）
+注册项目设置（audio/fmod/*）
     ↓ MODULE_INITIALIZATION_LEVEL_SCENE
-注册所有类到 ClassDB
+注册所有运行时类到 ClassDB
     ↓
 创建 FmodServer 单例
     ↓
@@ -339,6 +391,9 @@ FmodSystem* system = FmodServer::get_main_system();
 
 // 获取主通道组
 Ref<FmodChannelGroup> master = FmodServer::get_master_channel_group();
+
+// 获取总线布局
+Ref<FmodAudioBusLayout> layout = FmodServer::get_audio_bus_layout();
 ```
 
 ### FmodSystem
@@ -353,6 +408,12 @@ Ref<FmodChannel> channel = system->play_sound(sound, channel_group, false);
 
 // 创建 DSP
 Ref<FmodDSP> dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_REVERB);
+
+// 创建 3D 混响
+Ref<FmodReverb3D> reverb = system->create_reverb_3d();
+
+// 创建几何体
+Ref<FmodGeometry> geometry = system->create_geometry();
 ```
 
 ### FmodChannelControl
@@ -369,6 +430,18 @@ player.play()
 
 ---
 
+## 项目设置
+
+在 Godot 编辑器中可通过 `项目 > 项目设置 > 音频/fmod` 配置以下选项：
+
+| 设置项 | 类型 | 默认值 | 说明 |
+|--------|------|--------|------|
+| `audio/fmod/enable_profile` | bool | true | 启用 FMOD Profile（需重启） |
+| `audio/fmod/network_proxy` | String | "" | FMOD 网络代理地址（需重启） |
+| `audio/fmod/max_channels` | int | 32 | 最大通道数（需重启） |
+
+---
+
 ## 测试策略
 
 本项目**没有正式的单元测试框架**。测试通过以下方式进行：
@@ -382,12 +455,14 @@ player.play()
 ## 部署注意事项
 
 ### Windows
-- `fmod.dll` 必须与 GDExtension DLL 放在同一目录
+- `fmod.dll` 必须与 GDExtension DLL 放在同一目录 (`addons/fmod_player/bin/`)
 - 发布时需要使用 `fmod.dll`（非调试版 `fmodL.dll`）
+- Visual C++ Redistributable 可能需要随应用分发
 
 ### Android
 - FMOD Java 库（`fmod.jar`）需要包含在 APK 中
 - 对应架构的 `libfmod.so` 或 `libfmodL.so` 需要打包
+- 在 `android/src/com/your/package/` 中可能需要 FMOD 活动基类
 
 ### 许可证合规
 - 本项目使用 MIT 许可证
@@ -412,10 +487,28 @@ double linear = FmodUtils::db_to_linear(db);
 double db = FmodUtils::fader_to_db(fader);
 ```
 
+### 坐标系统转换（FMOD 左手系 Y-up ↔ Godot 右手系 Y-up）
+```cpp
+// FMOD 方向向量转 Godot 欧拉角
+godot::Vector3 euler = FmodUtils::fmod_vectors_to_godot_euler(forward, up);
+
+// Godot 欧拉角转 FMOD 方向向量
+FmodUtils::godot_euler_to_fmod_vectors(euler, &out_forward, &out_up);
+
+// FMOD 方向向量转 Godot 四元数
+godot::Quaternion quat = FmodUtils::fmod_vectors_to_godot_quat(forward, up);
+```
+
 ### 资源加载
 ```cpp
 // 类型安全的资源加载
 godot::Ref<MyResource> res = FmodUtils::load<MyResource>("res://path.tres");
+```
+
+### GUID 转换
+```cpp
+// FMOD GUID 转 Godot 字符串
+godot::String guid_str = FmodUtils::guid_to_string(fmod_guid);
 ```
 
 ---
@@ -442,7 +535,7 @@ FmodServer 注册了以下 Godot Performance 监视器：
 
 1. **修改代码** → 编辑 `src/` 目录下的源文件
 2. **构建** → 运行 `scons platform=windows target=template_debug arch=x86_64`
-3. **测试** → 在 Godot 中打开 `addons/` 项目并运行
+3. **测试** → 在 Godot 中打开包含 `addons/fmod_player` 的项目并运行
 4. **调试** → 使用 Visual Studio 附加到 Godot 进程
 
 ---
@@ -454,11 +547,13 @@ SConstruct 中已设置 UTF-8 编码选项：
 ```python
 env.Append(CCFLAGS=["/utf-8"])
 env.Append(CXXFLAGS=["/utf-8"])
+env.Append(CCFLAGS=["/wd4828"])  # 禁用字符编码警告
 ```
 
 ### Android 构建注意事项
 - godot-cpp 子模块需要切换到正确分支（当前为 4.5）
 - 确保 Android NDK 环境变量已设置
+- 使用 `ANDROID_NDK_ROOT` 环境变量指定 NDK 路径
 
 ### 平台特定代码
 使用条件编译：
@@ -479,4 +574,4 @@ env.Append(CXXFLAGS=["/utf-8"])
 - [FMOD Core API 文档](https://www.fmod.com/docs/2.03/api/core-api.html)
 - [Godot GDExtension 文档](https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/what_is_gdextension.html)
 - [godot-cpp 仓库](https://github.com/godotengine/godot-cpp)
-- 架构图：`docs/architecture_diagram.md`
+- 项目文档网站：[https://godot-fmodplayerdocs.readthedocs.io/zh-cn/latest/](https://godot-fmodplayerdocs.readthedocs.io/zh-cn/latest/)

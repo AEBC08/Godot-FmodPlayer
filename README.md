@@ -86,7 +86,7 @@ First-class Godot Editor support:
 ## Requirements
 
 - **Godot:** 4.1 or later
-- **Platforms:** Windows (x64), Android (arm64, arm32, x86, x86_64)
+- **Platforms:** Windows, Android
 - **Compiler:** C++17 (MSVC v145+ on Windows, NDK for Android)
 - **FMOD:** Core API libraries (included in `src/thirdparty/fmod/`)
 
@@ -96,8 +96,8 @@ First-class Godot Editor support:
 
 #### Available Options
 - **Platforms:** `windows`, `android`
-- **Targets:** `template_debug`, `template_release`, `editor`
-- **Architectures:** `x86_64`, `arm64`, `arm32`, `x86_32`
+- **Targets:** `template_debug`, `template_release`
+- **Architectures:** `x86_64`, `arm64`
 
 #### Enable the Plugin
 After building, go to `Project > Project Settings > Plugins` in Godot Editor, find **fmod_player** and enable it.

@@ -21,3 +21,6 @@ FmodAudioBusLayout = "icons/FmodAudioBusLayout.svg"
 windows.debug.x86_64 = {
     "fmod.dll" : "",
 }
+windows.release.x86_64 = {
+    "fmod.dll" : "",
+}

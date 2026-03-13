@@ -100,7 +100,7 @@ First-class Godot Editor support:
 - **Architectures:** `x86_64`, `arm64`, `arm32`, `x86_32`
 
 #### Enable the Plugin
-After building, go to `Project > Project Settings > Plugins` in Godot Editor, find **FMOD Player Plugin** and enable it.
+After building, go to `Project > Project Settings > Plugins` in Godot Editor, find **fmod_player** and enable it.
 
 ## Documentation
 
